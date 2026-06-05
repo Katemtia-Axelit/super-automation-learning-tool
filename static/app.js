@@ -2060,6 +2060,32 @@ function closeStateAssessmentModal() {
 // ============ TIMER ============
 var timerActiveSession = null;
 var timerTickHandle = null;
+var _timerTimeoutShown = false;
+
+function getRemainingMs(session) {
+  if (!session) return 0;
+  var plannedMs = (session.planned_minutes || 0) * 60 * 1000;
+  if (plannedMs <= 0) return 0;
+  var started = new Date(session.started_at).getTime();
+  var pausedSec = session.paused_duration || 0;
+  var now = session.status === 'paused' && session.paused_at ? new Date(session.paused_at).getTime() : Date.now();
+  var elapsedMs = now - started - pausedSec * 1000;
+  return Math.max(0, plannedMs - elapsedMs);
+}
+
+function formatRemaining(ms) {
+  var totalSec = Math.max(0, Math.floor(ms / 1000));
+  var m = Math.floor(totalSec / 60);
+  var s = totalSec % 60;
+  return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function remainingRatio(session) {
+  if (!session) return 1;
+  var plannedMs = (session.planned_minutes || 0) * 60 * 1000;
+  if (plannedMs <= 0) return 1;
+  return getRemainingMs(session) / plannedMs;
+}
 
 function formatElapsed(ms) {
   var sec = Math.max(0, Math.floor(ms / 1000));
@@ -2091,26 +2117,38 @@ function updateTimerDisplay() {
   if (!statusEl || !elapsedEl) return;
 
   if (timerActiveSession && timerActiveSession.started_at) {
-    var started = new Date(timerActiveSession.started_at).getTime();
-    var pausedSec = timerActiveSession.paused_duration || 0;
+    var remainingMs = getRemainingMs(timerActiveSession);
+    var ratio = remainingRatio(timerActiveSession);
     var isPaused = timerActiveSession.status === 'paused';
-    var elapsed = isPaused ? (new Date(timerActiveSession.paused_at).getTime() - started - pausedSec * 1000) : (Date.now() - started - pausedSec * 1000);
-    elapsedEl.textContent = formatElapsed(elapsed);
     var name = timerActiveSession.task_name || taskNameById(timerActiveSession.task_id);
-    statusEl.textContent = (isPaused ? '已暂停 · ' : '计时中 · ') + name + '（计划 ' + (timerActiveSession.planned_minutes || '?') + ' 分）';
-    statusEl.className = isPaused ? 'timer-paused' : '';
+    elapsedEl.textContent = formatRemaining(remainingMs);
+    elapsedEl.style.color = ratio <= 0.1 ? '#ff4444' : (ratio <= 0.3 ? '#ff9944' : '');
+    if (ratio <= 0.1 && !isPaused) elapsedEl.classList.add('timer-blink');
+    else elapsedEl.classList.remove('timer-blink');
+    statusEl.textContent = (isPaused ? '已暂停' : '剩余') + ' · ' + name;
+    statusEl.className = isPaused ? 'timer-paused' : (ratio <= 0.1 ? 'timer-urgent' : (ratio <= 0.3 ? 'timer-warn' : ''));
     if (startBtn) startBtn.classList.add('hidden');
     if (stopBtn) stopBtn.classList.remove('hidden');
     if (sel) sel.disabled = true;
     if (planned) planned.disabled = true;
+
+    if (!isPaused && !_timerTimeoutShown && remainingMs <= 0) {
+      _timerTimeoutShown = true;
+      pauseTimer().then(function () {
+        showTimeoutModal();
+      });
+    }
   } else {
     elapsedEl.textContent = '00:00';
+    elapsedEl.style.color = '';
+    elapsedEl.classList.remove('timer-blink');
     statusEl.textContent = '未在计时';
     statusEl.className = 'timer-idle';
     if (startBtn) startBtn.classList.remove('hidden');
     if (stopBtn) stopBtn.classList.add('hidden');
     if (sel) sel.disabled = false;
     if (planned) planned.disabled = false;
+    _timerTimeoutShown = false;
   }
   updateGachaTimerBar();
 }
@@ -2120,12 +2158,15 @@ function updateGachaTimerBar() {
   var empty = document.getElementById('gachaTimerEmpty');
   if (!bar || !empty) return;
   if (timerActiveSession && timerActiveSession.started_at) {
-    var started = new Date(timerActiveSession.started_at).getTime();
-    var pausedSec = timerActiveSession.paused_duration || 0;
+    var remainingMs = getRemainingMs(timerActiveSession);
+    var ratio = remainingRatio(timerActiveSession);
     var isPaused = timerActiveSession.status === 'paused';
-    var elapsed = isPaused ? (new Date(timerActiveSession.paused_at).getTime() - started - pausedSec * 1000) : (Date.now() - started - pausedSec * 1000);
     var name = timerActiveSession.task_name || taskNameById(timerActiveSession.task_id);
-    document.getElementById('gachaTimerElapsed').textContent = formatElapsed(elapsed);
+    var el = document.getElementById('gachaTimerElapsed');
+    el.textContent = formatRemaining(remainingMs);
+    el.style.color = ratio <= 0.1 ? '#ff4444' : (ratio <= 0.3 ? '#ff9944' : '');
+    if (ratio <= 0.1 && !isPaused) el.classList.add('timer-blink');
+    else el.classList.remove('timer-blink');
     document.getElementById('gachaTimerTaskName').textContent = (isPaused ? '[已暂停] ' : '') + name;
     bar.style.display = 'flex';
     empty.style.display = 'none';
@@ -2435,6 +2476,37 @@ async function resumeTimer() {
   } catch (e) {
     toast(e.message || '恢复失败', 'err');
   }
+}
+
+function showTimeoutModal() { showModal('timerTimeoutModal'); }
+
+async function handleTimeoutComplete() {
+  closeModal('timerTimeoutModal');
+  await resumeTimer();
+  await completeTimerFromGacha();
+}
+
+function handleTimeoutContinue() {
+  closeModal('timerTimeoutModal');
+  resumeTimer();
+  toast('计时继续', 'inf');
+}
+
+function handleTimeoutAbandon() {
+  closeModal('timerTimeoutModal');
+  var sid = timerActiveSession ? timerActiveSession.id : null;
+  if (sid) {
+    api('/api/timer/complete', {
+      method: 'POST',
+      body: JSON.stringify({ session_id: sid, result: 'abandoned', actual_minutes: 0 })
+    });
+  }
+  timerActiveSession = null;
+  updateTimerDisplay();
+  enableGachaBtn();
+  var r = document.getElementById('gachaResult');
+  if (r) r.innerHTML = '';
+  toast('任务已放弃', 'inf');
 }
 
 async function completeTimerFromGacha() {
