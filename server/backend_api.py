@@ -727,6 +727,8 @@ def ensure_timer_schema(conn):
         ('reason', 'TEXT', None),
         ('notes', 'TEXT', None),
         ('created_at', 'TEXT', 'CURRENT_TIMESTAMP'),
+        ('paused_at', 'TEXT', None),
+        ('paused_duration', 'INTEGER', '0'),
     ])
     conn.commit()
 
@@ -2917,7 +2919,7 @@ def api_timer_start():
         cur = conn.cursor()
         now = datetime.now().isoformat()
         # 检查是否已有进行中的计时
-        cur.execute('SELECT id FROM timer_sessions WHERE task_id=? AND status="running"', (task_id,))
+        cur.execute('SELECT id FROM timer_sessions WHERE task_id=? AND status IN ("running","paused")', (task_id,))
         if cur.fetchone():
             return jsonify({'error': '该任务已有进行中的计时'}), 400
         cur.execute('INSERT INTO timer_sessions (task_id, started_at, planned_minutes, status) VALUES (?,?,?,?)',
@@ -2942,7 +2944,7 @@ def api_timer_complete():
         cur = conn.cursor()
         now = datetime.now().isoformat()
         cur.execute('''UPDATE timer_sessions SET ended_at=?, actual_minutes=?, status="ended", result=?, reason=?
-                       WHERE id=? AND status="running"''',
+                       WHERE id=? AND status IN ("running","paused")''',
                    (now, actual_minutes, result, reason, session_id))
         conn.commit()
         if cur.rowcount == 0:
@@ -2956,13 +2958,53 @@ def api_timer_active():
     conn = get_db_connection()
     try:
         cur = conn.cursor()
-        cur.execute('''SELECT ts.id, ts.task_id, ts.started_at, ts.planned_minutes, t.name as task_name
+        cur.execute('''SELECT ts.id, ts.task_id, ts.started_at, ts.planned_minutes, ts.status,
+                       COALESCE(ts.paused_duration, 0) as paused_duration, t.name as task_name
                        FROM timer_sessions ts JOIN tasks t ON ts.task_id=t.id
-                       WHERE ts.status="running" ORDER BY ts.started_at DESC LIMIT 1''')
+                       WHERE ts.status IN ("running","paused") ORDER BY ts.started_at DESC LIMIT 1''')
         row = cur.fetchone()
         if row:
             return jsonify(dict(row))
         return jsonify(None)
+    finally:
+        conn.close()
+
+@app.route('/api/timer/pause', methods=['POST'])
+def api_timer_pause():
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        now = datetime.now().isoformat()
+        cur.execute("UPDATE timer_sessions SET status='paused', paused_at=? WHERE status='running' AND id=(SELECT id FROM timer_sessions WHERE status='running' ORDER BY started_at DESC LIMIT 1)", (now,))
+        conn.commit()
+        if cur.rowcount == 0:
+            return jsonify({'error': 'No active timer to pause'}), 400
+        return jsonify({'status': 'paused'})
+    finally:
+        conn.close()
+
+@app.route('/api/timer/resume', methods=['POST'])
+def api_timer_resume():
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id, paused_at, COALESCE(paused_duration, 0) as paused_duration FROM timer_sessions WHERE status='paused' ORDER BY started_at DESC LIMIT 1")
+        row = cur.fetchone()
+        if not row:
+            return jsonify({'error': 'No paused timer'}), 400
+        sid = row['id']
+        old_paused_duration = row['paused_duration']
+        paused_at = row['paused_at']
+        if paused_at:
+            import time
+            from datetime import datetime as dt2
+            paused_seconds = (dt2.now() - dt2.fromisoformat(paused_at)).total_seconds()
+        else:
+            paused_seconds = 0
+        new_paused_duration = int(old_paused_duration) + int(paused_seconds)
+        cur.execute("UPDATE timer_sessions SET status='running', paused_at=NULL, paused_duration=? WHERE id=?", (new_paused_duration, sid))
+        conn.commit()
+        return jsonify({'status': 'resumed', 'paused_duration': new_paused_duration})
     finally:
         conn.close()
 
