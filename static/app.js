@@ -679,6 +679,7 @@ async function doReplace() {
       gachaState.canReplace = false;
       document.getElementById('gachaResult').innerHTML = '';
       document.getElementById('gachaResult').appendChild(renderDrawnCard(r.task, 0));
+      applyCardSize(localStorage.getItem('cardSize') || '440');
       toast('已换牌', 'inf');
     }
   } catch (e) {
@@ -2247,6 +2248,7 @@ async function restoreGachaCardFromSession() {
 
     result.innerHTML = '';
     result.appendChild(wrap);
+    applyCardSize(localStorage.getItem('cardSize') || '440');
     disableGachaBtn();
   } catch (e) {
     // silent — task may have been deleted
@@ -2642,3 +2644,31 @@ renderSchedule();
 loadSleepPanel();
 loadStateAssessmentPanel();
 loadTimerPanel();
+
+(function initCardSizeSlider() {
+  var slider = document.getElementById('cardSizeSlider');
+  var val = document.getElementById('cardSizeVal');
+  if (!slider || !val) return;
+  var saved = localStorage.getItem('cardSize') || '440';
+  var maxW = Math.min(800, window.innerWidth - 40);
+  slider.max = maxW;
+  slider.value = saved;
+  val.textContent = saved + 'px';
+  applyCardSize(saved);
+  slider.addEventListener('input', function () {
+    val.textContent = slider.value + 'px';
+    localStorage.setItem('cardSize', slider.value);
+    applyCardSize(slider.value);
+  });
+  window.addEventListener('resize', function () {
+    var newMax = Math.min(800, window.innerWidth - 40);
+    slider.max = newMax;
+    if (parseInt(slider.value) > newMax) { slider.value = newMax; val.textContent = newMax + 'px'; }
+    applyCardSize(slider.value);
+  });
+})();
+
+function applyCardSize(size) {
+  var cards = document.querySelectorAll('.drawn-card');
+  cards.forEach(function (c) { c.style.maxWidth = size + 'px'; });
+}
