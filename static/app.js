@@ -2662,19 +2662,73 @@ loadTimerPanel();
   if (!slider || !val) return;
   var saved = localStorage.getItem('cardSize') || '440';
   slider.value = saved;
-  applyCardScale(saved);
+  var scale = Math.round(Math.max(0.7, Math.min(2.0, parseInt(saved) / 440)) * 100) / 100;
+  val.textContent = Math.round(scale * 100) + '%';
+  cloneCardEnlarged(scale);
   slider.addEventListener('input', function () {
-    applyCardScale(slider.value);
+    var s = Math.round(Math.max(0.7, Math.min(2.0, parseInt(slider.value) / 440)) * 100) / 100;
+    val.textContent = Math.round(s * 100) + '%';
     localStorage.setItem('cardSize', slider.value);
+    cloneCardEnlarged(s);
+  });
+  slider.addEventListener('change', function () {
+    cloneCardEnlarged(0); // 释放引用的克隆，让原始卡片显示
   });
 })();
 
-function applyCardScale(sizeVal) {
-  var base = 440;
-  var scale = Math.max(0.7, Math.min(2.0, parseInt(sizeVal) / base));
-  scale = Math.round(scale * 100) / 100;
-  var cards = document.querySelectorAll('.drawn-card');
-  cards.forEach(function (c) { c.style.transform = 'scale(' + scale + ')'; });
-  var val = document.getElementById('cardSizeVal');
-  if (val) val.textContent = Math.round(scale * 100) + '%';
+function cloneCardEnlarged(scale) {
+  var exist = document.getElementById('cardCloneOverlay');
+  if (exist) exist.remove();
+  if (scale <= 0 || scale >= 1.8) return; // scale 太大不克隆
+  
+  var orig = document.querySelector('.drawn-card');
+  if (!orig) return;
+  var rect = orig.getBoundingClientRect();
+  var baseW = 440, baseF = 24; // title font-size
+ 
+  var overlay = document.createElement('div');
+  overlay.id = 'cardCloneOverlay';
+  overlay.style.cssText =
+    'position:fixed;left:' + rect.left + 'px;top:' + rect.top + 'px;' +
+    'width:' + Math.round(baseW * scale) + 'px;' +
+    'z-index:9999;pointer-events:none;' +
+    'transform:translate(-' + Math.round((baseW * scale - rect.width) / 2) + 'px, 0);' +
+    'transition:opacity .15s;opacity:.85';
+  overlay.innerHTML = orig.outerHTML;
+  var clonedCard = overlay.querySelector('.drawn-card');
+  if (clonedCard) {
+    clonedCard.style.width = Math.round(baseW * scale) + 'px';
+    clonedCard.style.maxWidth = Math.round(baseW * scale) + 'px';
+    clonedCard.style.height = Math.round(baseW * scale * 4/3) + 'px';
+    clonedCard.style.transform = 'none';
+    clonedCard.style.animation = 'none';
+    clonedCard.style.aspectRatio = 'auto';
+    clonedCard.style.margin = '0';
+    // Enlarge fonts
+    var title = clonedCard.querySelector('.task-card-title');
+    if (title) title.style.fontSize = Math.round(baseF * scale) + 'px';
+    var desc = clonedCard.querySelector('.task-card-desc');
+    if (desc) desc.style.fontSize = Math.round(14 * scale) + 'px';
+    var meta = clonedCard.querySelector('.task-card-meta');
+    if (meta) meta.style.fontSize = Math.round(12 * scale) + 'px';
+    // Enlarge buttons
+    clonedCard.querySelectorAll('.btn').forEach(function(b) {
+      b.style.fontSize = Math.round(13 * scale) + 'px';
+      b.style.padding = Math.round(4 * scale) + 'px ' + Math.round(10 * scale) + 'px';
+    });
+    // Remove button onclick (clone is decorative)
+    clonedCard.querySelectorAll('.btn').forEach(function(b) { b.removeAttribute('onclick'); });
+  }
+  // Hide original actions
+  var footer = orig.querySelector('.task-card-footer');
+  if (footer) footer.style.opacity = '0.3';
+  document.getElementById('cardSizeControl').appendChild(overlay);
 }
+
+// Restore when slider interaction ends
+document.getElementById('cardSizeControl').addEventListener('mouseleave', function () {
+  var clone = document.getElementById('cardCloneOverlay');
+  if (clone) clone.remove();
+  var footer = document.querySelector('.drawn-card .task-card-footer');
+  if (footer) footer.style.opacity = '';
+});
