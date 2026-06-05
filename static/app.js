@@ -679,7 +679,7 @@ async function doReplace() {
       gachaState.canReplace = false;
       document.getElementById('gachaResult').innerHTML = '';
       document.getElementById('gachaResult').appendChild(renderDrawnCard(r.task, 0));
-      applyCardScale(localStorage.getItem('cardSize') || '440');
+      applyScale(parseInt(localStorage.getItem('cardSize') || '440'));
       toast('已换牌', 'inf');
     }
   } catch (e) {
@@ -2255,10 +2255,10 @@ async function restoreGachaCardFromSession() {
     card.classList.add('is-revealing');
     wrap.appendChild(card);
 
-    result.innerHTML = '';
-    result.appendChild(wrap);
-    applyCardScale(localStorage.getItem('cardSize') || '440');
-    disableGachaBtn();
+  result.innerHTML = '';
+  result.appendChild(wrap);
+  applyScale(parseInt(localStorage.getItem('cardSize') || '440'));
+  disableGachaBtn();
   } catch (e) {
     // silent — task may have been deleted
   }
@@ -2662,15 +2662,21 @@ loadTimerPanel();
   if (!slider || !val) return;
   var saved = localStorage.getItem('cardSize') || '440';
   slider.value = saved;
-  var scale = Math.round(Math.max(0.7, Math.min(2.0, parseInt(saved) / 440)) * 100) / 100;
-  val.textContent = Math.round(scale * 100) + '%';
-  cloneCardEnlarged(scale);
+  applyScale(parseInt(saved));
+  val.textContent = Math.round(parseInt(saved) / 440 * 100) + '%';
   slider.addEventListener('input', function () {
-    var s = Math.round(Math.max(0.7, Math.min(2.0, parseInt(slider.value) / 440)) * 100) / 100;
-    val.textContent = Math.round(s * 100) + '%';
+    applyScale(parseInt(slider.value));
+    val.textContent = Math.round(parseInt(slider.value) / 440 * 100) + '%';
     localStorage.setItem('cardSize', slider.value);
-    cloneCardEnlarged(s);
   });
+})();
+
+function applyScale(widthVal) {
+  var scale = Math.max(0.7, Math.min(2.0, widthVal / 440));
+  document.querySelectorAll('.drawn-card').forEach(function (c) {
+    c.style.setProperty('--card-scale', scale.toFixed(2));
+  });
+}
   slider.addEventListener('change', function () {
     cloneCardEnlarged(0); // 释放引用的克隆，让原始卡片显示
   });
