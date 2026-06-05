@@ -728,7 +728,13 @@ async function completeWithFeedback(id) {
     if (r.unlocked_tasks && r.unlocked_tasks.length) {
       toast('已解锁: ' + r.unlocked_tasks.join('、'), 'suc');
     }
-    await playCardAnim(id, 'is-completing is-evaporating is-fly-to-pile', 500);
+    var task = allTasks.find(function (x) { return x.id === id; });
+    var isOnetime = task && (task.task_profile === 'one_time' || task.category === 'once' || task.repeat_type === 'none');
+    if (isOnetime) {
+      await playCardAnim(id, 'is-burning', 700);
+    } else {
+      await playCardAnim(id, 'is-completing is-evaporating is-fly-to-pile', 500);
+    }
     document.getElementById('fbTaskId').value = id;
     document.getElementById('fbEnergy').value = 5;
     document.getElementById('fbEnergyVal').textContent = '5';
@@ -897,9 +903,12 @@ function moveToDiscard(id) {
   promptTaskFeedback('abandon', ctx).then(function () {
     return api('/api/tasks/' + id + '/move-to-discard', { method: 'POST' });
   }).then(function () {
-    return playCardAnim(id, 'is-discarding', 500);
+    return playCardAnim(id, 'is-discarding', 600);
   }).then(function () {
+    var box = document.getElementById('gachaDiscardBox');
+    if (box) { box.classList.add('discard-box-receive'); setTimeout(function () { box.classList.remove('discard-box-receive'); }, 500); }
     toast('已移入弃牌堆', 'inf');
+    enableGachaBtn();
     loadTasks();
   }).catch(function (e) { toast(e.message || '操作失败', 'err'); });
 }
@@ -2451,6 +2460,7 @@ async function pauseTimer() {
       timerActiveSession.status = 'paused';
       timerActiveSession.paused_at = new Date().toISOString();
       updateTimerDisplay();
+      updateGachaCardButtons(timerActiveSession.task_id);
       toast('计时已暂停', 'suc');
     }
   } catch (e) {
@@ -2470,6 +2480,7 @@ async function resumeTimer() {
       timerActiveSession.paused_duration = r.paused_duration || 0;
       timerActiveSession.paused_at = null;
       updateTimerDisplay();
+      updateGachaCardButtons(timerActiveSession.task_id);
       toast('计时已恢复', 'suc');
     }
   } catch (e) {
