@@ -527,16 +527,17 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 
 <div class="modal-overlay hidden" id="taskFeedbackModal">
 <div class="modal" style="max-width:520px">
-<h2 id="taskFeedbackTitle"><i class="fa-solid fa-comment-dots"></i> 任务反馈</h2>
-<p id="taskFeedbackQuestion" style="font-size:.9rem;margin-bottom:12px"></p>
+<h2 id="taskFeedbackTitle">提示</h2>
+<p id="taskFeedbackQuestion" style="font-size:.9rem;margin-bottom:4px;color:var(--gold)"></p>
+<p id="taskFeedbackSubtitle" style="font-size:.82rem;color:var(--text-secondary);margin-bottom:12px;display:none"></p>
 <div id="taskFeedbackOptions"></div>
 <div class="form-group mt8">
 <label for="taskFeedbackNote">补充说明（可选）</label>
 <textarea id="taskFeedbackNote" class="full-width" rows="2" placeholder="可留空"></textarea>
 </div>
 <div class="modal-actions mt16">
-<button type="button" class="btn" id="taskFeedbackCancelBtn">跳过反馈</button>
-<button type="button" class="btn pri" id="taskFeedbackConfirmBtn">确认</button>
+<button type="button" class="btn" id="taskFeedbackCancelBtn">关闭</button>
+<button type="button" class="btn pri" id="taskFeedbackConfirmBtn">好的</button>
 </div>
 </div>
 </div>
