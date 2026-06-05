@@ -766,6 +766,8 @@ def ensure_task_feedback_events_schema(conn):
         ('reason_detail', 'TEXT', None),
         ('note', 'TEXT', None),
         ('created_at', 'TEXT', 'CURRENT_TIMESTAMP'),
+        ('encouragement_shown', 'INTEGER', None),
+        ('encouragement_type', 'INTEGER', None),
     ])
     cur.execute('CREATE INDEX IF NOT EXISTS idx_task_feedback_task ON task_feedback_events(task_id)')
     cur.execute('CREATE INDEX IF NOT EXISTS idx_task_feedback_created ON task_feedback_events(created_at)')

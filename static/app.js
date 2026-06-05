@@ -41,133 +41,176 @@ function toast(msg, type) {
 function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-// ============ TASK EVENT FEEDBACK (P1-5B) ============
+// ============ ENCOURAGEMENT FEEDBACK (温情心理安抚版) ============
 var TASK_FEEDBACK_PRESETS = {
-  skip: {
-    eventType: 'skip_task',
-    question: '为什么这次不想做这个任务？',
+  refuse: {
+    title: '换个任务也好',
+    subtitle: '今天适合自己的节奏最重要',
     options: [
-      { label: '现在没精力', category: 'state_issue', detail: '现在没精力' },
-      { label: '任务太难', category: 'ability_issue', detail: '任务太难' },
-      { label: '任务太模糊', category: 'task_definition_issue', detail: '任务太模糊' },
-      { label: '时间不够', category: 'time_estimation_issue', detail: '时间不够' },
-      { label: '不重要了', category: 'priority_issue', detail: '不重要了' },
-      { label: '被其他事情打断', category: 'external_interrupt', detail: '被其他事情打断' },
-      { label: '今天不适合做这个', category: 'state_issue', detail: '今天不适合做这个' },
-      { label: '其他', category: 'other', detail: '其他' }
-    ]
+      { label: '想换个轻松点的', category: 'refuse_easier', detail: '想换个轻松点的' },
+      { label: '今天不太想做这个', category: 'refuse_mood', detail: '今天不太想做这个' },
+      { label: '现在精力不够', category: 'refuse_energy', detail: '现在精力不够' },
+      { label: '只是想看看', category: 'refuse_curious', detail: '只是想看看' }
+    ],
+    cancelLabel: '不用了',
+    confirmLabel: '换个任务',
+    encouragementType: 0
+  },
+  overtime: {
+    title: '这次花的时间比预计长，但你坚持做完了，这很棒',
+    subtitle: '',
+    options: [
+      { label: '把任务拆小一点', category: 'overtime_split', detail: '把任务拆小一点' },
+      { label: '下次多预留时间', category: 'overtime_more_time', detail: '下次多预留时间' },
+      { label: '先做更简单的热身', category: 'overtime_warmup', detail: '先做更简单的热身' }
+    ],
+    cancelLabel: '知道了',
+    confirmLabel: '谢谢鼓励',
+    encouragementType: 0
   },
   finish_early: {
-    eventType: 'finish_early',
-    question: '这次为什么比预计快很多？',
+    title: '这么快就完成了，状态不错',
+    subtitle: '',
     options: [
-      { label: '任务比预想简单', category: 'time_estimation_issue', detail: '任务比预想简单' },
-      { label: '我只完成了一部分', category: 'task_definition_issue', detail: '我只完成了一部分' },
-      { label: '之前已经做过', category: 'ability_issue', detail: '之前已经做过' },
-      { label: '今天状态很好', category: 'state_issue', detail: '今天状态很好' },
-      { label: '预估时间设置太长', category: 'time_estimation_issue', detail: '预估时间设置太长' },
-      { label: '任务定义不准确', category: 'task_definition_issue', detail: '任务定义不准确' },
-      { label: '其他', category: 'other', detail: '其他' }
-    ]
-  },
-  unfinished: {
-    eventType: 'timer_timeout_unfinished',
-    question: '这次没有完成，主要原因是什么？',
-    options: [
-      { label: '任务比预想复杂', category: 'time_estimation_issue', detail: '任务比预想复杂' },
-      { label: '任务拆得太大', category: 'task_definition_issue', detail: '任务拆得太大' },
-      { label: '今天状态不好', category: 'state_issue', detail: '今天状态不好' },
-      { label: '中途被打断', category: 'external_interrupt', detail: '中途被打断' },
-      { label: '前置知识没掌握', category: 'ability_issue', detail: '前置知识没掌握' },
-      { label: '时间预估太短', category: 'time_estimation_issue', detail: '时间预估太短' },
-      { label: '任务目标不清晰', category: 'task_definition_issue', detail: '任务目标不清晰' },
-      { label: '分心了', category: 'state_issue', detail: '分心了' },
-      { label: '其他', category: 'other', detail: '其他' }
-    ]
+      { label: '今天状态特别好', category: 'early_good_state', detail: '今天状态特别好' },
+      { label: '任务比预期简单', category: 'early_easier', detail: '任务比预期简单' },
+      { label: '之前已经复习过了', category: 'early_reviewed', detail: '之前已经复习过了' }
+    ],
+    cancelLabel: '开心',
+    confirmLabel: '记录',
+    encouragementType: 0
   },
   abandon: {
-    eventType: 'abandon_task',
-    question: '为什么放弃或中断这次任务？',
+    title: '今天先到这里，休息一下也好',
+    subtitle: '调整节奏才能走得更远',
     options: [
-      { label: '今天状态不好', category: 'state_issue', detail: '今天状态不好' },
-      { label: '中途被打断', category: 'external_interrupt', detail: '中途被打断' },
-      { label: '任务比预想复杂', category: 'time_estimation_issue', detail: '任务比预想复杂' },
-      { label: '任务目标不清晰', category: 'task_definition_issue', detail: '任务目标不清晰' },
-      { label: '不重要了', category: 'priority_issue', detail: '不重要了' },
-      { label: '其他', category: 'other', detail: '其他' }
-    ]
+      { label: '延期到明天', category: 'abandon_defer', detail: '延期到明天' },
+      { label: '拆成更小的步骤', category: 'abandon_split', detail: '拆成更小的步骤' },
+      { label: '换一个更轻松的任务', category: 'abandon_easier', detail: '换一个更轻松的任务' }
+    ],
+    cancelLabel: '休息一下',
+    confirmLabel: '帮我调整',
+    encouragementType: 0
   },
-  refuse: {
-    eventType: 'refuse_task',
-    question: '为什么不想做这个任务？',
+  skip: {
+    title: '先跳过没关系，记得回来就好',
+    subtitle: '',
     options: [
-      { label: '现在没精力', category: 'state_issue', detail: '现在没精力' },
-      { label: '任务太难', category: 'ability_issue', detail: '任务太难' },
-      { label: '任务太模糊', category: 'task_definition_issue', detail: '任务太模糊' },
-      { label: '时间不够', category: 'time_estimation_issue', detail: '时间不够' },
-      { label: '今天状态不好', category: 'state_issue', detail: '今天状态不好' },
-      { label: '被其他事情打断', category: 'external_interrupt', detail: '被其他事情打断' },
-      { label: '不重要了', category: 'priority_issue', detail: '不重要了' },
-      { label: '其他', category: 'other', detail: '其他' }
-    ]
+      { label: '今天状态不太好', category: 'skip_mood', detail: '今天状态不太好' },
+      { label: '这个任务不太紧急', category: 'skip_priority', detail: '这个任务不太紧急' },
+      { label: '想先做别的', category: 'skip_other', detail: '想先做别的' }
+    ],
+    cancelLabel: '好的',
+    confirmLabel: '跳过',
+    encouragementType: 0
+  },
+  complete_encourage: {
+    title: '又完成一个，今日进度加一',
+    subtitle: '',
+    options: [],
+    cancelLabel: '',
+    confirmLabel: '继续努力',
+    encouragementType: 1
+  },
+  daily_greeting: {
+    title: '早安，今天又是充满可能的一天',
+    subtitle: '',
+    options: [],
+    cancelLabel: '',
+    confirmLabel: '看看任务',
+    encouragementType: 3
+  },
+  streak: {
+    title: '连续完成 5 个任务',
+    subtitle: '继续保持这个节奏',
+    options: [],
+    cancelLabel: '继续',
+    confirmLabel: '保持节奏',
+    encouragementType: 2
   }
 };
 
 var _taskFeedbackResolve = null;
 var _taskFeedbackContext = null;
 var _taskFeedbackPresetKey = null;
+var _completedStreak = 0;
+var _completedToday = 0;
 
 function submitTaskFeedbackEvent(payload) {
   return api('/api/task-feedback', {
     method: 'POST',
     body: JSON.stringify(payload)
   }).catch(function (e) {
-    toast(e.message || '反馈保存失败', 'err');
+    toast(e.message || '保存失败', 'err');
   });
+}
+
+function showEncouragement(key) {
+  var preset = TASK_FEEDBACK_PRESETS[key];
+  if (!preset) return;
+  var modal = document.getElementById('taskFeedbackModal');
+  document.getElementById('taskFeedbackTitle').textContent = preset.title;
+  document.getElementById('taskFeedbackQuestion').textContent = preset.subtitle || '';
+  var sub = document.getElementById('taskFeedbackSubtitle');
+  if (preset.subtitle) {
+    sub.textContent = preset.subtitle;
+    sub.style.display = '';
+  } else {
+    sub.style.display = 'none';
+  }
+  var html = preset.options.map(function (opt, idx) {
+    return '<label class="feedback-option"><input type="radio" name="taskFbOpt" value="' + idx +
+      '"> ' + opt.label + '</label>';
+  }).join('');
+  document.getElementById('taskFeedbackOptions').innerHTML = html;
+  if (preset.options.length === 0) {
+    document.getElementById('taskFeedbackOptions').style.display = 'none';
+    document.getElementById('taskFeedbackNote').parentElement.style.display = 'none';
+  } else {
+    document.getElementById('taskFeedbackOptions').style.display = '';
+    document.getElementById('taskFeedbackNote').parentElement.style.display = '';
+  }
+  document.getElementById('taskFeedbackNote').value = '';
+  document.getElementById('taskFeedbackCancelBtn').textContent = preset.cancelLabel || '关闭';
+  document.getElementById('taskFeedbackConfirmBtn').textContent = preset.confirmLabel || '好的';
+  _taskFeedbackPresetKey = key;
+  showModal('taskFeedbackModal');
 }
 
 function promptTaskFeedback(presetKey, context) {
   var preset = TASK_FEEDBACK_PRESETS[presetKey];
   if (!preset) return Promise.resolve({ saved: false });
   _taskFeedbackContext = context || {};
-  _taskFeedbackPresetKey = presetKey;
-  document.getElementById('taskFeedbackQuestion').textContent = preset.question;
-  var html = preset.options.map(function (opt, idx) {
-    return '<label class="feedback-option"><input type="radio" name="taskFbOpt" value="' + idx +
-      '"> ' + opt.label + '</label>';
-  }).join('');
-  document.getElementById('taskFeedbackOptions').innerHTML = html;
-  document.getElementById('taskFeedbackNote').value = '';
-  showModal('taskFeedbackModal');
+  showEncouragement(presetKey);
   return new Promise(function (resolve) {
     _taskFeedbackResolve = resolve;
   });
 }
 
 function confirmTaskFeedbackModal() {
-  var selected = document.querySelector('input[name="taskFbOpt"]:checked');
-  if (!selected) {
-    toast('请选择一个原因', 'err');
-    return;
-  }
-  var idx = parseInt(selected.value, 10);
   var preset = TASK_FEEDBACK_PRESETS[_taskFeedbackPresetKey];
-  var opt = preset.options[idx];
-  if (!opt) {
-    toast('请选择有效原因', 'err');
-    return;
+  if (!preset) { closeModal('taskFeedbackModal'); return; }
+
+  var selected = document.querySelector('input[name="taskFbOpt"]:checked');
+  var opt = null;
+  if (selected && preset.options.length > 0) {
+    var idx = parseInt(selected.value, 10);
+    opt = preset.options[idx];
   }
+
   var ctx = _taskFeedbackContext || {};
   var note = (document.getElementById('taskFeedbackNote').value || '').trim();
   var payload = {
-    task_id: ctx.taskId,
-    event_type: preset.eventType,
+    task_id: ctx.taskId || null,
+    event_type: _taskFeedbackPresetKey,
     planned_minutes: ctx.plannedMinutes,
     actual_minutes: ctx.actualMinutes,
     completion_status: ctx.completionStatus,
-    reason_category: opt.category,
-    reason_detail: opt.detail,
-    note: note || null
+    reason_category: opt ? opt.category : 'none',
+    reason_detail: opt ? opt.detail : '',
+    note: note || null,
+    encouragement_shown: preset.encouragementType || 0,
+    encouragement_type: preset.encouragementType || 0
   };
   closeModal('taskFeedbackModal');
   var resolve = _taskFeedbackResolve;
@@ -2154,8 +2197,13 @@ async function handleTimerOutcome(outcome) {
       if (actualMinutes <= planned * 0.5) {
         await promptTaskFeedback('finish_early', fbCtx);
       } else if (actualMinutes >= planned * 1.2 && planned > 0) {
-        await promptTaskFeedback('unfinished', fbCtx);
+        await promptTaskFeedback('overtime', fbCtx);
       } else {
+        _completedToday++;
+        if (_completedToday === 1) _completedStreak = 1;
+        else _completedStreak++;
+        if (_completedStreak >= 5) showEncouragement('streak');
+        else if (_completedToday <= 3) showEncouragement('complete_encourage');
         await submitTaskFeedbackEvent({
           task_id: session.task_id,
           event_type: 'finish_on_time',
@@ -2168,7 +2216,7 @@ async function handleTimerOutcome(outcome) {
         });
       }
     } else if (outcome === 'unfinished') {
-      await promptTaskFeedback('unfinished', fbCtx);
+      await promptTaskFeedback('overtime', fbCtx);
     } else if (outcome === 'abandoned') {
       await promptTaskFeedback('abandon', fbCtx);
     }
