@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+
+# Virtual Environment
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+
+# Local config with secrets
+config/config.json
+
+# Temporary files
+*.tmp
+*.bak
+*.corrupted
+
+# Local runtime files
+.run/
+.venv_bak/

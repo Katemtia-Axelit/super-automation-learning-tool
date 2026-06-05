@@ -1,0 +1,23 @@
+{
+  "version": "task_patch_v1",
+  "mode": "manual_review_only",
+  "created_by": "external_ai",
+  "changes": [
+    {
+      "operation": "update",
+      "match_by": {
+        "task_id": null,
+        "title": "CET4-语法-非谓语动词与被动语态"
+      },
+      "new_fields": {
+        "title": "CET4｜非谓语动词与被动语态复习卡",
+        "estimated_minutes": 25,
+        "tags": ["英语", "四级", "语法", "复习"],
+        "priority": 8
+      },
+      "reason": "标题更清晰，标签更利于卡牌主题映射，时间保持轻量。",
+      "risk_level": "low",
+      "manual_action": "请在网页任务编辑界面手动修改。"
+    }
+  ]
+}
