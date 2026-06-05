@@ -2092,11 +2092,13 @@ function updateTimerDisplay() {
 
   if (timerActiveSession && timerActiveSession.started_at) {
     var started = new Date(timerActiveSession.started_at).getTime();
-    var elapsed = Date.now() - started;
+    var pausedSec = timerActiveSession.paused_duration || 0;
+    var isPaused = timerActiveSession.status === 'paused';
+    var elapsed = isPaused ? (new Date(timerActiveSession.paused_at).getTime() - started - pausedSec * 1000) : (Date.now() - started - pausedSec * 1000);
     elapsedEl.textContent = formatElapsed(elapsed);
     var name = timerActiveSession.task_name || taskNameById(timerActiveSession.task_id);
-    statusEl.textContent = '计时中 · ' + name + '（计划 ' + (timerActiveSession.planned_minutes || '?') + ' 分）';
-    statusEl.className = '';
+    statusEl.textContent = (isPaused ? '已暂停 · ' : '计时中 · ') + name + '（计划 ' + (timerActiveSession.planned_minutes || '?') + ' 分）';
+    statusEl.className = isPaused ? 'timer-paused' : '';
     if (startBtn) startBtn.classList.add('hidden');
     if (stopBtn) stopBtn.classList.remove('hidden');
     if (sel) sel.disabled = true;
@@ -2119,12 +2121,25 @@ function updateGachaTimerBar() {
   if (!bar || !empty) return;
   if (timerActiveSession && timerActiveSession.started_at) {
     var started = new Date(timerActiveSession.started_at).getTime();
-    var elapsed = Date.now() - started;
+    var pausedSec = timerActiveSession.paused_duration || 0;
+    var isPaused = timerActiveSession.status === 'paused';
+    var elapsed = isPaused ? (new Date(timerActiveSession.paused_at).getTime() - started - pausedSec * 1000) : (Date.now() - started - pausedSec * 1000);
     var name = timerActiveSession.task_name || taskNameById(timerActiveSession.task_id);
     document.getElementById('gachaTimerElapsed').textContent = formatElapsed(elapsed);
-    document.getElementById('gachaTimerTaskName').textContent = name;
+    document.getElementById('gachaTimerTaskName').textContent = (isPaused ? '[已暂停] ' : '') + name;
     bar.style.display = 'flex';
     empty.style.display = 'none';
+    // Update pause/resume button
+    var btn = bar.querySelector('.timer-bar-actions button:first-child');
+    if (btn) {
+      if (isPaused) {
+        btn.textContent = '继续';
+        btn.setAttribute('onclick', 'resumeTimer()');
+      } else {
+        btn.textContent = '暂停';
+        btn.setAttribute('onclick', 'pauseTimer()');
+      }
+    }
   } else {
     bar.style.display = 'none';
     empty.style.display = 'flex';
@@ -2199,7 +2214,9 @@ async function handleTimerOutcome(outcome) {
 
   var session = timerActiveSession;
   var started = new Date(session.started_at).getTime();
-  var actualMinutes = Math.max(1, Math.round((Date.now() - started) / 60000));
+  var pausedSec = session.paused_duration || 0;
+  var now = session.status === 'paused' && session.paused_at ? new Date(session.paused_at).getTime() : Date.now();
+  var actualMinutes = Math.max(1, Math.round((now - started - pausedSec * 1000) / 60000));
   var planned = session.planned_minutes || 30;
   var timerResult = outcome === 'completed' ? 'completed' : 'abandoned';
 
@@ -2257,7 +2274,7 @@ async function handleTimerOutcome(outcome) {
 }
 
 async function startTaskWithTimer(taskId) {
-  if (timerActiveSession) {
+  if (timerActiveSession && timerActiveSession.status !== 'paused') {
     toast('已有进行中的计时，请先完成当前任务', 'err');
     return;
   }
@@ -2325,6 +2342,52 @@ async function completeFromGachaCard(taskId) {
   } catch (e) {
     toast(e.message || '操作失败', 'err');
   }
+}
+
+async function pauseTimer() {
+  if (!timerActiveSession || !timerActiveSession.id) {
+    toast('当前无进行中的计时', 'err');
+    return;
+  }
+  try {
+    var r = await api('/api/timer/pause', { method: 'POST' });
+    if (r.status === 'paused') {
+      timerActiveSession.status = 'paused';
+      timerActiveSession.paused_at = new Date().toISOString();
+      updateTimerDisplay();
+      toast('计时已暂停', 'suc');
+    }
+  } catch (e) {
+    toast(e.message || '暂停失败', 'err');
+  }
+}
+
+async function resumeTimer() {
+  if (!timerActiveSession || !timerActiveSession.id) {
+    toast('当前无暂停的计时', 'err');
+    return;
+  }
+  try {
+    var r = await api('/api/timer/resume', { method: 'POST' });
+    if (r.status === 'resumed') {
+      timerActiveSession.status = 'running';
+      timerActiveSession.paused_duration = r.paused_duration || 0;
+      timerActiveSession.paused_at = null;
+      updateTimerDisplay();
+      toast('计时已恢复', 'suc');
+    }
+  } catch (e) {
+    toast(e.message || '恢复失败', 'err');
+  }
+}
+
+async function completeTimerFromGacha() {
+  if (!timerActiveSession || !timerActiveSession.id) {
+    toast('当前无进行中的计时', 'err');
+    return;
+  }
+  await stopTimer();
+  updateTimerDisplay();
 }
 
 async function loadSleepInfo() {
