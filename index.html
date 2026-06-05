@@ -247,6 +247,13 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 @keyframes skipSlide{0%{transform:translateX(0) rotate(0deg);opacity:1}100%{transform:translateX(-150px) rotate(-15deg);opacity:0}}
 @keyframes cardRefuseAway{to{opacity:0;transform:translateX(-70px) scale(.9) rotate(-4deg);filter:brightness(.55)}}
 .flying-card-no-transform{animation:none!important;transform:none!important}
+.timer-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:linear-gradient(135deg,rgba(240,192,64,.08),rgba(240,192,64,.03));border:1px solid rgba(240,192,64,.2);border-radius:10px;margin-bottom:16px;font-size:.85rem}
+.timer-bar-info{display:flex;align-items:center;gap:10px}
+.timer-bar-actions{display:flex;gap:6px}
+.timer-elapsed{font-family:monospace;font-size:1.05rem;color:var(--gold);min-width:50px}
+.timer-empty{justify-content:center;color:var(--text-secondary);font-size:.82rem;padding:6px 14px;border-style:dashed}
+.btn-disabled{opacity:.45;pointer-events:none;filter:grayscale(.5)}
+.btn-disabled:hover{transform:none!important;box-shadow:none!important}
 @media(max-width:600px){.task-card-title{font-size:1rem}.task-card-actions .btn{padding:4px 8px;font-size:.72rem}.task-card-meta{gap:4px}.card-deck{width:128px;height:172px}.gacha-draw-stage{min-height:210px}.task-grid{grid-template-columns:1fr}}
 @media(max-width:900px){.g3,.g4{grid-template-columns:repeat(2,1fr)}.know-layout{grid-template-columns:1fr}nav{gap:0}.nav-btn{padding:8px 10px;font-size:.82rem}header h1{font-size:1rem}}
 @media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}.gacha-pools{flex-direction:column;align-items:center}.task-grid{grid-template-columns:1fr}}
@@ -268,6 +275,18 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 <main>
 <section class="page active" id="page-gacha">
 <div class="gacha-container">
+<div id="gachaTimerBar" class="timer-bar" style="display:none">
+  <div class="timer-bar-info">
+    <i class="fa-solid fa-hourglass-half"></i>
+    <span id="gachaTimerTaskName"></span>
+    <span id="gachaTimerElapsed" class="timer-elapsed">00:00</span>
+  </div>
+  <div class="timer-bar-actions">
+    <button class="btn sm" onclick="pauseTimer()">暂停</button>
+    <button class="btn sm" onclick="completeTimerFromGacha()">完成</button>
+  </div>
+</div>
+<div id="gachaTimerEmpty" class="timer-bar timer-empty">暂无进行中的计时</div>
 <div class="gacha-energy" id="gachaEnergy">
 <button class="energy-btn" data-e="low"><i class="fa-solid fa-battery-quarter"></i> 低精力</button>
 <button class="energy-btn active" data-e="medium"><i class="fa-solid fa-battery-half"></i> 正常</button>

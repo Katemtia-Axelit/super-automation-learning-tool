@@ -446,7 +446,17 @@ document.querySelectorAll('.pool-btn').forEach(function (b) {
 });
 document.getElementById('gachaBtn').addEventListener('click', drawGacha);
 
+function disableGachaBtn() {
+  var btn = document.getElementById('gachaBtn');
+  if (btn) { btn.disabled = true; btn.classList.add('btn-disabled'); }
+}
+function enableGachaBtn() {
+  var btn = document.getElementById('gachaBtn');
+  if (btn) { btn.disabled = false; btn.classList.remove('btn-disabled'); }
+}
+
 async function drawGacha() {
+  disableGachaBtn();
   var time = parseInt(document.getElementById('gachaTime').value, 10) || 30;
   var count = parseInt(document.getElementById('gachaCount').value, 10) || 1;
   var result = document.getElementById('gachaResult');
@@ -466,11 +476,13 @@ async function drawGacha() {
       } else if (count === 1) {
         if (deck) deck.classList.remove('is-drawing');
         result.innerHTML = '<div class="empty-state mt24"><i class="fa-solid fa-box-open"></i><p></p></div>';
+        enableGachaBtn();
         return;
       }
     } catch (e) {
       if (deck) deck.classList.remove('is-drawing');
       toast(e.message || '抽卡失败', 'err');
+      enableGachaBtn();
       return;
     }
   }
@@ -684,6 +696,7 @@ function handleSkip(id) {
       return playCardAnim(id, 'is-skipping', 400).then(function () {
         document.getElementById('gachaResult').innerHTML =
           '<div class="empty-state"><i class="fa-solid fa-forward"></i><p>已跳过</p></div>';
+        enableGachaBtn();
         if (r.unlocked_tasks && r.unlocked_tasks.length) toast('已解锁: ' + r.unlocked_tasks.join('、'), 'suc');
         refreshGachaStats();
         loadTasks();
@@ -702,6 +715,7 @@ function handleRefuse(id) {
   }).then(function () {
     document.getElementById('gachaResult').innerHTML =
       '<div class="empty-state"><i class="fa-solid fa-xmark"></i><p>已拒绝</p></div>';
+    enableGachaBtn();
     refreshGachaStats();
   }).catch(function (e) { toast(e.message || '拒绝失败', 'err'); });
 }
@@ -724,6 +738,7 @@ async function completeWithFeedback(id) {
     gachaState.feedbackMood = 3;
     showModal('feedbackModal');
     setTimeout(function () { submitFeedback(); closeModal('feedbackModal'); }, 3000);
+    enableGachaBtn();
     loadTasks();
     refreshGachaStats();
   } catch (e) {
@@ -2099,6 +2114,25 @@ function updateTimerDisplay() {
     if (sel) sel.disabled = false;
     if (planned) planned.disabled = false;
   }
+  updateGachaTimerBar();
+}
+
+function updateGachaTimerBar() {
+  var bar = document.getElementById('gachaTimerBar');
+  var empty = document.getElementById('gachaTimerEmpty');
+  if (!bar || !empty) return;
+  if (timerActiveSession && timerActiveSession.started_at) {
+    var started = new Date(timerActiveSession.started_at).getTime();
+    var elapsed = Date.now() - started;
+    var name = timerActiveSession.task_name || taskNameById(timerActiveSession.task_id);
+    document.getElementById('gachaTimerElapsed').textContent = formatElapsed(elapsed);
+    document.getElementById('gachaTimerTaskName').textContent = name;
+    bar.style.display = 'flex';
+    empty.style.display = 'none';
+  } else {
+    bar.style.display = 'none';
+    empty.style.display = 'flex';
+  }
 }
 
 function startTimerTick() {
@@ -2224,6 +2258,23 @@ async function handleTimerOutcome(outcome) {
     toast(e.message || '停止计时失败', 'err');
     await loadTimerPanel();
   }
+}
+
+function pauseTimer() {
+  if (!timerActiveSession) {
+    toast('当前无进行中的计时', 'err');
+    return;
+  }
+  toast('计时器暂停功能将在后续版本开放', 'inf');
+}
+
+async function completeTimerFromGacha() {
+  if (!timerActiveSession || !timerActiveSession.id) {
+    toast('当前无进行中的计时', 'err');
+    return;
+  }
+  await stopTimer();
+  updateTimerDisplay();
 }
 
 async function loadSleepInfo() {
