@@ -280,8 +280,8 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 .gacha-stats-corner{position:fixed;bottom:16px;right:16px;font-size:.72rem;color:rgba(255,255,255,.3);text-align:right;z-index:100;transition:opacity .3s;opacity:.35;pointer-events:none}
 .gacha-stats-corner:hover{opacity:1}
 .gacha-stats-corner span{display:block;line-height:1.5}
-.card-size-control{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;opacity:.25;transition:opacity .3s}
-.card-size-control:hover{opacity:1}
+.card-size-control{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;opacity:.25;transition:opacity .3s;pointer-events:none}
+.card-size-control:hover{opacity:1;pointer-events:auto}
 .card-size-control input[type=range]{width:100px;accent-color:var(--gold)}
 .card-size-label{font-size:.72rem;color:var(--text-secondary)}
 .card-size-val{font-size:.72rem;color:var(--text-secondary);min-width:44px;text-align:right}
@@ -291,6 +291,9 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 .drawn-card .task-card-body-zone{flex:1;display:flex;flex-direction:column;justify-content:center}
 @media(max-width:900px){.g3,.g4{grid-template-columns:repeat(2,1fr)}.know-layout{grid-template-columns:1fr}nav{gap:0}.nav-btn{padding:8px 10px;font-size:.82rem}header h1{font-size:1rem}}
 @media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}.gacha-pools{flex-direction:column;align-items:center}.task-grid{grid-template-columns:1fr}}
+/* TEMP — click-through debug. Delete once buttons work */
+main,.gacha-container,.drawn-card-stage{pointer-events:auto!important}
+button,.btn{pointer-events:auto!important;position:relative;z-index:100!important}
 </style>
 </head>
 <body>
