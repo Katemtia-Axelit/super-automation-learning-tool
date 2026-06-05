@@ -96,6 +96,20 @@ var TASK_FEEDBACK_PRESETS = {
       { label: '不重要了', category: 'priority_issue', detail: '不重要了' },
       { label: '其他', category: 'other', detail: '其他' }
     ]
+  },
+  refuse: {
+    eventType: 'refuse_task',
+    question: '为什么不想做这个任务？',
+    options: [
+      { label: '现在没精力', category: 'state_issue', detail: '现在没精力' },
+      { label: '任务太难', category: 'ability_issue', detail: '任务太难' },
+      { label: '任务太模糊', category: 'task_definition_issue', detail: '任务太模糊' },
+      { label: '时间不够', category: 'time_estimation_issue', detail: '时间不够' },
+      { label: '今天状态不好', category: 'state_issue', detail: '今天状态不好' },
+      { label: '被其他事情打断', category: 'external_interrupt', detail: '被其他事情打断' },
+      { label: '不重要了', category: 'priority_issue', detail: '不重要了' },
+      { label: '其他', category: 'other', detail: '其他' }
+    ]
   }
 };
 
@@ -638,7 +652,7 @@ function handleSkip(id) {
 function handleRefuse(id) {
   var ctx = getTaskFeedbackContext(id);
   ctx.completionStatus = 'refused';
-  promptTaskFeedback('skip', ctx).then(function () {
+  promptTaskFeedback('refuse', ctx).then(function () {
     return api('/api/tasks/' + id + '/refuse', { method: 'POST' });
   }).then(function () {
     return playCardAnim(id, 'is-refusing');
@@ -2139,6 +2153,8 @@ async function handleTimerOutcome(outcome) {
     if (outcome === 'completed') {
       if (actualMinutes <= planned * 0.5) {
         await promptTaskFeedback('finish_early', fbCtx);
+      } else if (actualMinutes >= planned * 1.2 && planned > 0) {
+        await promptTaskFeedback('unfinished', fbCtx);
       } else {
         await submitTaskFeedbackEvent({
           task_id: session.task_id,
