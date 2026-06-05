@@ -24,80 +24,15 @@ header{background:var(--bg-primary);border-bottom:1px solid var(--border);paddin
 header h1{font-family:var(--font-display);font-size:1.2rem;letter-spacing:2px}
 nav{display:flex;gap:2px}
 main{max-width:1400px;margin:24px auto;padding:0 20px}
-/* DEBUG BORDERS — remove after layout fix */
-#debug-enabled header, #debug-enabled body{outline:2px solid red;outline-offset:-2px}
-#debug-enabled main{outline:2px dashed orange;outline-offset:-2px}
-#debug-enabled .drawn-card{outline:2px solid yellow;outline-offset:-2px}
-#debug-enabled .gacha-container{outline:2px solid cyan;outline-offset:-2px}
-#debug-enabled .drawn-card-stage{outline:1px solid lime;outline-offset:-2px}
-#debug-enabled .task-card-face{outline:1px dotted magenta}
-.nav-btn{background:0;border:0;color:var(--text-muted);padding:8px 14px;border-radius:var(--radius-md);cursor:pointer;font-family:var(--font-body);font-size:.95rem;transition:.2s;display:flex;align-items:center;gap:6px}
-.nav-btn:hover{color:var(--text-primary);background:rgba(255,255,255,.05)}
-.nav-btn.active{color:var(--gold);background:rgba(240,192,64,.1)}
-.header-status{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-muted)}
-.header-status .dot{width:8px;height:8px;border-radius:50%}.dot.online{background:var(--green)}.dot.offline{background:var(--red)}
-main{max-width:1400px;margin:24px auto;padding:0 20px}
-.page{display:none}.page.active{display:block;animation:fadeIn .3s}
-.btn{background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border);padding:8px 18px;border-radius:var(--radius-md);cursor:pointer;font-family:var(--font-body);font-size:.95rem;transition:.2s;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
-.btn:hover{border-color:var(--gold)}
-.btn.pri{background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:#0a0e1a;border:0;font-weight:700}
-.btn.pri:hover{box-shadow:0 0 20px rgba(240,192,64,.3)}
-.btn.danger{background:rgba(231,76,60,.1);border:1px solid var(--red);color:var(--red)}
-.btn.sm{padding:5px 10px;font-size:.8rem}
-.btn.ic{padding:6px 8px;min-width:30px;justify-content:center}
-input,select,textarea{background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border);border-radius:var(--radius-md);padding:9px 12px;font-family:var(--font-body);font-size:.9rem;outline:0;transition:.2s}
-input:focus,select:focus,textarea:focus{border-color:var(--gold)}
-select option{background:var(--bg-primary);color:var(--text-primary)}
-textarea{resize:vertical;min-height:70px}
-label{display:block;font-size:.85rem;color:var(--text-secondary);margin-bottom:4px}
-input[type=number]{width:80px}
-input.full-width,select.full-width,textarea.full-width{width:100%}
-.badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:.75rem;margin:2px;cursor:pointer;transition:.2s}
-.badge:hover{opacity:.8}.bg-gold{background:rgba(240,192,64,.15);color:var(--gold)}.bg-blue{background:rgba(74,143,231,.15);color:var(--blue)}.bg-green{background:rgba(39,174,96,.15);color:var(--green)}.bg-red{background:rgba(231,76,60,.15);color:var(--red)}.bg-purple{background:rgba(155,89,182,.15);color:var(--purple)}
-.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;transition:.2s}
-.card:hover{border-color:rgba(255,255,255,.1)}
-.card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
-.card-title{font-family:var(--font-heading);font-size:1.05rem}
-.card-meta{font-size:.8rem;color:var(--text-muted)}
-.card-body{line-height:1.6;font-size:.9rem;color:var(--text-secondary)}
-.card-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
-.flex{display:flex}.fc{flex-direction:column}.gap8{gap:8px}.gap16{gap:16px}.jc{justify-content:center}.ac{align-items:center}.sb{justify-content:space-between}.wrap{flex-wrap:wrap}.grow{flex:1}
-.mt8{margin-top:8px}.mt16{margin-top:16px}.mt24{margin-top:24px}.mb8{margin-bottom:8px}.mb16{margin-bottom:16px}
-.section-title{font-family:var(--font-heading);font-size:1.15rem;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.section-title i{color:var(--gold)}
-.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
-.empty-state i{font-size:3rem;margin-bottom:16px;display:block}
-.hidden{display:none!important}
-.toast-container{position:fixed;top:80px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.toast{padding:12px 20px;border-radius:var(--radius-md);animation:slideUp .3s;font-size:.9rem;max-width:350px;cursor:pointer}
-.toast.suc{background:rgba(39,174,96,.2);border:1px solid var(--green);color:var(--green)}
-.toast.err{background:rgba(231,76,60,.2);border:1px solid var(--red);color:var(--red)}
-.toast.inf{background:rgba(74,143,231,.2);border:1px solid var(--blue);color:var(--blue)}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
-.modal{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;max-width:600px;width:90%;max-height:85vh;overflow-y:auto;animation:slideUp .3s}
-.modal h2{font-family:var(--font-heading);font-size:1.2rem;margin-bottom:16px}
-.modal .form-group{margin-bottom:12px}
-.modal .frow{display:flex;gap:12px}.modal .frow>*{flex:1}
-.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
-.gacha-container{text-align:center;max-width:600px;margin:0 auto}
-.gacha-energy{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
-.energy-btn{padding:8px 20px;border-radius:20px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:.2s}
-.energy-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(240,192,64,.1)}
-.gacha-pools{display:flex;gap:10px;justify-content:center;margin-bottom:24px}
-.pool-btn{padding:10px 24px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:.2s;text-align:center}
-.pool-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(240,192,64,.1)}
-.pool-btn span{display:block;font-size:.75rem;color:var(--text-muted)}
-.gacha-main-btn{width:64px;height:64px;border-radius:50%;border:1px solid rgba(240,192,64,.35);background:rgba(15,20,34,.75);color:rgba(240,192,64,.75);font-family:var(--font-body);font-size:.75rem;cursor:pointer;transition:.25s;position:relative;margin:10px auto 0;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 2px 10px rgba(0,0,0,.35)}
-.gacha-main-btn i{font-size:1.25rem!important}
-.gacha-main-btn:hover{transform:scale(1.04);box-shadow:0 0 14px rgba(240,192,64,.2);border-color:rgba(240,192,64,.55);color:var(--gold)}
-.gacha-main-btn:active{transform:scale(.96)}
-.gacha-main-btn:hover{animation:none}
-.gacha-multi-row{display:flex;align-items:center;gap:10px;justify-content:center;margin-top:16px}
-.gacha-multi-row input{width:80px;text-align:center;font-size:1.1rem}
-.drawn-card{animation:cardIn .5s;margin-top:20px;max-width:440px;margin-left:auto;margin-right:auto;aspect-ratio:3/4;display:flex;flex-direction:column;transform-origin:center top}
+/* DEBUG BORDERS — delete after layout fixed */
+body{border:5px solid red!important}
+header{border:5px solid blue!important}
+main{border:5px solid orange!important}
+.gacha-container{outline:5px solid cyan!important;outline-offset:-5px}
+.drawn-card-stage{overflow:visible!important}
+.drawn-card{animation:cardIn .5s;margin-top:20px;max-width:440px;margin-left:auto;margin-right:auto;aspect-ratio:3/4;display:flex;flex-direction:column;transform-origin:center center;transform:scale(var(--card-scale,1));transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
 .drawn-card .task-card-inner{flex:1;display:flex;flex-direction:column}
-.drawn-card .task-card-face{flex:1}
+.drawn-card .task-card-face{flex:1;overflow:visible!important}
 .drawn-card .task-card-body-zone{flex:1;display:flex;flex-direction:column;justify-content:center}
 .drawn-card .card-background{background-size:cover;background-position:center}
 .drawn-card .card-back-pattern{background-size:20px 20px}
