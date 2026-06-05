@@ -22,6 +22,10 @@ Thumbs.db
 # Local config with secrets
 config/config.json
 
+# Database files (large, contain user data)
+data/*.db
+data/*.db-journal
+
 # Temporary files
 *.tmp
 *.bak
