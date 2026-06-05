@@ -2160,12 +2160,68 @@ async function loadTimerPanel() {
     timerActiveSession = r && r.id ? r : null;
     updateTimerDisplay();
     startTimerTick();
+    if (timerActiveSession && timerActiveSession.task_id) {
+      restoreGachaCardFromSession();
+    }
   } catch (e) {
     timerActiveSession = null;
     updateTimerDisplay();
     toast(e.message || '计时器状态加载失败', 'err');
   }
 }
+
+async function restoreGachaCardFromSession() {
+  var taskId = timerActiveSession.task_id;
+  var result = document.getElementById('gachaResult');
+  if (!result) return;
+  try {
+    var r = await api('/api/tasks/' + taskId);
+    if (!r || !r.id) return;
+    var task = r;
+    var theme = resolveTaskCardTheme(task);
+    var urgent = task.deadline && new Date(task.deadline) > new Date() &&
+      (new Date(task.deadline) - new Date()) / 86400000 < 1;
+
+    var isPaused = timerActiveSession.status === 'paused';
+    var actions;
+    if (isPaused) {
+      actions = '<button class="btn sm" onclick="resumeTimer()" title="恢复计时">继续</button>' +
+        '<button class="btn pri sm" onclick="completeFromGachaCard(' + task.id + ')" title="完成任务">完成</button>';
+    } else {
+      actions = '<button class="btn sm" onclick="pauseTimer()" title="暂停计时">暂停</button>' +
+        '<button class="btn pri sm" onclick="completeFromGachaCard(' + task.id + ')" title="完成任务">完成</button>';
+    }
+
+    var wrap = document.createElement('div');
+    wrap.className = 'drawn-card-stage';
+    var card = document.createElement('div');
+    card.className = 'task-card card drawn-card ' + theme + (urgent ? ' urgent' : '');
+    card.setAttribute('data-task-id', task.id);
+    card.setAttribute('data-restored', '1');
+    card.innerHTML =
+      '<div class="task-card-inner">' +
+      '<div class="task-card-face task-card-back"><div class="card-back-pattern"></div><div class="card-back-emblem">\u2726</div></div>' +
+      '<div class="task-card-face task-card-front">' +
+      buildTaskCardBodyHtml(task, { actionsHtml: actions, descLen: 120, showRepeat: false }) +
+      '</div></div>';
+    card.classList.add('is-revealing');
+    wrap.appendChild(card);
+
+    result.innerHTML = '';
+    result.appendChild(wrap);
+    disableGachaBtn();
+  } catch (e) {
+    // silent — task may have been deleted
+  }
+}
+
+window.addEventListener('beforeunload', function (e) {
+  if (timerActiveSession && timerActiveSession.status === 'running') {
+    e.preventDefault();
+    e.returnValue = '有任务正在进行中，确定要退出吗？';
+    return e.returnValue;
+  }
+});
 
 async function startTimer() {
   if (timerActiveSession) {
