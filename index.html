@@ -82,7 +82,7 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 .pool-btn{padding:10px 24px;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:.2s;text-align:center}
 .pool-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(240,192,64,.1)}
 .pool-btn span{display:block;font-size:.75rem;color:var(--text-muted)}
-.gacha-main-btn{width:64px;height:64px;border-radius:50%;border:1px solid rgba(240,192,64,.35);background:rgba(15,20,34,.75);color:rgba(240,192,64,.75);font-family:var(--font-body);font-size:.75rem;cursor:pointer;transition:.25s;position:relative;margin:10px auto 0;display:flex;align-items:center;justify-content:center;z-index:2;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.gacha-main-btn{width:64px;height:64px;border-radius:50%;border:1px solid rgba(240,192,64,.35);background:rgba(15,20,34,.75);color:rgba(240,192,64,.75);font-family:var(--font-body);font-size:.75rem;cursor:pointer;transition:.25s;position:relative;margin:20px auto 0;display:flex;align-items:center;justify-content:center;z-index:60!important;box-shadow:0 2px 10px rgba(0,0,0,.35)}
 .gacha-main-btn i{font-size:1.25rem!important}
 .gacha-main-btn:hover{transform:scale(1.04);box-shadow:0 0 14px rgba(240,192,64,.2);border-color:rgba(240,192,64,.55);color:var(--gold)}
 .gacha-main-btn:active{transform:scale(.96)}
@@ -194,7 +194,8 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 .lang-word{font-family:var(--font-body);font-size:.68rem;text-transform:lowercase;letter-spacing:.3px;padding:3px 5px;border-radius:5px;border:1px solid rgba(143,212,160,.18);background:rgba(143,212,160,.05);color:rgba(143,212,160,.75);text-align:center}
 .task-card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;position:relative;z-index:1}
 .task-card-tags .badge{font-size:.72rem;padding:2px 8px}
-.task-card-footer{padding:8px 12px 12px;border-top:1px solid rgba(255,255,255,.07);background:linear-gradient(0deg,rgba(0,0,0,.22),transparent);position:relative;z-index:1}
+.task-card-footer{padding:8px 12px 12px;border-top:1px solid rgba(255,255,255,.07);background:linear-gradient(0deg,rgba(0,0,0,.22),transparent);position:relative;z-index:5}
+.task-card-actions{position:relative;z-index:6}
 .task-card-actions{display:flex;gap:5px;flex-wrap:wrap}
 .task-card-actions .btn{padding:5px 10px;font-size:.76rem;border-radius:8px;min-height:30px}
 .task-card-actions .btn.card-act-btn{border-color:rgba(255,255,255,.12);background:rgba(0,0,0,.25)}
@@ -267,8 +268,8 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 .timer-urgent{color:#ff4444!important}
 .timer-warn{color:#ff9944!important}
 .deck-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
-.deck-pile-left,.deck-pile-right{display:flex;flex-direction:column;align-items:center;gap:6px}
-.deck-pile-right{cursor:pointer}
+.deck-pile-left{position:fixed!important;top:110px;left:40px;z-index:50;display:flex;flex-direction:column;align-items:center;gap:6px}
+.deck-pile-right{position:fixed!important;top:110px;right:40px;z-index:50;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
 .deck-label{font-size:.7rem;color:var(--text-secondary);opacity:.6;margin-top:2px}
 .discard-box{width:72px;height:96px;border-radius:12px;border:2px dashed rgba(255,255,255,.12);background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;transition:all .3s}
 .discard-box:hover{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.06)}
@@ -307,6 +308,22 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 <div class="header-status"><span class="dot online" id="apiDot"></span><span id="apiStatus">已连接</span></div>
 </div>
 </header>
+<div class="deck-pile-left">
+  <div class="card-deck" id="gachaDeck" aria-hidden="true">
+    <div class="card-deck-card" style="--deck-i:0"></div>
+    <div class="card-deck-card" style="--deck-i:1"></div>
+    <div class="card-deck-card" style="--deck-i:2"></div>
+    <div class="card-deck-card" style="--deck-i:3"></div>
+    <div class="card-deck-card" style="--deck-i:4"></div>
+  </div>
+  <div class="deck-label">牌堆</div>
+</div>
+<div class="deck-pile-right" title="弃牌堆">
+  <div class="discard-box" id="gachaDiscardBox">
+    <div class="discard-box-icon"><i class="fa-solid fa-box-archive"></i></div>
+  </div>
+  <div class="deck-label">弃牌堆</div>
+</div>
 <main>
 <section class="page active" id="page-gacha">
 <div class="gacha-container">
@@ -322,24 +339,6 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
   </div>
 </div>
 <div id="gachaTimerEmpty" class="timer-bar timer-empty">暂无进行中的计时</div>
-<div class="deck-row">
-  <div class="deck-pile-left">
-    <div class="card-deck" id="gachaDeck" aria-hidden="true">
-      <div class="card-deck-card" style="--deck-i:0"></div>
-      <div class="card-deck-card" style="--deck-i:1"></div>
-      <div class="card-deck-card" style="--deck-i:2"></div>
-      <div class="card-deck-card" style="--deck-i:3"></div>
-      <div class="card-deck-card" style="--deck-i:4"></div>
-    </div>
-    <div class="deck-label">牌堆</div>
-  </div>
-  <div class="deck-pile-right" title="弃牌堆">
-    <div class="discard-box" id="gachaDiscardBox">
-      <div class="discard-box-icon"><i class="fa-solid fa-box-archive"></i></div>
-    </div>
-    <div class="deck-label">弃牌堆</div>
-  </div>
-</div>
 <button class="gacha-main-btn" id="gachaBtn" title="抽一张卡"><i class="fa-solid fa-hand-pointer"></i></button>
 <div id="gachaResult"></div>
 <div class="card-size-control" id="cardSizeControl">
