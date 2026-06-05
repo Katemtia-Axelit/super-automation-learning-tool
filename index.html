@@ -371,7 +371,7 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 <div class="section-title mt16" style="font-size:.9rem"><i class="fa-solid fa-clock-rotate-left"></i> 近7日评估</div>
 <div id="stateAssessmentHistory"><p style="color:var(--text-muted);font-size:.85rem">加载中...</p></div>
 </div>
-<div class="schedule-nav"><button onclick="shiftDate(-1)"><i class="fa-solid fa-chevron-left"></i></button><span class="date-label" id="schedDate"></span><button onclick="shiftDate(1)"><i class="fa-solid fa-chevron-right"></i></button><button class="btn" onclick="openActivityMgr()"><i class="fa-solid fa-list"></i> 活动管理</button></div>
+<div class="schedule-nav"><button onclick="shiftDate(-1)" title="前一天"><i class="fa-solid fa-chevron-left"></i></button><span class="date-label" id="schedDate"></span><button onclick="shiftDate(1)" title="后一天"><i class="fa-solid fa-chevron-right"></i></button><button class="btn" onclick="openActivityMgr()"><i class="fa-solid fa-list"></i> 活动管理</button></div>
 <div class="sched-grid" id="schedGrid"></div>
 </section>
 <section class="page" id="page-knowledge">
@@ -385,7 +385,7 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 <div class="know-main">
 <div id="knowTitle" class="section-title">选择笔记或知识点查看</div>
 <div class="flex gap8 mb16" style="display:none" id="knowActions">
-<button class="btn sm" onclick="openCurrentInObsidian()"><i class="fa-solid fa-up-right-from-square"></i> Obsidian打开</button>
+<button class="btn sm" onclick="openCurrentInObsidian()" title="在Obsidian中打开当前文件"><i class="fa-solid fa-up-right-from-square"></i> Obsidian打开</button>
 </div>
 <div id="knowContent" class="md-content"></div>
 </div>

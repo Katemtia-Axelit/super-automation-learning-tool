@@ -511,10 +511,8 @@ function flyCardToResult(deckEl, resultEl, task) {
     var urgent = task.deadline && new Date(task.deadline) > new Date() &&
       (new Date(task.deadline) - new Date()) / 86400000 < 1;
     var actions =
-      '<button class="btn pri sm" onclick="completeWithFeedback(' + task.id + ')"><i class="fa-solid fa-check"></i></button>' +
-      '<button class="btn sm" onclick="handleSkip(' + task.id + ')"><i class="fa-solid fa-forward"></i></button>' +
-      '<button class="btn danger sm" onclick="handleRefuse(' + task.id + ')"><i class="fa-solid fa-xmark"></i></button>' +
-      (gachaState.canReplace ? '<button class="btn sm" onclick="showReplaceReason(' + task.id + ')"><i class="fa-solid fa-shuffle"></i></button>' : '');
+      '<button class="btn pri sm" onclick="startTaskWithTimer(' + task.id + ')" title="开始计时完成任务"><i class="fa-solid fa-play"></i> 开始</button>' +
+      (gachaState.canReplace ? '<button class="btn sm" onclick="showReplaceReason(' + task.id + ')" title="换一张牌"><i class="fa-solid fa-shuffle"></i> 换牌</button>' : '');
 
     var wrap = document.createElement('div');
     wrap.className = 'drawn-card-stage';
@@ -626,10 +624,8 @@ function renderDrawnCard(task, idx) {
   var urgent = task.deadline && new Date(task.deadline) > new Date() &&
     (new Date(task.deadline) - new Date()) / 86400000 < 1;
   var actions =
-    '<button class="btn pri sm" onclick="completeWithFeedback(' + task.id + ')"><i class="fa-solid fa-check"></i> 完成</button>' +
-    '<button class="btn sm" onclick="handleSkip(' + task.id + ')"><i class="fa-solid fa-forward"></i> 跳过</button>' +
-    '<button class="btn danger sm" onclick="handleRefuse(' + task.id + ')"><i class="fa-solid fa-xmark"></i> 拒绝</button>' +
-    (gachaState.canReplace ? '<button class="btn sm" onclick="showReplaceReason(' + task.id + ')"><i class="fa-solid fa-shuffle"></i> 换一个</button>' : '');
+    '<button class="btn pri sm" onclick="startTaskWithTimer(' + task.id + ')" title="开始计时完成任务"><i class="fa-solid fa-play"></i> 开始</button>' +
+    (gachaState.canReplace ? '<button class="btn sm" onclick="showReplaceReason(' + task.id + ')" title="换一张牌"><i class="fa-solid fa-shuffle"></i> 换牌</button>' : '');
   var wrap = document.createElement('div');
   wrap.className = 'drawn-card-stage';
   var card = document.createElement('div');
@@ -854,12 +850,12 @@ function renderTasks() {
     var blockedNote = hint ? '<div class="card-meta mt8" style="color:var(--purple)">' + hint + '</div>' : '';
     var canAct = t.is_unlocked !== false && !t.completed;
     var actions =
-      '<button class="btn sm" onclick="openTaskEdit(' + t.id + ')"><i class="fa-solid fa-pen"></i> 编辑</button>' +
-      (canAct ? '<button class="btn pri sm" onclick="completeWithFeedback(' + t.id + ')"><i class="fa-solid fa-check"></i> 完成</button>' : '') +
-      (canAct ? '<button class="btn sm" onclick="taskSkip(' + t.id + ')"><i class="fa-solid fa-forward"></i> 跳过</button>' : '') +
-      (canAct ? '<button class="btn sm" onclick="taskRefuse(' + t.id + ')"><i class="fa-solid fa-xmark"></i> 拒绝</button>' : '') +
-      (!t.in_discard_pile && !t.completed ? '<button class="btn sm" onclick="moveToDiscard(' + t.id + ')"><i class="fa-solid fa-box-archive"></i> 弃牌</button>' : '') +
-      '<button class="btn danger sm" onclick="deleteTask(' + t.id + ')"><i class="fa-solid fa-trash"></i> 删除</button>';
+      '<button class="btn sm" onclick="openTaskEdit(' + t.id + ')" title="编辑任务"><i class="fa-solid fa-pen"></i> 编辑</button>' +
+      (canAct ? '<button class="btn pri sm" onclick="completeWithFeedback(' + t.id + ')" title="标记完成"><i class="fa-solid fa-check"></i> 完成</button>' : '') +
+      (canAct ? '<button class="btn sm" onclick="taskSkip(' + t.id + ')" title="跳过任务"><i class="fa-solid fa-forward"></i> 跳过</button>' : '') +
+      (canAct ? '<button class="btn sm" onclick="taskRefuse(' + t.id + ')" title="拒绝任务"><i class="fa-solid fa-xmark"></i> 拒绝</button>' : '') +
+      (!t.in_discard_pile && !t.completed ? '<button class="btn sm" onclick="moveToDiscard(' + t.id + ')" title="移入弃牌堆"><i class="fa-solid fa-box-archive"></i> 弃牌</button>' : '') +
+      '<button class="btn danger sm" onclick="deleteTask(' + t.id + ')" title="删除任务"><i class="fa-solid fa-trash"></i> 删除</button>';
     batch += buildTaskCardHtml(t, {
       statusHtml: statusIcons.join(''),
       blockedNote: blockedNote,
@@ -961,7 +957,7 @@ async function loadDiscardPileList() {
         repeat + ' · 弃牌于 ' + discardedAt + '</div>' +
         (tags ? '<div class="flex gap8 wrap mt4">' + tags + '</div>' : '') +
         '</div>' +
-        '<button type="button" class="btn pri sm discard-restore-btn" data-id="' + t.id + '" data-name="' + safeName + '">' +
+        '<button type="button" class="btn pri sm discard-restore-btn" data-id="' + t.id + '" data-name="' + safeName + '" title="恢复任务到列表">' +
         '<i class="fa-solid fa-rotate-left"></i> 恢复</button></div>';
     }).join('');
     wrap.querySelectorAll('.discard-restore-btn').forEach(function (btn) {
@@ -2260,21 +2256,75 @@ async function handleTimerOutcome(outcome) {
   }
 }
 
-function pauseTimer() {
-  if (!timerActiveSession) {
-    toast('当前无进行中的计时', 'err');
+async function startTaskWithTimer(taskId) {
+  if (timerActiveSession) {
+    toast('已有进行中的计时，请先完成当前任务', 'err');
     return;
   }
-  toast('计时器暂停功能将在后续版本开放', 'inf');
+  var task = allTasks.find(function (x) { return x.id === taskId; });
+  var minutes = task ? (task.estimated_time || 30) : 30;
+  try {
+    var r = await api('/api/timer/start', {
+      method: 'POST',
+      body: JSON.stringify({ task_id: taskId, planned_minutes: minutes })
+    });
+    timerActiveSession = {
+      id: r.session_id,
+      task_id: r.task_id,
+      started_at: r.started_at,
+      planned_minutes: r.planned_minutes,
+      task_name: taskNameById(r.task_id)
+    };
+    toast('计时已开始', 'suc');
+    updateTimerDisplay();
+    updateGachaCardButtons(taskId);
+  } catch (e) {
+    toast(e.message || '开始计时失败', 'err');
+  }
 }
 
-async function completeTimerFromGacha() {
-  if (!timerActiveSession || !timerActiveSession.id) {
-    toast('当前无进行中的计时', 'err');
+function updateGachaCardButtons(taskId) {
+  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + taskId + '"]');
+  if (!card) return;
+  var footer = card.querySelector('.task-card-footer .task-card-actions');
+  if (!footer) return;
+  var canReplace = gachaState.canReplace;
+  if (timerActiveSession && timerActiveSession.task_id === taskId) {
+    footer.innerHTML =
+      '<button class="btn sm" onclick="completeFromGachaCard(' + taskId + ')" title="完成任务并记录用时"><i class="fa-solid fa-check"></i> 完成</button>' +
+      (canReplace ? '<button class="btn sm" onclick="showReplaceReason(' + taskId + ')" title="换一张牌"><i class="fa-solid fa-shuffle"></i> 换牌</button>' : '');
+  } else {
+    footer.innerHTML =
+      '<button class="btn pri sm" onclick="startTaskWithTimer(' + taskId + ')" title="开始计时完成任务"><i class="fa-solid fa-play"></i> 开始</button>' +
+      (canReplace ? '<button class="btn sm" onclick="showReplaceReason(' + taskId + ')" title="换一张牌"><i class="fa-solid fa-shuffle"></i> 换牌</button>' : '');
+  }
+}
+
+async function completeFromGachaCard(taskId) {
+  if (!timerActiveSession || timerActiveSession.task_id !== taskId) {
+    toast('请先开始计时', 'err');
     return;
   }
-  await stopTimer();
-  updateTimerDisplay();
+  try {
+    var started = new Date(timerActiveSession.started_at).getTime();
+    var actualMinutes = Math.max(1, Math.round((Date.now() - started) / 60000));
+    await stopTimer();
+    var r = await api('/api/tasks/' + taskId + '/complete', { method: 'POST' });
+    if (r.unlocked_tasks && r.unlocked_tasks.length) {
+      toast('已解锁: ' + r.unlocked_tasks.join('、'), 'suc');
+    }
+    await playCardAnim(taskId, 'is-completing is-evaporating is-fly-to-pile', 500);
+    enableGachaBtn();
+    _completedToday++;
+    if (_completedToday === 1) _completedStreak = 1;
+    else _completedStreak++;
+    if (_completedStreak >= 5) showEncouragement('streak');
+    else showEncouragement('complete_encourage');
+    loadTasks();
+    refreshGachaStats();
+  } catch (e) {
+    toast(e.message || '操作失败', 'err');
+  }
 }
 
 async function loadSleepInfo() {
