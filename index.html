@@ -254,6 +254,10 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 .timer-empty{justify-content:center;color:var(--text-secondary);font-size:.82rem;padding:6px 14px;border-style:dashed}
 .btn-disabled{opacity:.45;pointer-events:none;filter:grayscale(.5)}
 .btn-disabled:hover{transform:none!important;box-shadow:none!important}
+@keyframes timerBlink{0%,100%{opacity:1}50%{opacity:.35}}
+.timer-blink{animation:timerBlink .8s ease-in-out infinite}
+.timer-urgent{color:#ff4444!important}
+.timer-warn{color:#ff9944!important}
 @media(max-width:600px){.task-card-title{font-size:1rem}.task-card-actions .btn{padding:4px 8px;font-size:.72rem}.task-card-meta{gap:4px}.card-deck{width:128px;height:172px}.gacha-draw-stage{min-height:210px}.task-grid{grid-template-columns:1fr}}
 @media(max-width:900px){.g3,.g4{grid-template-columns:repeat(2,1fr)}.know-layout{grid-template-columns:1fr}nav{gap:0}.nav-btn{padding:8px 10px;font-size:.82rem}header h1{font-size:1rem}}
 @media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}.gacha-pools{flex-direction:column;align-items:center}.task-grid{grid-template-columns:1fr}}
@@ -540,6 +544,18 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 </div>
 <div class="modal-actions">
 <button type="button" class="btn" id="timerOutcomeCancelBtn">取消</button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay hidden" id="timerTimeoutModal">
+<div class="modal" style="max-width:400px">
+<h2>计划时间已到</h2>
+<p style="font-size:.85rem;color:var(--text-muted);margin-bottom:12px">是否已完成，还是需要继续？</p>
+<div class="timer-outcome-btns">
+<button type="button" class="btn pri" onclick="handleTimeoutComplete()">已完成</button>
+<button type="button" class="btn" onclick="handleTimeoutContinue()">继续计时</button>
+<button type="button" class="btn danger" onclick="handleTimeoutAbandon()">放弃</button>
 </div>
 </div>
 </div>
