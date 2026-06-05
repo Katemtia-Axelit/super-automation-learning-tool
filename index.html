@@ -87,10 +87,14 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 .gacha-main-btn:hover{animation:none}
 .gacha-multi-row{display:flex;align-items:center;gap:10px;justify-content:center;margin-top:16px}
 .gacha-multi-row input{width:80px;text-align:center;font-size:1.1rem}
-.drawn-card{animation:cardIn .5s;margin-top:20px;max-width:440px;margin-left:auto;margin-right:auto;aspect-ratio:3/4;display:flex;flex-direction:column}
+.drawn-card{animation:cardIn .5s;margin-top:20px;max-width:440px;margin-left:auto;margin-right:auto;aspect-ratio:3/4;display:flex;flex-direction:column;transition:transform .3s ease;transform-origin:center top;z-index:1}
+.drawn-card:hover{z-index:10}
 .drawn-card .task-card-inner{flex:1;display:flex;flex-direction:column}
 .drawn-card .task-card-face{flex:1}
 .drawn-card .task-card-body-zone{flex:1;display:flex;flex-direction:column;justify-content:center}
+.drawn-card .card-background{background-size:cover;background-position:center}
+.drawn-card .card-back-pattern{background-size:20px 20px}
+.drawn-card .task-card-header{padding:12px 14px 8px}
 .drawn-card.urgent{border-color:var(--red);box-shadow:0 0 20px rgba(231,76,60,.2)}
 .drawn-card .card-title{font-size:1.5rem;margin-bottom:8px}
 .task-info-row{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0;font-size:.85rem;color:var(--text-secondary)}
