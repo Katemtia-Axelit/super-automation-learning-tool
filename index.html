@@ -12,7 +12,7 @@
 :root{--font-display:'Cinzel Decorative',serif;--font-heading:'Cinzel',serif;--font-body:'Cormorant Garamond',serif;--bg-deep:#0a0e1a;--bg-primary:#0f1422;--bg-secondary:#1a2038;--bg-tertiary:#222a48;--bg-card:rgba(26,32,56,0.85);--border:rgba(255,255,255,0.06);--text-primary:#f0e8da;--text-secondary:#a8a0b8;--text-muted:#6b6480;--gold:#f0c040;--gold-light:#fae8a0;--gold-dark:#c99f2e;--blue:#4a8fe7;--green:#27ae60;--red:#e74c3c;--purple:#9b59b6;--radius-sm:6px;--radius-md:10px;--radius-lg:16px;--radius-xl:24px}
 *{margin:0;padding:0;box-sizing:border-box}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg-tertiary)}::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:3px}
-body{font-family:var(--font-body);background:var(--bg-deep);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+body{font-family:var(--font-body);background:var(--bg-deep);color:var(--text-primary);min-height:100vh;overflow-x:hidden;margin:0!important;padding:0!important}
 .gradient-text{background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .glass{background:var(--bg-card);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:var(--radius-lg)}
 @keyframes pulse{0%,100%{box-shadow:0 0 10px rgba(240,192,64,0.2)}50%{box-shadow:0 0 30px rgba(240,192,64,0.5)}}
@@ -20,10 +20,10 @@ body{font-family:var(--font-body);background:var(--bg-deep);color:var(--text-pri
 @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-header{background:var(--bg-primary);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;width:100%}
+header{background:var(--bg-primary);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;position:fixed!important;top:0!important;left:0!important;width:100vw!important;margin:0!important;z-index:1000!important}
 header h1{font-family:var(--font-display);font-size:1.2rem;letter-spacing:2px}
 nav{display:flex;gap:2px}
-main{max-width:1400px;margin:24px auto;padding:0 20px}
+main{max-width:none!important;width:100%!important;margin:0!important;padding:80px 24px 24px!important}
 /* DEBUG BORDERS — delete after layout fixed */
 body{border:5px solid red!important}
 header{border:5px solid blue!important}
@@ -185,7 +185,7 @@ main{border:5px solid orange!important}
 .card-deck-card::after{content:'';position:absolute;inset:9px;border-radius:9px;border:1px solid rgba(255,255,255,.09);background:repeating-linear-gradient(45deg,rgba(240,192,64,.05) 0 5px,transparent 5px 10px)}
 .card-deck.is-drawing{animation:none}
 .card-deck.is-drawing .card-deck-card:nth-child(5){animation:deckPop .55s ease-out forwards}
-.drawn-card-stage{display:flex;justify-content:center;perspective:900px;width:100%;max-width:420px;margin:0 auto}
+.drawn-card-stage{display:flex;justify-content:center;perspective:900px;width:100%;max-width:none!important;margin:0 auto}
 .task-card.is-drawing{animation:cardDrawOut .6s ease-out both}
 .task-card.is-completing{animation:completeDisappear .5s ease-out both}
 .task-card.is-evaporating,.task-card.is-fly-to-pile{animation:completeDisappear .5s ease-in forwards;pointer-events:none}
