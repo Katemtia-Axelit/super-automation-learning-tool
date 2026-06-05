@@ -20,9 +20,17 @@ body{font-family:var(--font-body);background:var(--bg-deep);color:var(--text-pri
 @keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-header{background:var(--bg-primary);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
+header{background:var(--bg-primary);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;width:100%}
 header h1{font-family:var(--font-display);font-size:1.2rem;letter-spacing:2px}
 nav{display:flex;gap:2px}
+main{max-width:1400px;margin:24px auto;padding:0 20px}
+/* DEBUG BORDERS — remove after layout fix */
+#debug-enabled header, #debug-enabled body{outline:2px solid red;outline-offset:-2px}
+#debug-enabled main{outline:2px dashed orange;outline-offset:-2px}
+#debug-enabled .drawn-card{outline:2px solid yellow;outline-offset:-2px}
+#debug-enabled .gacha-container{outline:2px solid cyan;outline-offset:-2px}
+#debug-enabled .drawn-card-stage{outline:1px solid lime;outline-offset:-2px}
+#debug-enabled .task-card-face{outline:1px dotted magenta}
 .nav-btn{background:0;border:0;color:var(--text-muted);padding:8px 14px;border-radius:var(--radius-md);cursor:pointer;font-family:var(--font-body);font-size:.95rem;transition:.2s;display:flex;align-items:center;gap:6px}
 .nav-btn:hover{color:var(--text-primary);background:rgba(255,255,255,.05)}
 .nav-btn.active{color:var(--gold);background:rgba(240,192,64,.1)}
@@ -87,8 +95,7 @@ input.full-width,select.full-width,textarea.full-width{width:100%}
 .gacha-main-btn:hover{animation:none}
 .gacha-multi-row{display:flex;align-items:center;gap:10px;justify-content:center;margin-top:16px}
 .gacha-multi-row input{width:80px;text-align:center;font-size:1.1rem}
-.drawn-card{animation:cardIn .5s;margin-top:20px;max-width:440px;margin-left:auto;margin-right:auto;aspect-ratio:3/4;display:flex;flex-direction:column;transition:transform .3s ease;transform-origin:center top;z-index:1}
-.drawn-card:hover{z-index:10}
+.drawn-card{animation:cardIn .5s;margin-top:20px;max-width:440px;margin-left:auto;margin-right:auto;aspect-ratio:3/4;display:flex;flex-direction:column;transform-origin:center top}
 .drawn-card .task-card-inner{flex:1;display:flex;flex-direction:column}
 .drawn-card .task-card-face{flex:1}
 .drawn-card .task-card-body-zone{flex:1;display:flex;flex-direction:column;justify-content:center}
