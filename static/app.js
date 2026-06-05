@@ -457,8 +457,8 @@ function enableGachaBtn() {
 
 async function drawGacha() {
   disableGachaBtn();
-  var time = parseInt(document.getElementById('gachaTime').value, 10) || 30;
-  var count = parseInt(document.getElementById('gachaCount').value, 10) || 1;
+  var time = 30;
+  var count = 1;
   var result = document.getElementById('gachaResult');
   var deck = document.getElementById('gachaDeck');
   result.innerHTML = '';
@@ -770,10 +770,7 @@ async function refreshGachaStats() {
   try {
     var r = await api('/api/gacha/statistics');
     var s = document.getElementById('gachaStats');
-    s.innerHTML =
-      '<div class="card stat-card"><div class="stat-val">' + r.total_draws + '</div><div class="stat-lbl">总抽卡</div></div>' +
-      '<div class="card stat-card"><div class="stat-val">' + r.acceptance_rate + '%</div><div class="stat-lbl">接受率</div></div>' +
-      '<div class="card stat-card"><div class="stat-val">' + r.rejections + '</div><div class="stat-lbl">拒绝数</div></div>';
+    s.innerHTML = '<span>抽卡 ' + r.total_draws + '</span><span>接受 ' + r.acceptance_rate + '%</span><span>拒绝 ' + r.rejections + '</span>';
   } catch (e) { /* 统计失败不阻塞 */ }
 }
 
