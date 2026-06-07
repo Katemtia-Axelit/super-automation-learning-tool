@@ -36,181 +36,96 @@ function toast(msg, type) {
   d.className = 'toast ' + type;
   d.textContent = msg;
   c.appendChild(d);
-  setTimeout(function () { d.remove(); }, 3000);
+  setTimeout(function () { d.remove(); }, 3500);
 }
 function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-// ============ ENCOURAGEMENT FEEDBACK (温情心理安抚版) ============
+// ============ 温情文案库 ============
+var WARM_MESSAGES = {
+  poolEmpty: '今天的你已经完成了所有挑战，明天继续加油！',
+  skipped: '好的，这张牌先收起来，随时可以再抽',
+  refused: '好的，已经记下来了',
+  discarded: '先放一边，等状态好的时候再试试',
+  completedEarly: '太棒了，比预计快这么多',
+  timeout: '还在努力呢，不着急，慢慢来',
+  unlock: '恭喜解锁了新任务'
+};
+
+// ============ TASK EVENT FEEDBACK (P1-5B, 简化版) ============
 var TASK_FEEDBACK_PRESETS = {
-  refuse: {
-    title: '换个任务也好',
-    subtitle: '今天适合自己的节奏最重要',
+  skip: {
+    eventType: 'skip_task',
+    question: '这次为什么跳过？',
     options: [
-      { label: '想换个轻松点的', category: 'refuse_easier', detail: '想换个轻松点的' },
-      { label: '今天不太想做这个', category: 'refuse_mood', detail: '今天不太想做这个' },
-      { label: '现在精力不够', category: 'refuse_energy', detail: '现在精力不够' },
-      { label: '只是想看看', category: 'refuse_curious', detail: '只是想看看' }
-    ],
-    cancelLabel: '不用了',
-    confirmLabel: '换个任务',
-    encouragementType: 0
-  },
-  overtime: {
-    title: '这次花的时间比预计长，但你坚持做完了，这很棒',
-    subtitle: '',
-    options: [
-      { label: '把任务拆小一点', category: 'overtime_split', detail: '把任务拆小一点' },
-      { label: '下次多预留时间', category: 'overtime_more_time', detail: '下次多预留时间' },
-      { label: '先做更简单的热身', category: 'overtime_warmup', detail: '先做更简单的热身' }
-    ],
-    cancelLabel: '知道了',
-    confirmLabel: '谢谢鼓励',
-    encouragementType: 0
-  },
-  finish_early: {
-    title: '这么快就完成了，状态不错',
-    subtitle: '',
-    options: [
-      { label: '今天状态特别好', category: 'early_good_state', detail: '今天状态特别好' },
-      { label: '任务比预期简单', category: 'early_easier', detail: '任务比预期简单' },
-      { label: '之前已经复习过了', category: 'early_reviewed', detail: '之前已经复习过了' }
-    ],
-    cancelLabel: '开心',
-    confirmLabel: '记录',
-    encouragementType: 0
+      { label: '精力不足', category: 'state_issue', detail: '精力不足' },
+      { label: '时间不够', category: 'time_estimation_issue', detail: '时间不够' },
+      { label: '太难了', category: 'ability_issue', detail: '太难了' },
+      { label: '其他', category: 'other', detail: '其他' }
+    ]
   },
   abandon: {
-    title: '今天先到这里，休息一下也好',
-    subtitle: '调整节奏才能走得更远',
+    eventType: 'abandon_task',
+    question: '为什么放弃？',
     options: [
-      { label: '延期到明天', category: 'abandon_defer', detail: '延期到明天' },
-      { label: '拆成更小的步骤', category: 'abandon_split', detail: '拆成更小的步骤' },
-      { label: '换一个更轻松的任务', category: 'abandon_easier', detail: '换一个更轻松的任务' }
-    ],
-    cancelLabel: '休息一下',
-    confirmLabel: '帮我调整',
-    encouragementType: 0
-  },
-  skip: {
-    title: '先跳过没关系，记得回来就好',
-    subtitle: '',
-    options: [
-      { label: '今天状态不太好', category: 'skip_mood', detail: '今天状态不太好' },
-      { label: '这个任务不太紧急', category: 'skip_priority', detail: '这个任务不太紧急' },
-      { label: '想先做别的', category: 'skip_other', detail: '想先做别的' }
-    ],
-    cancelLabel: '好的',
-    confirmLabel: '跳过',
-    encouragementType: 0
-  },
-  complete_encourage: {
-    title: '又完成一个，今日进度加一',
-    subtitle: '',
-    options: [],
-    cancelLabel: '',
-    confirmLabel: '继续努力',
-    encouragementType: 1
-  },
-  daily_greeting: {
-    title: '早安，今天又是充满可能的一天',
-    subtitle: '',
-    options: [],
-    cancelLabel: '',
-    confirmLabel: '看看任务',
-    encouragementType: 3
-  },
-  streak: {
-    title: '连续完成 5 个任务',
-    subtitle: '继续保持这个节奏',
-    options: [],
-    cancelLabel: '继续',
-    confirmLabel: '保持节奏',
-    encouragementType: 2
+      { label: '状态不好', category: 'state_issue', detail: '状态不好' },
+      { label: '被打断了', category: 'external_interrupt', detail: '被打断了' },
+      { label: '太复杂了', category: 'time_estimation_issue', detail: '太复杂了' },
+      { label: '其他', category: 'other', detail: '其他' }
+    ]
   }
 };
 
 var _taskFeedbackResolve = null;
 var _taskFeedbackContext = null;
 var _taskFeedbackPresetKey = null;
-var _completedStreak = 0;
-var _completedToday = 0;
 
 function submitTaskFeedbackEvent(payload) {
   return api('/api/task-feedback', {
     method: 'POST',
     body: JSON.stringify(payload)
   }).catch(function (e) {
-    toast(e.message || '保存失败', 'err');
+    toast(e.message || '反馈保存失败', 'err');
   });
-}
-
-function showEncouragement(key) {
-  var preset = TASK_FEEDBACK_PRESETS[key];
-  if (!preset) return;
-  var modal = document.getElementById('taskFeedbackModal');
-  document.getElementById('taskFeedbackTitle').textContent = preset.title;
-  document.getElementById('taskFeedbackQuestion').textContent = preset.subtitle || '';
-  var sub = document.getElementById('taskFeedbackSubtitle');
-  if (preset.subtitle) {
-    sub.textContent = preset.subtitle;
-    sub.style.display = '';
-  } else {
-    sub.style.display = 'none';
-  }
-  var html = preset.options.map(function (opt, idx) {
-    return '<label class="feedback-option"><input type="radio" name="taskFbOpt" value="' + idx +
-      '"> ' + opt.label + '</label>';
-  }).join('');
-  document.getElementById('taskFeedbackOptions').innerHTML = html;
-  if (preset.options.length === 0) {
-    document.getElementById('taskFeedbackOptions').style.display = 'none';
-    document.getElementById('taskFeedbackNote').parentElement.style.display = 'none';
-  } else {
-    document.getElementById('taskFeedbackOptions').style.display = '';
-    document.getElementById('taskFeedbackNote').parentElement.style.display = '';
-  }
-  document.getElementById('taskFeedbackNote').value = '';
-  document.getElementById('taskFeedbackCancelBtn').textContent = preset.cancelLabel || '关闭';
-  document.getElementById('taskFeedbackConfirmBtn').textContent = preset.confirmLabel || '好的';
-  _taskFeedbackPresetKey = key;
-  showModal('taskFeedbackModal');
 }
 
 function promptTaskFeedback(presetKey, context) {
   var preset = TASK_FEEDBACK_PRESETS[presetKey];
   if (!preset) return Promise.resolve({ saved: false });
   _taskFeedbackContext = context || {};
-  showEncouragement(presetKey);
+  _taskFeedbackPresetKey = presetKey;
+  document.getElementById('taskFeedbackQuestion').textContent = preset.question;
+  var html = preset.options.map(function (opt, idx) {
+    return '<label class="feedback-option"><input type="radio" name="taskFbOpt" value="' + idx +
+      '"> ' + opt.label + '</label>';
+  }).join('');
+  document.getElementById('taskFeedbackOptions').innerHTML = html;
+  document.getElementById('taskFeedbackNote').value = '';
+  showModal('taskFeedbackModal');
   return new Promise(function (resolve) {
     _taskFeedbackResolve = resolve;
   });
 }
 
 function confirmTaskFeedbackModal() {
-  var preset = TASK_FEEDBACK_PRESETS[_taskFeedbackPresetKey];
-  if (!preset) { closeModal('taskFeedbackModal'); return; }
-
   var selected = document.querySelector('input[name="taskFbOpt"]:checked');
-  var opt = null;
-  if (selected && preset.options.length > 0) {
-    var idx = parseInt(selected.value, 10);
-    opt = preset.options[idx];
-  }
-
   var ctx = _taskFeedbackContext || {};
+  var preset = TASK_FEEDBACK_PRESETS[_taskFeedbackPresetKey];
+  var opt = null;
+  if (selected) {
+    var idx = parseInt(selected.value, 10);
+    opt = preset ? preset.options[idx] : null;
+  }
   var note = (document.getElementById('taskFeedbackNote').value || '').trim();
   var payload = {
-    task_id: ctx.taskId || null,
-    event_type: _taskFeedbackPresetKey,
+    task_id: ctx.taskId,
+    event_type: preset ? preset.eventType : 'unknown',
     planned_minutes: ctx.plannedMinutes,
     actual_minutes: ctx.actualMinutes,
     completion_status: ctx.completionStatus,
-    reason_category: opt ? opt.category : 'none',
-    reason_detail: opt ? opt.detail : '',
-    note: note || null,
-    encouragement_shown: preset.encouragementType || 0,
-    encouragement_type: preset.encouragementType || 0
+    reason_category: opt ? opt.category : 'other',
+    reason_detail: opt ? opt.detail : (note || '未选择'),
+    note: note || null
   };
   closeModal('taskFeedbackModal');
   var resolve = _taskFeedbackResolve;
@@ -241,19 +156,24 @@ function getTaskFeedbackContext(taskId) {
   };
 }
 
-function runWithSkipFeedback(taskId, actionFn) {
-  var ctx = getTaskFeedbackContext(taskId);
-  ctx.completionStatus = 'skipped';
-  return promptTaskFeedback('skip', ctx).then(function () {
-    return actionFn();
-  });
-}
-
+// ============ 页面切换 ============
 function showPage(id) {
   document.querySelectorAll('.page').forEach(function (p) { p.classList.remove('active'); });
   document.getElementById('page-' + id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(function (b) { b.classList.remove('active'); });
   document.querySelector('[data-page="' + id + '"]').classList.add('active');
+  if (id === 'gacha') { refreshGachaStats(); updateTimerDock(); }
+  if (id === 'tasks') { renderTasks(); loadTags(); loadTimerPanel(); }
+  if (id === 'schedule') {
+    renderSchedule();
+    loadSleepPanel();
+    loadStateAssessmentPanel();
+  }
+  if (id === 'knowledge') loadCategories();
+  if (id === 'config') {
+    loadConfigForm();
+    loadPromptList();
+  }
 }
 
 function taskNameById(id) {
@@ -287,27 +207,15 @@ function validatePrereqsLocal(taskId, prereqIds) {
   return null;
 }
 
-// Nav
+// ============ 导航事件 ============
 document.querySelectorAll('.nav-btn').forEach(function (b) {
   b.addEventListener('click', function () {
     var p = b.dataset.page;
     showPage(p);
-    if (p === 'gacha') refreshGachaStats();
-    if (p === 'tasks') { renderTasks(); loadTags(); loadTimerPanel(); }
-    if (p === 'schedule') {
-      renderSchedule();
-      loadSleepPanel();
-      loadStateAssessmentPanel();
-    }
-    if (p === 'knowledge') loadCategories();
-    if (p === 'config') {
-      loadConfigForm();
-      loadPromptList();
-    }
   });
 });
 
-// Health check
+// ============ 健康检查 ============
 setInterval(function () {
   fetch('/api/health').then(function (r) {
     if (r.ok) {
@@ -324,11 +232,11 @@ document.getElementById('fbEnergy').addEventListener('input', function () {
   document.getElementById('fbEnergyVal').textContent = this.value;
 });
 
-// ============ TASK CARD (P1-Visual-1) ============
+// ============ 卡牌主题 ============
 var CARD_THEME_SYMBOLS = {
-  'theme-math': '∑', 'theme-lang': 'Aa', 'theme-history': '⏳',
-  'theme-code': '{ }', 'theme-write': '✎', 'theme-science': '⚛',
-  'theme-review': '↻', 'theme-default': '◆'
+  'theme-math': '\u03A3', 'theme-lang': 'Aa', 'theme-history': '\u23F3',
+  'theme-code': '{ }', 'theme-write': '\u270E', 'theme-science': '\u269B',
+  'theme-review': '\u21BB', 'theme-default': '\u25C6'
 };
 var CARD_CORNER_LABELS = { study: '学习', exercise: '运动', work: '工作', life: '生活', other: '其他' };
 var CARD_REPEAT_LABELS = { none: '单次', daily: '每日', weekly: '每周', accumulation: '积累' };
@@ -357,6 +265,7 @@ function getTaskCardStatusClass(task) {
   return 'status-active';
 }
 
+// ============ 动画系统 ============
 function playCardAnim(taskId, animClasses, ms) {
   ms = ms || 650;
   var classes = animClasses.split(/\s+/).filter(Boolean);
@@ -385,7 +294,7 @@ function buildLangPatternHtml() {
 function buildTaskCardBodyHtml(task, opts) {
   opts = opts || {};
   var theme = resolveTaskCardTheme(task);
-  var sym = CARD_THEME_SYMBOLS[theme] || '◆';
+  var sym = CARD_THEME_SYMBOLS[theme] || '\u25C6';
   var corner = CARD_CORNER_LABELS[task.category] || '任务';
   var tags = (task.tags || []).map(function (x) {
     return '<span class="badge bg-gold">' + x + '</span>';
@@ -428,8 +337,11 @@ function buildTaskCardHtml(task, opts) {
     buildTaskCardBodyHtml(task, opts) + '</div>';
 }
 
-// ============ GACHA ============
-var gachaState = { energy: 'medium', pool: 'fragment', canReplace: true, replacedTaskId: null, feedbackMood: 3 };
+// ============ 抽卡 ============
+var gachaState = { energy: 'medium', pool: 'fragment', canReplace: true, replacedTaskId: null, feedbackMood: 3, currentTaskId: null };
+var isDrawing = false;
+
+// 精力和卡池选择保留 JS 逻辑（隐藏 UI 但逻辑可用）
 document.querySelectorAll('.energy-btn').forEach(function (b) {
   b.addEventListener('click', function () {
     document.querySelectorAll('.energy-btn').forEach(function (x) { x.classList.remove('active'); });
@@ -444,206 +356,392 @@ document.querySelectorAll('.pool-btn').forEach(function (b) {
     gachaState.pool = b.dataset.pool;
   });
 });
+
+// ============ 计时器Dock（主页面常驻）============
+var timerDockSession = null;
+var timerDockTick = null;
+var timerDockPaused = false;
+var timerDockPausedElapsed = 0;
+
+function initTimerDock() {
+  loadTimerDockActive();
+  // 每秒更新
+  if (timerDockTick) clearInterval(timerDockTick);
+  timerDockTick = setInterval(updateTimerDockDisplay, 1000);
+}
+
+async function loadTimerDockActive() {
+  try {
+    var r = await api('/api/timer/active');
+    timerDockSession = r && r.id ? r : null;
+    timerDockPaused = false;
+    timerDockPausedElapsed = 0;
+    updateTimerDockDisplay();
+  } catch (e) {
+    timerDockSession = null;
+    updateTimerDockDisplay();
+  }
+}
+
+function updateTimerDockDisplay() {
+  var idleEl = document.getElementById('timerDockIdle');
+  var activeEl = document.getElementById('timerDockActive');
+  var taskNameEl = document.getElementById('timerDockTaskName');
+  var timeEl = document.getElementById('timerDockTime');
+  var barEl = document.getElementById('timerDockBar');
+  var pauseBtn = document.getElementById('timerDockPauseBtn');
+
+  if (!idleEl || !activeEl) return;
+
+  if (!timerDockSession || !timerDockSession.started_at) {
+    idleEl.classList.remove('hidden');
+    activeEl.classList.add('hidden');
+    return;
+  }
+
+  idleEl.classList.add('hidden');
+  activeEl.classList.remove('hidden');
+
+  var started = new Date(timerDockSession.started_at).getTime();
+  var elapsed = Date.now() - started;
+  if (timerDockPaused) elapsed = timerDockPausedElapsed;
+
+  var sec = Math.floor(elapsed / 1000);
+  var m = Math.floor(sec / 60);
+  var s = sec % 60;
+  var timeStr = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+
+  var name = timerDockSession.task_name || taskNameById(timerDockSession.task_id) || '进行中';
+  var planned = timerDockSession.planned_minutes || 30;
+  var progress = Math.min(100, (elapsed / 1000 / 60 / planned) * 100);
+
+  if (taskNameEl) taskNameEl.textContent = name;
+  if (timeEl) timeEl.textContent = timeStr;
+  if (barEl) barEl.style.width = progress + '%';
+  if (pauseBtn) {
+    if (timerDockPaused) {
+      pauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+      pauseBtn.title = '继续计时器';
+    } else {
+      pauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+      pauseBtn.title = '暂停计时器';
+    }
+  }
+}
+
+function toggleTimerDockPause() {
+  if (!timerDockSession) return;
+  if (!timerDockPaused) {
+    // 暂停：记录当前已流逝的时间
+    timerDockPaused = true;
+    var started = new Date(timerDockSession.started_at).getTime();
+    timerDockPausedElapsed = Date.now() - started;
+  } else {
+    // 继续：重置 started_at 为"当前时间 - 已流逝时间"
+    timerDockPaused = false;
+    timerDockSession.started_at = new Date(Date.now() - timerDockPausedElapsed).toISOString();
+  }
+  updateTimerDockDisplay();
+}
+
+document.getElementById('timerDockPauseBtn').addEventListener('click', toggleTimerDockPause);
+document.getElementById('timerDockStopBtn').addEventListener('click', function () {
+  if (!timerDockSession) return;
+  stopTimerFromDock(timerDockSession.id);
+});
+
+async function stopTimerFromDock(sessionId) {
+  if (!confirm('确定提前结束此任务？')) return;
+  try {
+    var started = new Date(timerDockSession.started_at).getTime();
+    var actualMin = Math.max(1, Math.round((Date.now() - started) / 60000));
+    await api('/api/timer/complete', {
+      method: 'POST',
+      body: JSON.stringify({ session_id: sessionId, actual_minutes: actualMin, result: 'abandoned', reason: 'dock_stop' })
+    });
+    timerDockSession = null;
+    timerDockPaused = false;
+    timerDockPausedElapsed = 0;
+    updateTimerDockDisplay();
+    toast('计时已结束', 'suc');
+    loadTasks();
+    refreshGachaStats();
+  } catch (e) {
+    toast(e.message || '停止失败', 'err');
+  }
+}
+
+function updateTimerDock() {
+  loadTimerDockActive();
+}
+
+// ============ 抽卡主流程 ============
 document.getElementById('gachaBtn').addEventListener('click', drawGacha);
 
-function disableGachaBtn() {
-  var btn = document.getElementById('gachaBtn');
-  if (btn) { btn.disabled = true; btn.classList.add('btn-disabled'); }
-}
-function enableGachaBtn() {
-  var btn = document.getElementById('gachaBtn');
-  if (btn) { btn.disabled = false; btn.classList.remove('btn-disabled'); }
-}
-
 async function drawGacha() {
-  disableGachaBtn();
-  var time = 30;
-  var count = 1;
+  if (isDrawing) return;
+  var btn = document.getElementById('gachaBtn');
+  if (btn) btn.disabled = true;
+  isDrawing = true;
+
   var result = document.getElementById('gachaResult');
   var deck = document.getElementById('gachaDeck');
   result.innerHTML = '';
   if (deck) deck.classList.add('is-drawing');
-  for (var i = 0; i < count; i++) {
-    try {
-      var r = await api('/api/gacha/draw', {
-        method: 'POST',
-        body: JSON.stringify({ pool: gachaState.pool, energy: gachaState.energy, available_time: time })
-      });
-      if (r.task) {
-        gachaState.canReplace = r.can_replace !== false;
-        var wrap = await flyCardToResult(deck, result, r.task);
-        result.appendChild(wrap);
-      } else if (count === 1) {
-        if (deck) deck.classList.remove('is-drawing');
-        result.innerHTML = '<div class="empty-state mt24"><i class="fa-solid fa-box-open"></i><p></p></div>';
-        enableGachaBtn();
-        return;
-      }
-    } catch (e) {
-      if (deck) deck.classList.remove('is-drawing');
-      toast(e.message || '抽卡失败', 'err');
-      enableGachaBtn();
-      return;
+
+  try {
+    var r = await api('/api/gacha/draw', {
+      method: 'POST',
+      body: JSON.stringify({ pool: gachaState.pool, energy: gachaState.energy, available_time: 45 })
+    });
+    if (r.task) {
+      gachaState.canReplace = r.can_replace !== false;
+      gachaState.currentTaskId = r.task.id;
+      var stage = renderDrawnCard(r.task, 0);
+      result.appendChild(stage);
+      // 播放飞行动画
+      await playCardFlyAnimation(r.task);
+      updateDiscardPileVisual();
+    } else {
+      result.innerHTML = '<div class="empty-state mt24"><i class="fa-solid fa-box-open"></i><p>' + WARM_MESSAGES.poolEmpty + '</p></div>';
+      gachaState.currentTaskId = null;
     }
+  } catch (e) {
+    toast(e.message || '抽卡失败', 'err');
+    gachaState.currentTaskId = null;
   }
+
   if (deck) deck.classList.remove('is-drawing');
+  if (btn) btn.disabled = false;
+  isDrawing = false;
   refreshGachaStats();
 }
 
-function flyCardToResult(deckEl, resultEl, task) {
-  return new Promise(function (resolve) {
-    if (!deckEl) { resolve(); return; }
-    var start = deckEl.getBoundingClientRect();
-    var end = resultEl.getBoundingClientRect();
+// 飞行动画：从牌堆飞向中央
+async function playCardFlyAnimation(task) {
+  var deck = document.getElementById('gachaDeck');
+  var stage = document.querySelector('.drawn-card-stage');
+  var flyLayer = document.getElementById('cardFlyLayer');
+  if (!deck || !stage || !flyLayer) return;
 
-    if (end.height < 20) {
-      var vw = window.innerWidth, vh = window.innerHeight;
-      end = { left: vw / 2 - 74, top: vh * 0.38 - 98, width: 148, height: 196 };
-    }
+  var deckRect = deck.getBoundingClientRect();
+  var stageRect = stage.getBoundingClientRect();
 
-    var startX = start.left + start.width / 2 - 74;
-    var startY = start.top + start.height / 2 - 98;
-    var endX = end.left + end.width / 2 - 140;
-    var endY = end.top + end.height / 2 - 98;
+  // 创建飞行的卡牌（竖向尺寸，用于飞行动画）
+  var flyingCard = document.createElement('div');
+  flyingCard.className = 'flying-card';
+  flyingCard.style.left = deckRect.left + 'px';
+  flyingCard.style.top = deckRect.top + 'px';
+  flyingCard.style.width = '140px';
+  flyingCard.style.height = '98px';
+  flyingCard.style.opacity = '0.9';
+  flyLayer.appendChild(flyingCard);
 
-    // Build the final task card structure
-    var theme = resolveTaskCardTheme(task);
-    var urgent = task.deadline && new Date(task.deadline) > new Date() &&
-      (new Date(task.deadline) - new Date()) / 86400000 < 1;
-    var actions =
-      '<button class="btn pri sm" onclick="startTaskWithTimer(' + task.id + ')" title="开始计时完成任务"><i class="fa-solid fa-play"></i> 开始</button>' +
-      (gachaState.canReplace ? '<button class="btn sm" onclick="showReplaceReason(' + task.id + ')" title="换一张牌"><i class="fa-solid fa-shuffle"></i> 换牌</button>' : '');
+  // 等待下一帧
+  await new Promise(function(resolve) { requestAnimationFrame(resolve); });
 
-    var wrap = document.createElement('div');
-    wrap.className = 'drawn-card-stage';
+  // 移动到舞台中心（卡片从竖向过渡到横向）
+  var targetX = stageRect.left + stageRect.width / 2 - 125;
+  var targetY = stageRect.top;
 
-    var card = document.createElement('div');
-    card.className = 'task-card card drawn-card ' + theme + (urgent ? ' urgent' : '');
-    card.setAttribute('data-task-id', task.id);
-    card.innerHTML =
-      '<div class="task-card-inner">' +
-      '<div class="task-card-face task-card-back"><div class="card-back-pattern"></div><div class="card-back-emblem">\u2726</div></div>' +
-      '<div class="task-card-face task-card-front">' +
-      buildTaskCardBodyHtml(task, { actionsHtml: actions, descLen: 120, showRepeat: false }) +
-      '</div></div>';
+  flyingCard.style.transition = 'all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  flyingCard.style.left = targetX + 'px';
+  flyingCard.style.top = targetY + 'px';
+  flyingCard.style.width = '250px';
+  flyingCard.style.height = '150px';
+  flyingCard.style.transform = 'rotate(0deg)';
 
-    // Start as fixed-position flight card
-    card.classList.add('flying-card-no-transform');
-    card.style.position = 'fixed';
-    card.style.left = startX + 'px';
-    card.style.top = startY + 'px';
-    card.style.zIndex = '9999';
-    card.style.opacity = '0';
-    card.style.transform = 'scale(0.5)';
-    card.style.width = '148px';
-    card.style.height = '196px';
-    card.style.pointerEvents = 'none';
-    card.style.transition = 'none';
-    wrap.appendChild(card);
-    document.body.appendChild(wrap);
+  await new Promise(function(resolve) { setTimeout(resolve, 700); });
 
-    var mid = { left: window.innerWidth * 0.3, top: window.innerHeight * 0.2 };
-    var startTime = performance.now();
-    var duration = 600;
-
-    function easeOutQuad(p) { return 1 - (1 - p) * (1 - p); }
-
-    function animate(now) {
-      var elapsed = now - startTime;
-      var t = Math.min(1, elapsed / duration);
-
-      var left, top, scale, rotate, opacity;
-      if (t < 0.4) {
-        var p = t / 0.4;
-        var e = easeOutQuad(p);
-        left = startX + (mid.left - startX) * e;
-        top = startY + (mid.top - startY) * e;
-        scale = 0.5 + (1.2 - 0.5) * e;
-        rotate = 0 + 20 * e;
-        opacity = 0.6 + (1 - 0.6) * e;
-      } else {
-        var p2 = (t - 0.4) / 0.6;
-        var e2 = easeOutQuad(p2);
-        left = mid.left + (endX - mid.left) * e2;
-        top = mid.top + (endY - mid.top) * e2;
-        scale = 1.2 + (1.0 - 1.2) * e2;
-        rotate = 20 * (1 - e2);
-        opacity = 1;
-      }
-
-      card.style.left = left + 'px';
-      card.style.top = top + 'px';
-      card.style.transform = 'scale(' + scale + ') rotate(' + rotate + 'deg)';
-      card.style.opacity = opacity;
-
-      if (t < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        // Land: convert to final display card
-        card.classList.remove('flying-card-no-transform');
-        card.style.position = '';
-        card.style.left = '';
-        card.style.top = '';
-        card.style.zIndex = '';
-        card.style.opacity = '';
-        card.style.transform = '';
-        card.style.width = '';
-        card.style.height = '';
-        card.style.pointerEvents = '';
-        card.style.transition = '';
-
-        wrap.style.position = '';
-        wrap.style.left = '';
-        wrap.style.top = '';
-        wrap.style.zIndex = '';
-        wrap.style.width = '';
-
-        // Remove from body, will be re-appended by caller
-        document.body.removeChild(wrap);
-
-        // Trigger flip animation
-        requestAnimationFrame(function () {
-          card.classList.add('is-drawing');
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              card.classList.add('is-revealing');
-            });
-          });
-        });
-
-        resolve(wrap);
-      }
-    }
-
-    requestAnimationFrame(animate);
-  });
+  // 移除飞行卡牌，触发翻牌动画
+  flyingCard.remove();
 }
 
 function renderDrawnCard(task, idx) {
   var theme = resolveTaskCardTheme(task);
   var urgent = task.deadline && new Date(task.deadline) > new Date() &&
     (new Date(task.deadline) - new Date()) / 86400000 < 1;
+  var isOneOff = task.repeat_type === 'single';
+
+  // 抽卡后的操作按钮
   var actions =
-    '<button class="btn pri sm" onclick="startTaskWithTimer(' + task.id + ')" title="开始计时完成任务"><i class="fa-solid fa-play"></i> 开始</button>' +
-    (gachaState.canReplace ? '<button class="btn sm" onclick="showReplaceReason(' + task.id + ')" title="换一张牌"><i class="fa-solid fa-shuffle"></i> 换牌</button>' : '');
+    '<button class="btn pri" onclick="startTask(' + task.id + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-play"></i> 开始任务</button>' +
+    '<button class="btn" onclick="handleSkip(' + task.id + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-forward"></i> 跳过</button>' +
+    '<button class="btn danger" onclick="handleRefuse(' + task.id + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-xmark"></i> 拒绝</button>' +
+    (gachaState.canReplace ? '<button class="btn" onclick="showReplaceReason(' + task.id + ')" style="width:100%"><i class="fa-solid fa-shuffle"></i> 换一张</button>' : '');
+
   var wrap = document.createElement('div');
   wrap.className = 'drawn-card-stage';
   var card = document.createElement('div');
-  card.className = 'task-card card drawn-card ' + theme + (urgent ? ' urgent' : '');
+  card.className = 'task-card card drawn-card ' + theme + (urgent ? ' urgent' : '') + (isOneOff ? ' is-oneoff' : '');
   card.setAttribute('data-task-id', task.id);
   card.style.animationDelay = (idx * 0.15) + 's';
+
+  // 横向布局：左侧任务信息，右侧操作按钮
+  var corner = { study: '学习', exercise: '运动', work: '工作', life: '生活', other: '其他' }[task.category] || '任务';
+  var repeatLbl = { none: '单次', daily: '每日', weekly: '每周' }[task.repeat_type] || '单次';
+  var tagsHtml = (task.tags || []).map(function(x) { return '<span class="badge bg-gold">' + x + '</span>'; }).join('');
+  var priority = task.priority || '?';
+  var mins = task.estimated_time || '?';
+  var desc = (task.description || '').substring(0, 150);
+
+  var leftHtml =
+    '<div class="task-card-header" style="width:100%;border-bottom:1px solid rgba(255,255,255,0.06);padding:8px 10px;background:linear-gradient(180deg,rgba(0,0,0,0.18),transparent)">' +
+    '<div style="display:flex;align-items:center;gap:8px">' +
+    '<span style="font-size:.68rem;padding:2px 8px;border-radius:8px;background:rgba(0,0,0,0.28);border:1px solid var(--card-border);color:var(--card-accent);font-family:var(--font-heading)">' + corner + '</span>' +
+    '<span style="font-size:.68rem;padding:2px 8px;border-radius:8px;background:rgba(0,0,0,0.28);border:1px solid var(--card-border);color:var(--card-accent);font-family:var(--font-heading)">P' + priority + '</span>' +
+    '</div></div>' +
+    '<div style="flex:1;padding:8px 10px;display:flex;flex-direction:column;justify-content:center;min-height:0">' +
+    '<div style="font-family:var(--font-heading);font-size:1.05rem;margin-bottom:6px;font-weight:600">' + task.name + '</div>' +
+    '<div style="font-size:.82rem;color:var(--text-secondary);margin-bottom:6px;line-height:1.4">' + desc + '</div>' +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+    '<span style="font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:3px"><i class="fa-solid fa-clock" style="color:var(--gold);font-size:.7rem"></i>' + mins + '分</span>' +
+    '<span style="font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:3px"><i class="fa-solid fa-repeat" style="color:var(--gold);font-size:.7rem"></i>' + repeatLbl + '</span>' +
+    '</div>' +
+    (tagsHtml ? '<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">' + tagsHtml + '</div>' : '') +
+    '</div>';
+
+  var rightHtml =
+    '<div class="drawn-card-right-panel" style="flex:1;padding:10px;display:flex;flex-direction:column;justify-content:center;align-items:stretch">' +
+    actions +
+    '</div>';
+
   card.innerHTML =
     '<div class="task-card-inner">' +
-    '<div class="task-card-face task-card-back"><div class="card-back-pattern"></div><div class="card-back-emblem">✦</div></div>' +
+    '<div class="task-card-face task-card-back"><div class="card-back-pattern"></div><div class="card-back-emblem">\u2726</div></div>' +
     '<div class="task-card-face task-card-front">' +
-    buildTaskCardBodyHtml(task, { actionsHtml: actions, descLen: 120, showRepeat: false }) +
+    '<div style="flex:2;display:flex;flex-direction:column">' + leftHtml + '</div>' +
+    '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px;border-left:1px solid rgba(255,255,255,0.06)">' + rightHtml + '</div>' +
     '</div></div>';
   card.classList.add('is-drawing');
   wrap.appendChild(card);
+
+  // 双 rAF 触发动画
   requestAnimationFrame(function () {
     requestAnimationFrame(function () { card.classList.add('is-revealing'); });
   });
   return wrap;
+}
+
+// ============ 开始任务（计时器）============
+async function startTask(taskId) {
+  var task = allTasks.find(function (x) { return x.id === taskId; });
+  if (!task) { toast('任务不存在', 'err'); return; }
+  if (!task.is_unlocked && task.is_unlocked !== undefined) {
+    toast(prereqHint(task) || '任务被前置依赖阻塞', 'err');
+    return;
+  }
+
+  var planned = task.estimated_time || 30;
+  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + taskId + '"]');
+  if (!card) { toast('请先抽一张卡牌', 'err'); return; }
+
+  var rightPanel = card.querySelector('.drawn-card-right-panel');
+  if (!rightPanel) return;
+
+  rightPanel.innerHTML =
+    '<div style="text-align:center;margin-bottom:8px">' +
+    '<div style="font-size:.78rem;color:var(--text-secondary);margin-bottom:4px">执行中...</div>' +
+    '<div class="card-timer-display" style="font-family:var(--font-heading);font-size:1.3rem;color:var(--gold);margin-bottom:6px">00:00</div>' +
+    '<div style="font-size:.68rem;color:var(--text-muted)">计划 ' + planned + ' 分</div>' +
+    '</div>' +
+    '<button class="btn" onclick="pauseInlineTimer(' + taskId + ')" style="width:100%;margin-bottom:6px"><i class="fa-solid fa-pause"></i> 暂停</button>' +
+    '<button class="btn pri" onclick="confirmComplete(' + taskId + ')" style="width:100%"><i class="fa-solid fa-check"></i> 确认完成任务</button>';
+
+  try {
+    var r = await api('/api/timer/start', {
+      method: 'POST',
+      body: JSON.stringify({ task_id: taskId, planned_minutes: planned })
+    });
+    timerDockSession = {
+      id: r.session_id,
+      task_id: r.task_id,
+      started_at: r.started_at,
+      planned_minutes: r.planned_minutes,
+      task_name: task.name
+    };
+    timerDockPaused = false;
+    timerDockPausedElapsed = 0;
+    updateTimerDockDisplay();
+    startInlineTimer(taskId, r.started_at, planned);
+    toast('计时已开始，加油！', 'suc');
+  } catch (e) {
+    toast(e.message || '启动计时失败', 'err');
+    if (rightPanel) {
+      rightPanel.innerHTML = '<button class="btn pri" onclick="startTask(' + taskId + ')" style="width:100%"><i class="fa-solid fa-play"></i> 开始任务</button>';
+    }
+  }
+}
+
+// 内嵌计时器更新
+function startInlineTimer(taskId, startedAt, planned) {
+  if (window._inlineTimerHandle) clearInterval(window._inlineTimerHandle);
+  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + taskId + '"]');
+  if (!card) return;
+  window._inlineTimerHandle = setInterval(function () {
+    if (!timerDockSession || timerDockSession.task_id !== taskId) {
+      clearInterval(window._inlineTimerHandle);
+      return;
+    }
+    var display = card.querySelector('.card-timer-display');
+    if (!display) { clearInterval(window._inlineTimerHandle); return; }
+    var started = new Date(timerDockSession.started_at).getTime();
+    var elapsed = Date.now() - started;
+    if (timerDockPaused) elapsed = timerDockPausedElapsed;
+    var sec = Math.floor(Math.max(0, elapsed) / 1000);
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    display.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }, 1000);
+}
+
+// 内嵌暂停
+async function pauseInlineTimer(taskId) {
+  if (!timerDockSession || timerDockSession.task_id !== taskId) return;
+  toggleTimerDockPause();
+  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + taskId + '"]');
+  if (!card) return;
+  var rightPanel = card.querySelector('.drawn-card-right-panel');
+  if (!rightPanel) return;
+  var pauseBtn = rightPanel.querySelector('button[onclick*="pauseInlineTimer"]');
+  if (pauseBtn) {
+    pauseBtn.innerHTML = timerDockPaused
+      ? '<i class="fa-solid fa-play"></i> 继续'
+      : '<i class="fa-solid fa-pause"></i> 暂停';
+  }
+}
+
+// 确认完成任务（需要先停止计时器）
+async function confirmComplete(taskId) {
+  // 先停止计时器
+  if (timerDockSession && timerDockSession.id) {
+    try {
+      var started = new Date(timerDockSession.started_at).getTime();
+      var actualMin = Math.max(1, Math.round((Date.now() - started) / 60000));
+      await api('/api/timer/complete', {
+        method: 'POST',
+        body: JSON.stringify({ session_id: timerDockSession.id, actual_minutes: actualMin, result: 'completed' })
+      });
+    } catch (e) { /* ignore timer stop error */ }
+  }
+  timerDockSession = null;
+  updateTimerDockDisplay();
+  await completeWithFeedback(taskId);
+}
+
+async function checkTaskTimerStatus(taskId) {
+  try {
+    var r = await api('/api/timer/active');
+    if (r && r.task_id === taskId) {
+      // 仍在计时，超时提醒
+      var started = new Date(r.started_at).getTime();
+      var planned = r.planned_minutes || 30;
+      var elapsed = (Date.now() - started) / 60000;
+      if (elapsed > planned * 0.8) {
+        toast(WARM_MESSAGES.timeout, 'inf');
+      }
+    }
+  } catch (e) { /* ignore */ }
 }
 
 function showReplaceReason(taskId) {
@@ -679,7 +777,6 @@ async function doReplace() {
       gachaState.canReplace = false;
       document.getElementById('gachaResult').innerHTML = '';
       document.getElementById('gachaResult').appendChild(renderDrawnCard(r.task, 0));
-      applyScale(parseInt(localStorage.getItem('cardSize') || '440'));
       toast('已换牌', 'inf');
     }
   } catch (e) {
@@ -687,66 +784,83 @@ async function doReplace() {
   }
 }
 
-function handleSkip(id) {
-  runWithSkipFeedback(id, function () {
-    return api('/api/tasks/' + id + '/skip', { method: 'POST' }).then(function (r) {
-      return playCardAnim(id, 'is-skipping', 400).then(function () {
-        document.getElementById('gachaResult').innerHTML =
-          '<div class="empty-state"><i class="fa-solid fa-forward"></i><p>已跳过</p></div>';
-        enableGachaBtn();
-        if (r.unlocked_tasks && r.unlocked_tasks.length) toast('已解锁: ' + r.unlocked_tasks.join('、'), 'suc');
-        refreshGachaStats();
-        loadTasks();
-      });
-    });
-  }).catch(function (e) { toast(e.message || '跳过失败', 'err'); });
-}
-
-function handleRefuse(id) {
-  var ctx = getTaskFeedbackContext(id);
-  ctx.completionStatus = 'refused';
-  promptTaskFeedback('refuse', ctx).then(function () {
-    return api('/api/tasks/' + id + '/refuse', { method: 'POST' });
-  }).then(function () {
-    return playCardAnim(id, 'is-refusing');
-  }).then(function () {
-    document.getElementById('gachaResult').innerHTML =
-      '<div class="empty-state"><i class="fa-solid fa-xmark"></i><p>已拒绝</p></div>';
-    enableGachaBtn();
-    refreshGachaStats();
-  }).catch(function (e) { toast(e.message || '拒绝失败', 'err'); });
-}
-
+// ============ 完成任务（自动反馈）============
 async function completeWithFeedback(id) {
   var task = allTasks.find(function (x) { return x.id === id; });
   if (task && !task.is_unlocked) {
     toast(prereqHint(task) || '任务被前置依赖阻塞', 'err');
     return;
   }
+
+  var drawnCard = document.querySelector('.task-card.drawn-card[data-task-id="' + id + '"]');
+
   try {
     var r = await api('/api/tasks/' + id + '/complete', { method: 'POST' });
     if (r.unlocked_tasks && r.unlocked_tasks.length) {
-      toast('已解锁: ' + r.unlocked_tasks.join('、'), 'suc');
+      toast(WARM_MESSAGES.unlock + ': ' + r.unlocked_tasks.join('、'), 'suc');
     }
-    var task = allTasks.find(function (x) { return x.id === id; });
-    var isOnetime = task && (task.task_profile === 'one_time' || task.category === 'once' || task.repeat_type === 'none');
-    if (isOnetime) {
-      await playCardAnim(id, 'is-burning', 700);
-    } else {
-      await playCardAnim(id, 'is-completing is-evaporating is-fly-to-pile', 500);
+
+    if (drawnCard) {
+      await flyCardToDiscard(drawnCard);
     }
-    document.getElementById('fbTaskId').value = id;
-    document.getElementById('fbEnergy').value = 5;
-    document.getElementById('fbEnergyVal').textContent = '5';
-    gachaState.feedbackMood = 3;
-    showModal('feedbackModal');
-    setTimeout(function () { submitFeedback(); closeModal('feedbackModal'); }, 3000);
-    enableGachaBtn();
+
+    // 先将任务放入弃牌堆，再标记完成
+    await api('/api/tasks/' + id + '/move-to-discard', { method: 'POST' });
+
+    api('/api/tasks/' + id + '/feedback', {
+      method: 'POST',
+      body: JSON.stringify({ energy_after: 5, mood_after: 3 })
+    }).catch(function () { });
+
+    document.getElementById('gachaResult').innerHTML =
+      '<div class="empty-state"><i class="fa-solid fa-circle-check" style="color:var(--gold)"></i><p>太棒了，继续加油！</p></div>';
+
     loadTasks();
     refreshGachaStats();
+    updateDiscardPileVisual();
+    timerDockSession = null;
+    updateTimerDockDisplay();
   } catch (e) {
     toast(e.message || '完成失败', 'err');
   }
+}
+
+// 将卡牌飞向弃牌堆
+async function flyCardToDiscard(cardEl) {
+  if (!cardEl) return;
+  var pile = document.getElementById('discardPile');
+  var flyLayer = document.getElementById('cardFlyLayer');
+  if (!pile || !flyLayer) return;
+
+  var cardRect = cardEl.getBoundingClientRect();
+  var pileRect = pile.getBoundingClientRect();
+
+  var flying = document.createElement('div');
+  flying.className = 'flying-card';
+  flying.style.left = cardRect.left + 'px';
+  flying.style.top = cardRect.top + 'px';
+  flying.style.width = cardRect.width + 'px';
+  flying.style.height = cardRect.height + 'px';
+  flying.style.opacity = '1';
+  flying.style.transition = 'none';
+  flyLayer.appendChild(flying);
+
+  cardEl.style.opacity = '0';
+
+  await new Promise(function (resolve) { requestAnimationFrame(resolve); });
+
+  var tx = pileRect.left + pileRect.width / 2 - cardRect.width / 2;
+  var ty = pileRect.top + pileRect.height / 2 - cardRect.height / 2;
+
+  flying.style.transition = 'all 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
+  flying.style.left = tx + 'px';
+  flying.style.top = ty + 'px';
+  flying.style.transform = 'scale(0.6) rotate(8deg)';
+  flying.style.opacity = '0.35';
+  flying.style.filter = 'grayscale(0.6) brightness(0.7)';
+
+  await new Promise(function (resolve) { setTimeout(resolve, 720); });
+  flying.remove();
 }
 
 function setMood(v, el) {
@@ -765,7 +879,7 @@ function submitFeedback() {
   }).catch(function () { });
   closeModal('feedbackModal');
   document.getElementById('gachaResult').innerHTML =
-    '<div class="empty-state"><i class="fa-solid fa-circle-check" style="color:var(--green)"></i><p>任务完成!</p></div>';
+    '<div class="empty-state"><i class="fa-solid fa-circle-check" style="color:var(--green)"></i><p>太棒了，继续加油！</p></div>';
   refreshGachaStats();
 }
 
@@ -773,13 +887,88 @@ function cancelFeedback() {
   closeModal('feedbackModal');
 }
 
+async function handleSkip(id) {
+  var ctx = getTaskFeedbackContext(id);
+  ctx.completionStatus = 'skipped';
+  await promptTaskFeedback('skip', ctx);
+  try {
+    var r = await api('/api/tasks/' + id + '/skip', { method: 'POST' });
+    await playCardAnim(id, 'is-skipping');
+    document.getElementById('gachaResult').innerHTML =
+      '<div class="empty-state"><i class="fa-solid fa-forward"></i><p>' + WARM_MESSAGES.skipped + '</p></div>';
+    if (r.unlocked_tasks && r.unlocked_tasks.length) toast(WARM_MESSAGES.unlock + ': ' + r.unlocked_tasks.join('、'), 'suc');
+    refreshGachaStats();
+    loadTasks();
+  } catch (e) {
+    toast(e.message || '跳过失败', 'err');
+  }
+}
+
+async function handleRefuse(id) {
+  var ctx = getTaskFeedbackContext(id);
+  ctx.completionStatus = 'refused';
+  await promptTaskFeedback('skip', ctx);
+  try {
+    await api('/api/tasks/' + id + '/refuse', { method: 'POST' });
+    await playCardAnim(id, 'is-refusing');
+    document.getElementById('gachaResult').innerHTML =
+      '<div class="empty-state"><i class="fa-solid fa-xmark"></i><p>' + WARM_MESSAGES.refused + '</p></div>';
+    refreshGachaStats();
+  } catch (e) {
+    toast(e.message || '拒绝失败', 'err');
+  }
+}
+
 async function refreshGachaStats() {
   try {
     var r = await api('/api/gacha/statistics');
-    var s = document.getElementById('gachaStats');
-    s.innerHTML = '<span>抽卡 ' + r.total_draws + '</span><span>接受 ' + r.acceptance_rate + '%</span><span>拒绝 ' + r.rejections + '</span>';
+    var se = document.getElementById('statDraws');
+    var sr = document.getElementById('statRate');
+    var srej = document.getElementById('statRejects');
+    if (se) se.textContent = r.total_draws || 0;
+    if (sr) sr.textContent = r.acceptance_rate != null ? (Math.round(r.acceptance_rate) + '%') : '--';
+    if (srej) srej.textContent = r.rejections || 0;
   } catch (e) { /* 统计失败不阻塞 */ }
 }
+
+// ============ 弃牌堆视觉 ============
+async function updateDiscardPileVisual() {
+  try {
+    var items = await api('/api/discard-pile');
+    var stack = document.getElementById('discardPileStack');
+    var empty = document.getElementById('discardPileEmpty');
+    if (!stack) return;
+    // 移除所有视觉卡
+    stack.querySelectorAll('.discard-pile-visual-card').forEach(function (el) { el.remove(); });
+    // 显示空状态或堆叠卡
+    if (empty) empty.style.display = items && items.length > 0 ? 'none' : 'flex';
+    if (items && items.length > 0) {
+      var show = Math.min(items.length, 5);
+      for (var i = 0; i < show; i++) {
+        var card = document.createElement('div');
+        card.className = 'discard-pile-visual-card discard-pile-card';
+        card.style.setProperty('--di', i);
+        card.style.zIndex = i;
+        stack.appendChild(card);
+      }
+    }
+  } catch (e) { /* ignore */ }
+}
+
+// ============ 卡牌大小滑块 ============
+(function () {
+  var saved = localStorage.getItem('cardScale');
+  if (saved) {
+    document.documentElement.style.setProperty('--card-scale', saved / 100);
+    var slider = document.getElementById('cardSizeRange');
+    if (slider) slider.value = saved;
+  }
+})();
+document.getElementById('cardSizeRange').addEventListener('input', function () {
+  var v = this.value / 100;
+  document.documentElement.style.setProperty('--card-scale', v);
+  localStorage.setItem('cardScale', this.value);
+});
 
 // ============ TASKS ============
 var allTasks = [], allTags = [], selectedTagFilter = null;
@@ -854,12 +1043,12 @@ function renderTasks() {
     var blockedNote = hint ? '<div class="card-meta mt8" style="color:var(--purple)">' + hint + '</div>' : '';
     var canAct = t.is_unlocked !== false && !t.completed;
     var actions =
-      '<button class="btn sm" onclick="openTaskEdit(' + t.id + ')" title="编辑任务"><i class="fa-solid fa-pen"></i> 编辑</button>' +
-      (canAct ? '<button class="btn pri sm" onclick="completeWithFeedback(' + t.id + ')" title="标记完成"><i class="fa-solid fa-check"></i> 完成</button>' : '') +
-      (canAct ? '<button class="btn sm" onclick="taskSkip(' + t.id + ')" title="跳过任务"><i class="fa-solid fa-forward"></i> 跳过</button>' : '') +
-      (canAct ? '<button class="btn sm" onclick="taskRefuse(' + t.id + ')" title="拒绝任务"><i class="fa-solid fa-xmark"></i> 拒绝</button>' : '') +
-      (!t.in_discard_pile && !t.completed ? '<button class="btn sm" onclick="moveToDiscard(' + t.id + ')" title="移入弃牌堆"><i class="fa-solid fa-box-archive"></i> 弃牌</button>' : '') +
-      '<button class="btn danger sm" onclick="deleteTask(' + t.id + ')" title="删除任务"><i class="fa-solid fa-trash"></i> 删除</button>';
+      '<button class="btn sm" onclick="openTaskEdit(' + t.id + ')"><i class="fa-solid fa-pen"></i> 编辑</button>' +
+      (canAct ? '<button class="btn pri sm" onclick="completeWithFeedback(' + t.id + ')"><i class="fa-solid fa-check"></i> 完成</button>' : '') +
+      (canAct ? '<button class="btn sm" onclick="taskSkip(' + t.id + ')"><i class="fa-solid fa-forward"></i> 跳过</button>' : '') +
+      (canAct ? '<button class="btn sm" onclick="taskRefuse(' + t.id + ')"><i class="fa-solid fa-xmark"></i> 拒绝</button>' : '') +
+      (!t.in_discard_pile && !t.completed ? '<button class="btn sm" onclick="moveToDiscard(' + t.id + ')"><i class="fa-solid fa-box-archive"></i> 弃牌</button>' : '') +
+      '<button class="btn danger sm" onclick="deleteTask(' + t.id + ')"><i class="fa-solid fa-trash"></i> 删除</button>';
     batch += buildTaskCardHtml(t, {
       statusHtml: statusIcons.join(''),
       blockedNote: blockedNote,
@@ -872,45 +1061,45 @@ function renderTasks() {
   if (window._renderPending) { window._renderPending = false; renderTasks(); }
 }
 
-function taskSkip(id) {
-  runWithSkipFeedback(id, function () {
-    return api('/api/tasks/' + id + '/skip', { method: 'POST' }).then(function (r) {
-      return playCardAnim(id, 'is-skipping', 400).then(function () {
-        toast('已跳过', 'suc');
-        if (r.unlocked_tasks && r.unlocked_tasks.length) toast('已解锁: ' + r.unlocked_tasks.join('、'), 'suc');
-        loadTasks();
-      });
-    });
-  }).catch(function (e) { toast(e.message || '跳过失败', 'err'); });
+async function taskSkip(id) {
+  var ctx = getTaskFeedbackContext(id);
+  ctx.completionStatus = 'skipped';
+  await promptTaskFeedback('skip', ctx);
+  try {
+    var r = await api('/api/tasks/' + id + '/skip', { method: 'POST' });
+    await playCardAnim(id, 'is-skipping');
+    toast('已跳过', 'suc');
+    if (r.unlocked_tasks && r.unlocked_tasks.length) toast(WARM_MESSAGES.unlock + ': ' + r.unlocked_tasks.join('、'), 'suc');
+    loadTasks();
+  } catch (e) {
+    toast(e.message || '跳过失败', 'err');
+  }
 }
 
-function taskRefuse(id) {
+async function taskRefuse(id) {
   var ctx = getTaskFeedbackContext(id);
   ctx.completionStatus = 'refused';
-  promptTaskFeedback('skip', ctx).then(function () {
-    return api('/api/tasks/' + id + '/refuse', { method: 'POST' });
-  }).then(function () {
-    return playCardAnim(id, 'is-refusing');
-  }).then(function () {
-    toast('已记录拒绝', 'inf');
+  await promptTaskFeedback('skip', ctx);
+  try {
+    await api('/api/tasks/' + id + '/refuse', { method: 'POST' });
+    await playCardAnim(id, 'is-refusing');
+    toast('已记录', 'inf');
     loadTasks();
-  }).catch(function (e) { toast(e.message || '拒绝失败', 'err'); });
+  } catch (e) {
+    toast(e.message || '拒绝失败', 'err');
+  }
 }
 
-function moveToDiscard(id) {
-  var ctx = getTaskFeedbackContext(id);
-  ctx.completionStatus = 'abandoned';
-  promptTaskFeedback('abandon', ctx).then(function () {
-    return api('/api/tasks/' + id + '/move-to-discard', { method: 'POST' });
-  }).then(function () {
-    return playCardAnim(id, 'is-discarding', 600);
-  }).then(function () {
-    var box = document.getElementById('gachaDiscardBox');
-    if (box) { box.classList.add('discard-box-receive'); setTimeout(function () { box.classList.remove('discard-box-receive'); }, 500); }
-    toast('已移入弃牌堆', 'inf');
-    enableGachaBtn();
+async function moveToDiscard(id) {
+  try {
+    await api('/api/tasks/' + id + '/move-to-discard', { method: 'POST' });
+    await playCardAnim(id, 'is-discarding');
+    toast(WARM_MESSAGES.discarded, 'inf');
     loadTasks();
-  }).catch(function (e) { toast(e.message || '操作失败', 'err'); });
+    updateDiscardPileVisual();
+  } catch (e) {
+    toast(e.message || '操作失败', 'err');
+  }
 }
 
 var REPEAT_LABELS = { none: '单次', daily: '每日', weekly: '每周', accumulation: '积累' };
@@ -953,18 +1142,16 @@ async function loadDiscardPileList() {
         return '<span class="badge bg-gold">' + String(x).replace(/</g, '&lt;') + '</span>';
       }).join(' ');
       var repeat = REPEAT_LABELS[t.repeat_type] || t.repeat_type || '-';
-      var status = discardTaskStatus(t);
-      var discardedAt = formatDiscardTime(t.last_completed_at || t.updated_at);
       var safeName = String(t.name || '').replace(/</g, '&lt;').replace(/"/g, '&quot;');
       return '<div class="activity-row discard-row" data-id="' + t.id + '">' +
         '<div style="flex:1;min-width:0">' +
         '<div><strong>#' + t.id + '</strong> ' + safeName +
-        ' <span class="badge bg-red" style="font-size:.75rem">' + status + '</span></div>' +
+        ' <span class="badge bg-red" style="font-size:.75rem">' + discardTaskStatus(t) + '</span></div>' +
         '<div style="color:var(--text-muted);font-size:.8rem;margin-top:4px">' +
-        repeat + ' · 弃牌于 ' + discardedAt + '</div>' +
+        repeat + ' · ' + formatDiscardTime(t.last_completed_at || t.updated_at) + '</div>' +
         (tags ? '<div class="flex gap8 wrap mt4">' + tags + '</div>' : '') +
         '</div>' +
-        '<button type="button" class="btn pri sm discard-restore-btn" data-id="' + t.id + '" data-name="' + safeName + '" title="恢复任务到列表">' +
+        '<button type="button" class="btn pri sm discard-restore-btn" data-id="' + t.id + '" data-name="' + safeName + '">' +
         '<i class="fa-solid fa-rotate-left"></i> 恢复</button></div>';
     }).join('');
     wrap.querySelectorAll('.discard-restore-btn').forEach(function (btn) {
@@ -979,12 +1166,13 @@ async function loadDiscardPileList() {
 }
 
 function restoreFromDiscard(id, name) {
-  if (!confirm('确定将「' + (name || ('#' + id)) + '」从弃牌堆恢复？恢复后可重新参与抽卡。')) return;
+  if (!confirm('确定将「' + (name || ('#' + id)) + '」从弃牌堆恢复？')) return;
   api('/api/discard-pile/' + id + '/restore', { method: 'POST', body: JSON.stringify({}) }).then(function () {
     toast('已恢复任务', 'suc');
     loadDiscardPileList();
     loadTasks();
     refreshGachaStats();
+    updateDiscardPileVisual();
   }).catch(function (e) {
     toast(e.message || '恢复失败', 'err');
   });
@@ -999,6 +1187,7 @@ function openTaskEdit(id) {
   document.getElementById('tfId').value = '';
   document.getElementById('taskModalTitle').textContent = '新建任务';
   document.getElementById('taskDelBtn').style.display = 'none';
+  loadNoteOptionsForTaskModal();
   document.getElementById('tfExistingTags').innerHTML = allTags.map(function (t) {
     return '<span class="badge bg-blue tag-pick" data-tag="' + t.name.replace(/"/g, '&quot;') + '">' + t.name + '</span>';
   }).join('');
@@ -1037,9 +1226,24 @@ function openTaskEdit(id) {
   document.getElementById('tfEnergy').value = 'medium';
   document.getElementById('tfRepeat').value = 'none';
   document.getElementById('tfProfile').value = 'deadline_flexible';
+  document.getElementById('tfLinkedNote').value = '';
   document.getElementById('tfTagChips').innerHTML = '';
   window._tfTags = [];
   buildDepList([]);
+}
+
+async function loadNoteOptionsForTaskModal() {
+  var sel = document.getElementById('tfLinkedNote');
+  if (!sel || sel.options.length > 1) return;
+  try {
+    var notes = await api('/api/knowledge/notes');
+    notes.slice(0, 200).forEach(function (n) {
+      var opt = document.createElement('option');
+      opt.value = n.path || '';
+      opt.textContent = (n.category || '') + ' / ' + (n.name || n.path || '');
+      sel.appendChild(opt);
+    });
+  } catch (e) { /* ignore */ }
 }
 
 function buildDepList(selectedIds) {
@@ -1096,6 +1300,8 @@ async function saveTask() {
     tags: window._tfTags || [],
     prerequisite_ids: prereqIds
   };
+  var linkedNote = document.getElementById('tfLinkedNote').value;
+  if (linkedNote) data.linked_note_path = linkedNote;
   try {
     await api(id ? '/api/tasks/' + id : '/api/tasks', {
       method: id ? 'PUT' : 'POST',
@@ -1513,7 +1719,7 @@ async function selectAgentReadonly(id, el) {
     var pr = await api('/api/agent/agents/' + encodeURIComponent(id) + '/prompt');
     document.getElementById('agentRoPromptLabel').textContent =
       '提示词内容（只读）' + (pr.exists ? ' · ' + pr.size + ' 字符' : ' · 文件缺失');
-    ta.value = pr.exists ? (pr.content || '') : '（提示词文件不存在：' + (agent.prompt_file || '') + '）';
+    ta.value = pr.exists ? (pr.content || '') : '（提示词文件不存在）';
   } catch (e) {
     ta.value = '';
     toast(e.message || '提示词加载失败', 'err');
@@ -1559,7 +1765,6 @@ async function loadAgentRawList(subdir) {
       el.addEventListener('click', function () {
         var name = el.getAttribute('data-raw-dir');
         var next = agentRawSubdir ? agentRawSubdir + '/' + name : name;
-        if (name === '已分类') next = '已分类';
         loadAgentRawList(next);
       });
     });
@@ -1663,14 +1868,14 @@ async function saveConfigForm() {
   };
   try {
     var r = await api('/api/config/save', { method: 'POST', body: JSON.stringify(data) });
-    if (r.success) toast('已保存', 'suc');
+    if (r.success) toast('已保存，重启服务器后生效', 'suc');
     else toast('保存失败: ' + (r.error || ''), 'err');
   } catch (e) {
     toast(e.message || '保存失败', 'err');
   }
 }
 
-// ============ PROMPTS (read-only + editable) ============
+// ============ PROMPTS ============
 var promptFiles = [];
 var promptCurrentContent = '';
 var promptOriginalContent = '';
@@ -2067,32 +2272,6 @@ function closeStateAssessmentModal() {
 // ============ TIMER ============
 var timerActiveSession = null;
 var timerTickHandle = null;
-var _timerTimeoutShown = false;
-
-function getRemainingMs(session) {
-  if (!session) return 0;
-  var plannedMs = (session.planned_minutes || 0) * 60 * 1000;
-  if (plannedMs <= 0) return 0;
-  var started = new Date(session.started_at).getTime();
-  var pausedSec = session.paused_duration || 0;
-  var now = session.status === 'paused' && session.paused_at ? new Date(session.paused_at).getTime() : Date.now();
-  var elapsedMs = now - started - pausedSec * 1000;
-  return Math.max(0, plannedMs - elapsedMs);
-}
-
-function formatRemaining(ms) {
-  var totalSec = Math.max(0, Math.floor(ms / 1000));
-  var m = Math.floor(totalSec / 60);
-  var s = totalSec % 60;
-  return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-}
-
-function remainingRatio(session) {
-  if (!session) return 1;
-  var plannedMs = (session.planned_minutes || 0) * 60 * 1000;
-  if (plannedMs <= 0) return 1;
-  return getRemainingMs(session) / plannedMs;
-}
 
 function formatElapsed(ms) {
   var sec = Math.max(0, Math.floor(ms / 1000));
@@ -2124,73 +2303,24 @@ function updateTimerDisplay() {
   if (!statusEl || !elapsedEl) return;
 
   if (timerActiveSession && timerActiveSession.started_at) {
-    var remainingMs = getRemainingMs(timerActiveSession);
-    var ratio = remainingRatio(timerActiveSession);
-    var isPaused = timerActiveSession.status === 'paused';
+    var started = new Date(timerActiveSession.started_at).getTime();
+    var elapsed = Date.now() - started;
+    elapsedEl.textContent = formatElapsed(elapsed);
     var name = timerActiveSession.task_name || taskNameById(timerActiveSession.task_id);
-    elapsedEl.textContent = formatRemaining(remainingMs);
-    elapsedEl.style.color = ratio <= 0.1 ? '#ff4444' : (ratio <= 0.3 ? '#ff9944' : '');
-    if (ratio <= 0.1 && !isPaused) elapsedEl.classList.add('timer-blink');
-    else elapsedEl.classList.remove('timer-blink');
-    statusEl.textContent = (isPaused ? '已暂停' : '剩余') + ' · ' + name;
-    statusEl.className = isPaused ? 'timer-paused' : (ratio <= 0.1 ? 'timer-urgent' : (ratio <= 0.3 ? 'timer-warn' : ''));
+    statusEl.textContent = '计时中 · ' + name + '（计划 ' + (timerActiveSession.planned_minutes || '?') + ' 分）';
+    statusEl.className = '';
     if (startBtn) startBtn.classList.add('hidden');
     if (stopBtn) stopBtn.classList.remove('hidden');
     if (sel) sel.disabled = true;
     if (planned) planned.disabled = true;
-
-    if (!isPaused && !_timerTimeoutShown && remainingMs <= 0) {
-      _timerTimeoutShown = true;
-      pauseTimer().then(function () {
-        showTimeoutModal();
-      });
-    }
   } else {
     elapsedEl.textContent = '00:00';
-    elapsedEl.style.color = '';
-    elapsedEl.classList.remove('timer-blink');
     statusEl.textContent = '未在计时';
     statusEl.className = 'timer-idle';
     if (startBtn) startBtn.classList.remove('hidden');
     if (stopBtn) stopBtn.classList.add('hidden');
     if (sel) sel.disabled = false;
     if (planned) planned.disabled = false;
-    _timerTimeoutShown = false;
-  }
-  updateGachaTimerBar();
-}
-
-function updateGachaTimerBar() {
-  var bar = document.getElementById('gachaTimerBar');
-  var empty = document.getElementById('gachaTimerEmpty');
-  if (!bar || !empty) return;
-  if (timerActiveSession && timerActiveSession.started_at) {
-    var remainingMs = getRemainingMs(timerActiveSession);
-    var ratio = remainingRatio(timerActiveSession);
-    var isPaused = timerActiveSession.status === 'paused';
-    var name = timerActiveSession.task_name || taskNameById(timerActiveSession.task_id);
-    var el = document.getElementById('gachaTimerElapsed');
-    el.textContent = formatRemaining(remainingMs);
-    el.style.color = ratio <= 0.1 ? '#ff4444' : (ratio <= 0.3 ? '#ff9944' : '');
-    if (ratio <= 0.1 && !isPaused) el.classList.add('timer-blink');
-    else el.classList.remove('timer-blink');
-    document.getElementById('gachaTimerTaskName').textContent = (isPaused ? '[已暂停] ' : '') + name;
-    bar.style.display = 'flex';
-    empty.style.display = 'none';
-    // Update pause/resume button
-    var btn = bar.querySelector('.timer-bar-actions button:first-child');
-    if (btn) {
-      if (isPaused) {
-        btn.textContent = '继续';
-        btn.setAttribute('onclick', 'resumeTimer()');
-      } else {
-        btn.textContent = '暂停';
-        btn.setAttribute('onclick', 'pauseTimer()');
-      }
-    }
-  } else {
-    bar.style.display = 'none';
-    empty.style.display = 'flex';
   }
 }
 
@@ -2208,69 +2338,12 @@ async function loadTimerPanel() {
     timerActiveSession = r && r.id ? r : null;
     updateTimerDisplay();
     startTimerTick();
-    if (timerActiveSession && timerActiveSession.task_id) {
-      restoreGachaCardFromSession();
-    }
   } catch (e) {
     timerActiveSession = null;
     updateTimerDisplay();
     toast(e.message || '计时器状态加载失败', 'err');
   }
 }
-
-async function restoreGachaCardFromSession() {
-  var taskId = timerActiveSession.task_id;
-  var result = document.getElementById('gachaResult');
-  if (!result) return;
-  try {
-    var r = await api('/api/tasks/' + taskId);
-    if (!r || !r.id) return;
-    var task = r;
-    var theme = resolveTaskCardTheme(task);
-    var urgent = task.deadline && new Date(task.deadline) > new Date() &&
-      (new Date(task.deadline) - new Date()) / 86400000 < 1;
-
-    var isPaused = timerActiveSession.status === 'paused';
-    var actions;
-    if (isPaused) {
-      actions = '<button class="btn sm" onclick="resumeTimer()" title="恢复计时">继续</button>' +
-        '<button class="btn pri sm" onclick="completeFromGachaCard(' + task.id + ')" title="完成任务">完成</button>';
-    } else {
-      actions = '<button class="btn sm" onclick="pauseTimer()" title="暂停计时">暂停</button>' +
-        '<button class="btn pri sm" onclick="completeFromGachaCard(' + task.id + ')" title="完成任务">完成</button>';
-    }
-
-    var wrap = document.createElement('div');
-    wrap.className = 'drawn-card-stage';
-    var card = document.createElement('div');
-    card.className = 'task-card card drawn-card ' + theme + (urgent ? ' urgent' : '');
-    card.setAttribute('data-task-id', task.id);
-    card.setAttribute('data-restored', '1');
-    card.innerHTML =
-      '<div class="task-card-inner">' +
-      '<div class="task-card-face task-card-back"><div class="card-back-pattern"></div><div class="card-back-emblem">\u2726</div></div>' +
-      '<div class="task-card-face task-card-front">' +
-      buildTaskCardBodyHtml(task, { actionsHtml: actions, descLen: 120, showRepeat: false }) +
-      '</div></div>';
-    card.classList.add('is-revealing');
-    wrap.appendChild(card);
-
-  result.innerHTML = '';
-  result.appendChild(wrap);
-  applyScale(parseInt(localStorage.getItem('cardSize') || '440'));
-  disableGachaBtn();
-  } catch (e) {
-    // silent — task may have been deleted
-  }
-}
-
-window.addEventListener('beforeunload', function (e) {
-  if (timerActiveSession && timerActiveSession.status === 'running') {
-    e.preventDefault();
-    e.returnValue = '有任务正在进行中，确定要退出吗？';
-    return e.returnValue;
-  }
-});
 
 async function startTimer() {
   if (timerActiveSession) {
@@ -2319,9 +2392,7 @@ async function handleTimerOutcome(outcome) {
 
   var session = timerActiveSession;
   var started = new Date(session.started_at).getTime();
-  var pausedSec = session.paused_duration || 0;
-  var now = session.status === 'paused' && session.paused_at ? new Date(session.paused_at).getTime() : Date.now();
-  var actualMinutes = Math.max(1, Math.round((now - started - pausedSec * 1000) / 60000));
+  var actualMinutes = Math.max(1, Math.round((Date.now() - started) / 60000));
   var planned = session.planned_minutes || 30;
   var timerResult = outcome === 'completed' ? 'completed' : 'abandoned';
 
@@ -2347,185 +2418,29 @@ async function handleTimerOutcome(outcome) {
     };
     if (outcome === 'completed') {
       if (actualMinutes <= planned * 0.5) {
-        await promptTaskFeedback('finish_early', fbCtx);
-      } else if (actualMinutes >= planned * 1.2 && planned > 0) {
-        await promptTaskFeedback('overtime', fbCtx);
-      } else {
-        _completedToday++;
-        if (_completedToday === 1) _completedStreak = 1;
-        else _completedStreak++;
-        if (_completedStreak >= 5) showEncouragement('streak');
-        else if (_completedToday <= 3) showEncouragement('complete_encourage');
-        await submitTaskFeedbackEvent({
-          task_id: session.task_id,
-          event_type: 'finish_on_time',
-          planned_minutes: planned,
-          actual_minutes: actualMinutes,
-          completion_status: 'completed',
-          reason_category: 'other',
-          reason_detail: '按时完成',
-          note: null
-        });
+        toast(WARM_MESSAGES.completedEarly, 'inf');
       }
+      await submitTaskFeedbackEvent({
+        task_id: session.task_id,
+        event_type: 'finish_on_time',
+        planned_minutes: planned,
+        actual_minutes: actualMinutes,
+        completion_status: 'completed',
+        reason_category: 'other',
+        reason_detail: '按时完成',
+        note: null
+      });
     } else if (outcome === 'unfinished') {
-      await promptTaskFeedback('overtime', fbCtx);
+      toast(WARM_MESSAGES.timeout, 'inf');
     } else if (outcome === 'abandoned') {
-      await promptTaskFeedback('abandon', fbCtx);
+      toast(WARM_MESSAGES.timeout, 'inf');
     }
+    loadTasks();
+    refreshGachaStats();
   } catch (e) {
     toast(e.message || '停止计时失败', 'err');
     await loadTimerPanel();
   }
-}
-
-async function startTaskWithTimer(taskId) {
-  if (timerActiveSession && timerActiveSession.status !== 'paused') {
-    toast('已有进行中的计时，请先完成当前任务', 'err');
-    return;
-  }
-  var task = allTasks.find(function (x) { return x.id === taskId; });
-  var minutes = task ? (task.estimated_time || 30) : 30;
-  try {
-    var r = await api('/api/timer/start', {
-      method: 'POST',
-      body: JSON.stringify({ task_id: taskId, planned_minutes: minutes })
-    });
-    timerActiveSession = {
-      id: r.session_id,
-      task_id: r.task_id,
-      started_at: r.started_at,
-      planned_minutes: r.planned_minutes,
-      task_name: taskNameById(r.task_id)
-    };
-    toast('计时已开始', 'suc');
-    updateTimerDisplay();
-    updateGachaCardButtons(taskId);
-  } catch (e) {
-    toast(e.message || '开始计时失败', 'err');
-  }
-}
-
-function updateGachaCardButtons(taskId) {
-  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + taskId + '"]');
-  if (!card) return;
-  var footer = card.querySelector('.task-card-footer .task-card-actions');
-  if (!footer) return;
-  var canReplace = gachaState.canReplace;
-  if (timerActiveSession && timerActiveSession.task_id === taskId) {
-    footer.innerHTML =
-      '<button class="btn sm" onclick="completeFromGachaCard(' + taskId + ')" title="完成任务并记录用时"><i class="fa-solid fa-check"></i> 完成</button>' +
-      (canReplace ? '<button class="btn sm" onclick="showReplaceReason(' + taskId + ')" title="换一张牌"><i class="fa-solid fa-shuffle"></i> 换牌</button>' : '');
-  } else {
-    footer.innerHTML =
-      '<button class="btn pri sm" onclick="startTaskWithTimer(' + taskId + ')" title="开始计时完成任务"><i class="fa-solid fa-play"></i> 开始</button>' +
-      (canReplace ? '<button class="btn sm" onclick="showReplaceReason(' + taskId + ')" title="换一张牌"><i class="fa-solid fa-shuffle"></i> 换牌</button>' : '');
-  }
-}
-
-async function completeFromGachaCard(taskId) {
-  if (!timerActiveSession || timerActiveSession.task_id !== taskId) {
-    toast('请先开始计时', 'err');
-    return;
-  }
-  try {
-    var started = new Date(timerActiveSession.started_at).getTime();
-    var actualMinutes = Math.max(1, Math.round((Date.now() - started) / 60000));
-    await stopTimer();
-    var r = await api('/api/tasks/' + taskId + '/complete', { method: 'POST' });
-    if (r.unlocked_tasks && r.unlocked_tasks.length) {
-      toast('已解锁: ' + r.unlocked_tasks.join('、'), 'suc');
-    }
-    await playCardAnim(taskId, 'is-completing is-evaporating is-fly-to-pile', 500);
-    enableGachaBtn();
-    _completedToday++;
-    if (_completedToday === 1) _completedStreak = 1;
-    else _completedStreak++;
-    if (_completedStreak >= 5) showEncouragement('streak');
-    else showEncouragement('complete_encourage');
-    loadTasks();
-    refreshGachaStats();
-  } catch (e) {
-    toast(e.message || '操作失败', 'err');
-  }
-}
-
-async function pauseTimer() {
-  if (!timerActiveSession || !timerActiveSession.id) {
-    toast('当前无进行中的计时', 'err');
-    return;
-  }
-  try {
-    var r = await api('/api/timer/pause', { method: 'POST' });
-    if (r.status === 'paused') {
-      timerActiveSession.status = 'paused';
-      timerActiveSession.paused_at = new Date().toISOString();
-      updateTimerDisplay();
-      updateGachaCardButtons(timerActiveSession.task_id);
-      toast('计时已暂停', 'suc');
-    }
-  } catch (e) {
-    toast(e.message || '暂停失败', 'err');
-  }
-}
-
-async function resumeTimer() {
-  if (!timerActiveSession || !timerActiveSession.id) {
-    toast('当前无暂停的计时', 'err');
-    return;
-  }
-  try {
-    var r = await api('/api/timer/resume', { method: 'POST' });
-    if (r.status === 'resumed') {
-      timerActiveSession.status = 'running';
-      timerActiveSession.paused_duration = r.paused_duration || 0;
-      timerActiveSession.paused_at = null;
-      updateTimerDisplay();
-      updateGachaCardButtons(timerActiveSession.task_id);
-      toast('计时已恢复', 'suc');
-    }
-  } catch (e) {
-    toast(e.message || '恢复失败', 'err');
-  }
-}
-
-function showTimeoutModal() { showModal('timerTimeoutModal'); }
-
-async function handleTimeoutComplete() {
-  closeModal('timerTimeoutModal');
-  await resumeTimer();
-  await completeTimerFromGacha();
-}
-
-function handleTimeoutContinue() {
-  closeModal('timerTimeoutModal');
-  resumeTimer();
-  toast('计时继续', 'inf');
-}
-
-function handleTimeoutAbandon() {
-  closeModal('timerTimeoutModal');
-  var sid = timerActiveSession ? timerActiveSession.id : null;
-  if (sid) {
-    api('/api/timer/complete', {
-      method: 'POST',
-      body: JSON.stringify({ session_id: sid, result: 'abandoned', actual_minutes: 0 })
-    });
-  }
-  timerActiveSession = null;
-  updateTimerDisplay();
-  enableGachaBtn();
-  var r = document.getElementById('gachaResult');
-  if (r) r.innerHTML = '';
-  toast('任务已放弃', 'inf');
-}
-
-async function completeTimerFromGacha() {
-  if (!timerActiveSession || !timerActiveSession.id) {
-    toast('当前无进行中的计时', 'err');
-    return;
-  }
-  await stopTimer();
-  updateTimerDisplay();
 }
 
 async function loadSleepInfo() {
@@ -2606,11 +2521,6 @@ async function loadWeeklyEnergyTable() {
   }
 }
 
-async function loadSleepPanel() {
-  await loadSleepInfo();
-  await loadWeeklyEnergyTable();
-}
-
 // ============ INIT ============
 document.getElementById('promptRefreshBtn').addEventListener('click', loadPromptList);
 document.getElementById('promptCopyBtn').addEventListener('click', copyPromptContent);
@@ -2648,6 +2558,7 @@ document.querySelectorAll('.agent-ro-tab').forEach(function (btn) {
 });
 document.getElementById('sleepSaveBtn').addEventListener('click', saveSleep);
 
+// ============ 启动加载 ============
 loadTasks();
 loadTags();
 refreshGachaStats();
@@ -2655,86 +2566,5 @@ renderSchedule();
 loadSleepPanel();
 loadStateAssessmentPanel();
 loadTimerPanel();
-
-(function initCardSizeSlider() {
-  var slider = document.getElementById('cardSizeSlider');
-  var val = document.getElementById('cardSizeVal');
-  if (!slider || !val) return;
-  var saved = localStorage.getItem('cardSize') || '440';
-  slider.value = saved;
-  applyScale(parseInt(saved));
-  val.textContent = Math.round(parseInt(saved) / 440 * 100) + '%';
-  slider.addEventListener('input', function () {
-    applyScale(parseInt(slider.value));
-    val.textContent = Math.round(parseInt(slider.value) / 440 * 100) + '%';
-    localStorage.setItem('cardSize', slider.value);
-  });
-})();
-
-function applyScale(widthVal) {
-  var scale = Math.max(0.7, Math.min(2.0, widthVal / 440));
-  document.querySelectorAll('.drawn-card').forEach(function (c) {
-    c.style.setProperty('--card-scale', scale.toFixed(2));
-  });
-}
-  slider.addEventListener('change', function () {
-    cloneCardEnlarged(0); // 释放引用的克隆，让原始卡片显示
-  });
-})();
-
-function cloneCardEnlarged(scale) {
-  var exist = document.getElementById('cardCloneOverlay');
-  if (exist) exist.remove();
-  if (scale <= 0 || scale >= 1.8) return; // scale 太大不克隆
-  
-  var orig = document.querySelector('.drawn-card');
-  if (!orig) return;
-  var rect = orig.getBoundingClientRect();
-  var baseW = 440, baseF = 24; // title font-size
- 
-  var overlay = document.createElement('div');
-  overlay.id = 'cardCloneOverlay';
-  overlay.style.cssText =
-    'position:fixed;left:' + rect.left + 'px;top:' + rect.top + 'px;' +
-    'width:' + Math.round(baseW * scale) + 'px;' +
-    'z-index:9999;pointer-events:none;' +
-    'transform:translate(-' + Math.round((baseW * scale - rect.width) / 2) + 'px, 0);' +
-    'transition:opacity .15s;opacity:.85';
-  overlay.innerHTML = orig.outerHTML;
-  var clonedCard = overlay.querySelector('.drawn-card');
-  if (clonedCard) {
-    clonedCard.style.width = Math.round(baseW * scale) + 'px';
-    clonedCard.style.maxWidth = Math.round(baseW * scale) + 'px';
-    clonedCard.style.height = Math.round(baseW * scale * 4/3) + 'px';
-    clonedCard.style.transform = 'none';
-    clonedCard.style.animation = 'none';
-    clonedCard.style.aspectRatio = 'auto';
-    clonedCard.style.margin = '0';
-    // Enlarge fonts
-    var title = clonedCard.querySelector('.task-card-title');
-    if (title) title.style.fontSize = Math.round(baseF * scale) + 'px';
-    var desc = clonedCard.querySelector('.task-card-desc');
-    if (desc) desc.style.fontSize = Math.round(14 * scale) + 'px';
-    var meta = clonedCard.querySelector('.task-card-meta');
-    if (meta) meta.style.fontSize = Math.round(12 * scale) + 'px';
-    // Enlarge buttons
-    clonedCard.querySelectorAll('.btn').forEach(function(b) {
-      b.style.fontSize = Math.round(13 * scale) + 'px';
-      b.style.padding = Math.round(4 * scale) + 'px ' + Math.round(10 * scale) + 'px';
-    });
-    // Remove button onclick (clone is decorative)
-    clonedCard.querySelectorAll('.btn').forEach(function(b) { b.removeAttribute('onclick'); });
-  }
-  // Hide original actions
-  var footer = orig.querySelector('.task-card-footer');
-  if (footer) footer.style.opacity = '0.3';
-  document.getElementById('cardSizeControl').appendChild(overlay);
-}
-
-// Restore when slider interaction ends
-document.getElementById('cardSizeControl').addEventListener('mouseleave', function () {
-  var clone = document.getElementById('cardCloneOverlay');
-  if (clone) clone.remove();
-  var footer = document.querySelector('.drawn-card .task-card-footer');
-  if (footer) footer.style.opacity = '';
-});
+initTimerDock();
+updateDiscardPileVisual();

@@ -1,7 +1,6 @@
 """直接导入任务 JSON 文件到数据库"""
-import os
 import sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, r"D:\Axelit\工作\trae\超级自动化学习工具")
 
 from src.tasks.models.database import Database
 from src.tasks.services.ai_import_processor import AIImportProcessor
