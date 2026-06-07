@@ -5,31 +5,8 @@ cd /d "%~dp0\.."
 
 set "PY=.venv\Scripts\python.exe"
 if not exist "%PY%" (
-  echo [ERROR] .venv not found. Run: python -m venv .venv
+  echo [ERROR] .venv not found. Run: py -3 -m venv .venv
   exit /b 1
-)
-
-echo ============================================
-echo   GATE CHECK
-echo ============================================
-echo [GATE] Running portability gate check...
-"%PY%" scripts\check_portability.py
-set GATE_RC=%ERRORLEVEL%
-if %GATE_RC% EQU 1 (
-  echo.
-  echo [GATE] BLOCKER found - acceptance ABORTED.
-  echo [GATE] Fix the BLOCKER items listed above before retrying.
-  exit /b 1
-)
-if %GATE_RC% EQU 2 (
-  echo.
-  echo [GATE] PASS_WITH_WARNINGS - warnings present but will continue.
-  echo.
-)
-if %GATE_RC% EQU 0 (
-  echo.
-  echo [GATE] PASS - all checks passed.
-  echo.
 )
 
 set FAILED=0

@@ -1,36 +1,49 @@
-# Python
-__pycache__/
-*.py[cod]
-*.so
-.Python
+# ============================
+# 敏感配置（含 API Key 等）
+# ============================
+config/config.json
+opencode.json
+.env
 
-# Virtual Environment
+# ============================
+# Python 运行时环境
+# ============================
 .venv/
-venv/
+.python/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
 
-# IDE
+# ============================
+# 数据库与用户数据（禁止提交）
+# ============================
+data/task_publisher.db
+data/task_publisher*.db
+data/backup/
+data/ai_imports/
+ai_workspace/
+
+# ============================
+# IDE 与系统临时文件
+# ============================
+.run/
+_port.txt
 .vscode/
 .idea/
-
-# OS
-Thumbs.db
+*.swp
+*.swo
+*~
 .DS_Store
+Thumbs.db
 
-# Logs
-*.log
-
-# Local config with secrets
-config/config.json
-
-# Database files (large, contain user data)
-data/*.db
-data/*.db-journal
-
-# Temporary files
-*.tmp
-*.bak
+# ============================
+# 临时测试文件
+# ============================
 *.corrupted
-
-# Local runtime files
-.run/
-.venv_bak/
+TODO.md

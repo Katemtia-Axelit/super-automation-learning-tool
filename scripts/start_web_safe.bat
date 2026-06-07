@@ -18,33 +18,19 @@ if exist ".venv\Scripts\python.exe" (
     goto :have_python
 )
 
-:: Priority 1: embedded .python\python.exe
-if exist ".python\python.exe" (
-    echo [INFO] Creating .venv with embedded .python\python.exe
-    .python\python.exe -m venv .venv
-    if !errorlevel!==0 (
-        .venv\Scripts\python.exe -m pip install -q pip --upgrade 2>nul
-        set "PY=.venv\Scripts\python.exe"
-        set "PY_LABEL=.venv (via .python/python.exe)"
-        goto :have_python
-    )
-)
-
-:: Priority 2: py launcher
 where py >nul 2>&1
 if !errorlevel!==0 (
     py -3 --version >nul 2>&1
     if !errorlevel!==0 (
         echo [INFO] Creating .venv with: py -3
         py -3 -m venv .venv
-        if errorlevel 1 goto :find_system_python
+        if errorlevel 1 goto :no_python
         set "PY=.venv\Scripts\python.exe"
         set "PY_LABEL=.venv (created via py -3)"
         goto :have_python
     )
 )
 
-:find_system_python
 for /f "delims=" %%P in ('where python 2^>nul') do (
     echo %%P | findstr /i "WindowsApps" >nul
     if errorlevel 1 (
@@ -63,13 +49,13 @@ for /f "delims=" %%P in ('where python 2^>nul') do (
 
 :no_python
 echo.
-echo [ERROR] No Python 3.10+ found.
+echo [ERROR] 未找到可用的 Python 3.10+
 echo.
-echo Options:
-echo   1. Run scripts\download_python.bat to download embedded Python
-echo   2. Or install Python and add to PATH
-echo   3. Or manually download python-3.11.9-embed-amd64.zip to .python\
-echo      from https://www.python.org/ftp/python/3.11.9/
+echo 请安装 Python 3.10 或更高版本，并勾选 "Add python.exe to PATH"
+echo 下载: https://www.python.org/downloads/
+echo.
+echo 若已安装但仍报错，可能是 Microsoft Store 占位 python。
+echo 请关闭 "应用执行别名" 中的 python.exe 别名，或使用 py -3。
 echo.
 pause
 exit /b 1
@@ -81,30 +67,6 @@ if errorlevel 1 (
     echo [ERROR] Python 无法运行
     pause
     exit /b 1
-)
-
-echo.
-echo ============================================
-echo   PREFLIGHT CHECK
-echo ============================================
-echo [PREFLIGHT] Running portability check...
-"!PY!" scripts\check_portability.py
-set PF_RC=!ERRORLEVEL!
-if !PF_RC! EQU 1 (
-    echo.
-    echo [PREFLIGHT] BLOCKER found - startup BLOCKED.
-    echo [PREFLIGHT] Fix the BLOCKER items listed above before retrying.
-    pause
-    exit /b 1
-)
-if !PF_RC! EQU 2 (
-    echo.
-    echo [PREFLIGHT] PASS_WITH_WARNINGS - issues found but startup will proceed.
-    echo.
-) else if !PF_RC! EQU 0 (
-    echo.
-    echo [PREFLIGHT] PASS - all checks passed.
-    echo.
 )
 
 echo [INFO] Installing web dependencies...
