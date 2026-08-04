@@ -1963,18 +1963,36 @@ def api_get_tags():
 
 @app.route('/api/tags', methods=['POST'])
 def api_create_tag():
+    from flask import Response
     data = request.json
     name = data.get('name', '').strip()
     if not name:
         return jsonify({'error': 'Tag name required'}), 400
     conn = get_db_connection()
     try:
-        conn.execute('INSERT OR IGNORE INTO tags (name) VALUES (?)', (name,))
-        conn.commit()
         cur = conn.cursor()
-        cur.execute('SELECT id, name FROM tags WHERE name = ?', (name,))
-        row = cur.fetchone()
-        return jsonify(dict(row)) if row else jsonify({'error': 'Failed to create'}), 500
+        try:
+            cur.execute('INSERT INTO tags (name) VALUES (?)', (name,))
+            conn.commit()
+            tag_id = cur.lastrowid
+            return Response(
+                json.dumps({'id': tag_id, 'name': name}),
+                status=201,
+                mimetype='application/json'
+            )
+        except sqlite3.IntegrityError:
+            conn.rollback()
+            cur.execute('SELECT id, name FROM tags WHERE name = ?', (name,))
+            row = cur.fetchone()
+            if row:
+                return Response(
+                    json.dumps({'id': row['id'], 'name': row['name']}),
+                    status=200,
+                    mimetype='application/json'
+                )
+            return jsonify({'error': 'Failed to create'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
 
