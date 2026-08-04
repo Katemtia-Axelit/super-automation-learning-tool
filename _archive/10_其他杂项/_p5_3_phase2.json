@@ -1,0 +1,298 @@
+[
+  {
+    "subject": "大学物理",
+    "file": "22_静电场与电场强度.md",
+    "size": 4808,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "大学物理",
+    "file": "23_静电场的环路定理与电势.md",
+    "size": 3275,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "大学物理",
+    "file": "24_电通量与高斯定理.md",
+    "size": 4556,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "大学物理",
+    "file": "01_质点运动描述的物理量.md",
+    "size": 5738,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 2,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "大学物理",
+    "file": "26_毕奥-萨伐尔定律与磁场典型模型.md",
+    "size": 4276,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "高等数学",
+    "file": "01-01_函数的概念与基本要素.md",
+    "size": 4085,
+    "has_example": true,
+    "source_count": 2,
+    "first_source": [
+      "2023-2024学年高等数学AI期末考试·填空题第2题",
+      "期末"
+    ],
+    "ppt_count": 0,
+    "class_count": 1,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "高等数学",
+    "file": "01-04_极限存在准则与重要极限.md",
+    "size": 2975,
+    "has_example": true,
+    "source_count": 2,
+    "first_source": [
+      "2023-2024学年高等数学AI期末考试·计算题第5题",
+      "期末"
+    ],
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "高等数学",
+    "file": "06-01_向量的数量积.md",
+    "size": 5196,
+    "has_example": true,
+    "source_count": 2,
+    "first_source": [
+      "2022-2023学年高等数学AII期末考试·填空题第1题",
+      "期末"
+    ],
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "高等数学",
+    "file": "11-04_全微分方程判定与求解.md",
+    "size": 3985,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "高等数学",
+    "file": "10-05_泰勒级数与函数展开.md",
+    "size": 3920,
+    "has_example": true,
+    "source_count": 1,
+    "first_source": [
+      "2022-2023学年高等数学AII期末考试·计算题第7题",
+      "期末"
+    ],
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "高等数学",
+    "file": "09-02_格林公式及其应用.md",
+    "size": 4783,
+    "has_example": true,
+    "source_count": 2,
+    "first_source": [
+      "2024-2025学年高等数学AII期末考试·填空题第4题",
+      "期末"
+    ],
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "线性代数",
+    "file": "01_线性相关与无关判定.md",
+    "size": 7964,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 5,
+    "teacher_quote_count": 1
+  },
+  {
+    "subject": "线性代数",
+    "file": "02_线性空间与基底维数.md",
+    "size": 9965,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 8,
+    "teacher_quote_count": 2
+  },
+  {
+    "subject": "线性代数",
+    "file": "07_行列式展开与逆矩阵.md",
+    "size": 5405,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 1,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "线性代数",
+    "file": "08_特征值与特征向量基础.md",
+    "size": 5133,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "线性代数",
+    "file": "12_相似矩阵与对角化.md",
+    "size": 4276,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "电子技术",
+    "file": "01_半导体基础与PN结.md",
+    "size": 5365,
+    "has_example": false,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 10,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "电子技术",
+    "file": "02_二极管特性与等效模型.md",
+    "size": 8192,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 6,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "电子技术",
+    "file": "13_集成运放与负反馈.md",
+    "size": 7160,
+    "has_example": false,
+    "source_count": 10,
+    "first_source": [
+      "来源：第4章 PPT slide_003——运放的电路符号及输入/输出结构*",
+      ""
+    ],
+    "ppt_count": 40,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "电子技术",
+    "file": "14_直流稳压电源.md",
+    "size": 7890,
+    "has_example": false,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 32,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "电子技术",
+    "file": "08_布尔代数与逻辑门电路.md",
+    "size": 5581,
+    "has_example": false,
+    "source_count": 4,
+    "first_source": [
+      "来源：第7章 PPT——模拟信号（连续时间、连续幅值）vs 数字信号（离散时间、离散幅值，高电平=1，低电平=0）*",
+      ""
+    ],
+    "ppt_count": 8,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "计算机",
+    "file": "04_计算机硬件组成与总线.md",
+    "size": 6055,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 3,
+    "teacher_quote_count": 3
+  },
+  {
+    "subject": "计算机",
+    "file": "06_数值数据的编码_原码反码补码.md",
+    "size": 5089,
+    "has_example": true,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 14,
+    "teacher_quote_count": 8
+  },
+  {
+    "subject": "计算机",
+    "file": "08_数据存储与单位.md",
+    "size": 4201,
+    "has_example": false,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 0,
+    "teacher_quote_count": 0
+  },
+  {
+    "subject": "计算机",
+    "file": "11_程序的编译链接与符号解析.md",
+    "size": 6343,
+    "has_example": false,
+    "source_count": 0,
+    "first_source": null,
+    "ppt_count": 0,
+    "class_count": 7,
+    "teacher_quote_count": 2
+  }
+]

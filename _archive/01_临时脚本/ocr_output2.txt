@@ -1,0 +1,19 @@
+﻿powershell : 所在位置 D:\Axelit\工作\trae\超级自动化学习工具\ocr_windows.ps1:11 字符: 17
+所在位置 行:1 字符: 5
++ & { powershell -ExecutionPolicy Bypass -File ocr_windows.ps1 2>&1 | O ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (所在位置 D:\Axelit\...s.ps1:11 字符: 17 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
++     Write-Host "OCR engine creation failed"
++                 ~~~
+表达式或语句中包含意外的标记“OCR”。
+所在位置 D:\Axelit\工作\trae\超级自动化学习工具\ocr_windows.ps1:39 字符: 18
++ Write-Host "Done!"
++                  ~
+字符串缺少终止符: "。
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordEx 
+   ception
+    + FullyQualifiedErrorId : UnexpectedToken
+ 

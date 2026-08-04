@@ -70,7 +70,8 @@ class Task:
                  next_available_at=None, last_drawn_at=None, draw_count_today=0,
                  min_push_time="20:00", in_discard_pile=False, completed_count=0,
                  tags=None, completed=False, difficulty=None, created_at=None,
-                 updated_at=None, prerequisite_ids=None, is_unlocked=True):
+                 updated_at=None, prerequisite_ids=None, is_unlocked=True,
+                 linked_note_path=None):
         self.id = id
         self.name = name
         self.category = category
@@ -104,6 +105,7 @@ class Task:
         self.updated_at = updated_at or datetime.now().isoformat()
         self.prerequisite_ids = prerequisite_ids or []
         self.is_unlocked = is_unlocked
+        self.linked_note_path = linked_note_path
 
     def to_dict(self):
         return {
@@ -139,7 +141,8 @@ class Task:
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             "prerequisite_ids": self.prerequisite_ids,
-            "is_unlocked": self.is_unlocked
+            "is_unlocked": self.is_unlocked,
+            "linked_note_path": self.linked_note_path
         }
 
     @classmethod
@@ -230,7 +233,8 @@ class Task:
             created_at=safe_get(row, "created_at"),
             updated_at=safe_get(row, "updated_at"),
             prerequisite_ids=prereq_ids,
-            is_unlocked=bool(safe_get(row, "is_unlocked", True))
+            is_unlocked=bool(safe_get(row, "is_unlocked", True)),
+            linked_note_path=safe_get(row, "linked_note_path")
         )
 
 class GachaPool(Enum):
@@ -386,15 +390,15 @@ def add_task(task):
                 estimated_time, preferred_time, deadline, 
                 resistance, energy_required, rarity, priority,
                 is_daily, repeat_type, created_at, updated_at,
-                prerequisite_ids, is_unlocked
+                prerequisite_ids, is_unlocked, linked_note_path
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             task.name, task.category, "normal", task.description,
             task.estimated_time, task.preferred_time, task.deadline,
             task.resistance, task.energy_required, task.rarity, task.priority,
             int(task.is_daily), task.repeat_type, now, now,
-            prereq_json, is_unlocked
+            prereq_json, is_unlocked, task.linked_note_path
         ))
         conn.commit()
         task_id = cursor.lastrowid
@@ -423,6 +427,7 @@ def update_task(task):
                 is_daily=?, completed=?, repeat_type=?, task_profile=?,
                 parent_task_id=?, group_id=?, min_push_time=?, difficulty=?,
                 prerequisite_ids=?, is_unlocked=?,
+                linked_note_path=?,
                 updated_at=CURRENT_TIMESTAMP
             WHERE id = ?
         ''', (
@@ -449,6 +454,7 @@ def update_task(task):
             task.difficulty,
             json.dumps(prereq_ids),
             int(is_unlocked),
+            task.linked_note_path,
             task.id
         ))
         conn.commit()
@@ -1145,21 +1151,41 @@ def get_available_tasks_for_gacha():
     finally:
         conn.close()
 
-def draw_single(tasks, pool, energy="medium", session_context=None):
+def draw_single(tasks, pool, energy="medium", session_context=None, preferred_tag=None, include_category=None, exclude_category=None):
     if session_context is None:
         session_context = GachaSessionContext()
 
     time_ranges = {GachaPool.FRAGMENT: (0, 15), GachaPool.TOMATO: (15, 45), GachaPool.DEEP: (45, 999)}
     lo, hi = time_ranges.get(pool, (0, 999))
 
-    matching = [t for t in tasks if lo <= (t.get('estimated_time', 0) or 0) < hi]
-    if not matching:
-        matching = tasks  # fallback: allow all
+    # 1. 按时间范围过滤
+    pool_tasks = [t for t in tasks if lo <= (t.get('estimated_time', 0) or 0) < hi]
+    if not pool_tasks:
+        pool_tasks = tasks  # fallback: allow all
 
-    if not matching:
+    # 2. 按 preferred_tag 优先过滤
+    if preferred_tag:
+        tagged = [t for t in pool_tasks if preferred_tag in (t.get('tags') or [])]
+        if tagged:
+            pool_tasks = tagged
+        # 无匹配标签 → 回退到全卡池（不强制报错）
+
+    # 3. 按 include_category 过滤（"继续抽同科"）
+    if include_category:
+        same_cat = [t for t in pool_tasks if t.get('category') == include_category]
+        if same_cat:
+            pool_tasks = same_cat
+
+    # 4. 按 exclude_category 过滤（"换换口味"）
+    if exclude_category:
+        pool_tasks = [t for t in pool_tasks if t.get('category') != exclude_category]
+        if not pool_tasks:
+            pool_tasks = [t for t in tasks if t.get('category') != exclude_category]
+
+    if not pool_tasks:
         return None
 
-    task_objects = [Task.from_dict(t) if isinstance(t, dict) else t for t in matching]
+    task_objects = [Task.from_dict(t) if isinstance(t, dict) else t for t in pool_tasks]
 
     selected = _weighted_pick(task_objects, energy, session_context)
     if not selected:
@@ -1312,7 +1338,8 @@ def api_create_task():
         is_daily=data.get('is_daily', False),
         repeat_type=data.get('repeat_type', 'none'),
         tags=data.get('tags', []),
-        prerequisite_ids=prereq_ids
+        prerequisite_ids=prereq_ids,
+        linked_note_path=data.get('linked_note_path')
     )
     task_id = add_task(task)
     return jsonify({'id': task_id, 'message': 'Task created successfully'}), 201
@@ -1366,6 +1393,8 @@ def api_update_task(task_id):
         task.tags = data['tags']
     if 'prerequisite_ids' in data:
         task.prerequisite_ids = new_prereqs
+    if 'linked_note_path' in data:
+        task.linked_note_path = data['linked_note_path']
 
     update_task(task)
     return jsonify({'message': 'Task updated successfully'})
@@ -1445,6 +1474,7 @@ def api_draw_task():
     data = request.json
     pool_id = data.get('pool', 'fragment')
     energy = data.get('energy', 'medium')
+    preferred_tag = data.get('preferred_tag')  # Optional[str]: 优先标签名
 
     try:
         pool = GachaPool(pool_id)
@@ -1453,7 +1483,38 @@ def api_draw_task():
 
     tasks = get_available_tasks_for_gacha()
     session_context = GachaSessionContext()
-    result = draw_single(tasks, pool, energy, session_context)
+    result = draw_single(tasks, pool, energy, session_context, preferred_tag=preferred_tag)
+
+    if result and result.task:
+        return jsonify({
+            'task': result.task.to_dict(),
+            'pool': pool.value,
+            'can_replace': result.can_replace,
+            'is_replacement': result.is_replacement
+        })
+    return jsonify({'error': 'No tasks available'}), 404
+
+@app.route('/api/gacha/care-draw', methods=['POST'])
+def api_care_gacha_draw():
+    """关怀模式抽卡：支持 include_category（继续抽同科）或 exclude_category（换口味）"""
+    data = request.json
+    pool_id = data.get('pool', 'fragment')
+    energy = data.get('energy', 'medium')
+    preferred_tag = data.get('preferred_tag')
+    include_category = data.get('include_category')   # 只抽此 category
+    exclude_category = data.get('exclude_category')   # 排除此 category
+
+    try:
+        pool = GachaPool(pool_id)
+    except ValueError:
+        return jsonify({'error': 'Invalid pool'}), 400
+
+    tasks = get_available_tasks_for_gacha()
+    session_context = GachaSessionContext()
+    result = draw_single(tasks, pool, energy, session_context,
+                        preferred_tag=preferred_tag,
+                        include_category=include_category,
+                        exclude_category=exclude_category)
 
     if result and result.task:
         return jsonify({
@@ -2375,6 +2436,8 @@ def api_gacha_replace():
     reason = data.get('reason', 'other')
     pool_id = data.get('pool', 'fragment')
     energy = data.get('energy', 'medium')
+    preferred_tag = data.get('preferred_tag')
+    exclude_category = data.get('exclude_category')
 
     conn = get_db_connection()
     try:
@@ -2396,7 +2459,8 @@ def api_gacha_replace():
         return jsonify({'error': 'Invalid pool'}), 400
     session_context = GachaSessionContext()
     session_context.use_replace(task_id)
-    result = draw_single(tasks, pool, energy, session_context)
+    result = draw_single(tasks, pool, energy, session_context,
+                         preferred_tag=preferred_tag, exclude_category=exclude_category)
     if result and result.task:
         return jsonify({'task': result.task.to_dict(), 'replaced': task_id, 'reason': reason})
     return jsonify({'error': 'No replacement available'}), 404
@@ -2465,7 +2529,14 @@ def migrate_dependency_data():
 @app.route('/')
 def serve_index():
     from flask import send_file, make_response
-    index_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'index.html')
+    project_root = os.path.dirname(os.path.dirname(__file__))
+    # 兼容两处可能位置：根目录（标准）与 src/（P3.1 误移后）
+    for candidate in ('index.html', os.path.join('src', 'index.html')):
+        index_path = os.path.join(project_root, candidate)
+        if os.path.isfile(index_path):
+            break
+    else:
+        return make_response('index.html not found in project root or src/', 500)
     response = make_response(send_file(index_path))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     return response
