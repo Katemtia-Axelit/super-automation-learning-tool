@@ -158,6 +158,20 @@ function getTaskFeedbackContext(taskId) {
 
 // ============ 页面切换 ============
 function showPage(id) {
+  // 离开页面时清理抽卡动画残留（P0-3 修复）
+  if (id !== 'gacha') {
+    var flyLayer = document.getElementById('cardFlyLayer');
+    if (flyLayer) flyLayer.innerHTML = '';
+    var deck = document.getElementById('gachaDeck');
+    if (deck) {
+      deck.classList.remove('is-drawing');
+      deck.classList.remove('is-revealing');
+    }
+    if (window._inlineTimerHandle) {
+      clearInterval(window._inlineTimerHandle);
+      window._inlineTimerHandle = null;
+    }
+  }
   document.querySelectorAll('.page').forEach(function (p) { p.classList.remove('active'); });
   document.getElementById('page-' + id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(function (b) { b.classList.remove('active'); });
@@ -475,21 +489,28 @@ document.getElementById('timerDockStopBtn').addEventListener('click', function (
 });
 
 async function stopTimerFromDock(sessionId) {
-  if (!confirm('确定提前结束此任务？')) return;
+  if (!confirm('确定提前完成此任务？')) return;
+  var session = timerDockSession;
   try {
-    var started = new Date(timerDockSession.started_at).getTime();
-    var actualMin = Math.max(1, Math.round((Date.now() - started) / 60000));
-    await api('/api/timer/complete', {
-      method: 'POST',
-      body: JSON.stringify({ session_id: sessionId, actual_minutes: actualMin, result: 'abandoned', reason: 'dock_stop' })
-    });
+    if (session && session.id) {
+      var started = new Date(session.started_at).getTime();
+      var actualMin = Math.max(1, Math.round((Date.now() - started) / 60000));
+      await api('/api/timer/complete', {
+        method: 'POST',
+        body: JSON.stringify({ session_id: session.id, actual_minutes: actualMin, result: 'completed', reason: 'early_finish' })
+      });
+    }
     timerDockSession = null;
     timerDockPaused = false;
     timerDockPausedElapsed = 0;
     updateTimerDockDisplay();
-    toast('计时已结束', 'suc');
-    loadTasks();
-    refreshGachaStats();
+    if (session && session.task_id) {
+      await completeWithFeedback(session.task_id, { finishEarly: true });
+    } else {
+      loadTasks();
+      refreshGachaStats();
+    }
+    toast('已标记提前完成', 'suc');
   } catch (e) {
     toast(e.message || '停止失败', 'err');
   }
@@ -510,8 +531,16 @@ async function drawGacha() {
 
   var result = document.getElementById('gachaResult');
   var deck = document.getElementById('gachaDeck');
-  result.innerHTML = '';
-  if (deck) deck.classList.add('is-drawing');
+  var flyLayer = document.getElementById('cardFlyLayer');
+  // 清掉上一次的飞行卡片残留，防止快速二次抽卡时动画叠层（P0-3）
+  if (flyLayer) flyLayer.innerHTML = '';
+  // 清掉抽卡结果区，避免新旧卡牌同时显示
+  if (result) result.innerHTML = '';
+  if (deck) {
+    deck.classList.remove('is-drawing');
+    deck.classList.remove('is-revealing');
+    deck.classList.add('is-drawing');
+  }
 
   try {
     var r = await api('/api/gacha/draw', {
@@ -826,7 +855,10 @@ async function doReplace() {
 }
 
 // ============ 完成任务（自动反馈）============
-async function completeWithFeedback(id) {
+// opts.finishEarly = true 表示"提前完成"（计时器未到计划时间），用 event_type=finish_early 上报
+async function completeWithFeedback(id, opts) {
+  opts = opts || {};
+  var finishEarly = !!opts.finishEarly;
   var task = allTasks.find(function (x) { return x.id === id; });
   if (task && !task.is_unlocked) {
     toast(prereqHint(task) || '任务被前置依赖阻塞', 'err');
@@ -848,9 +880,11 @@ async function completeWithFeedback(id) {
     // 先将任务放入弃牌堆，再标记完成
     await api('/api/tasks/' + id + '/move-to-discard', { method: 'POST' });
 
+    var feedbackBody = { energy_after: 5, mood_after: 3 };
+    if (finishEarly) feedbackBody.event_type = 'finish_early';
     api('/api/tasks/' + id + '/feedback', {
       method: 'POST',
-      body: JSON.stringify({ energy_after: 5, mood_after: 3 })
+      body: JSON.stringify(feedbackBody)
     }).catch(function () { });
 
     loadTasks();
