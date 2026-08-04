@@ -590,11 +590,14 @@ function renderDrawnCard(task, idx) {
   var theme = resolveTaskCardTheme(task);
   var urgent = task.deadline && new Date(task.deadline) > new Date() &&
     (new Date(task.deadline) - new Date()) / 86400000 < 1;
-  var isOneOff = task.repeat_type === 'single';
+  var isOneOff = task.repeat_type === 'none';
 
-  // 抽卡后的操作按钮
+  // 抽卡后的操作按钮（noteBtn 内含文件路径，必须双重转义：单引号 + HTML 实体）
+  var safeNotePath = task.linked_note_path
+    ? task.linked_note_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;')
+    : '';
   var noteBtn = task.linked_note_path
-    ? '<button class="btn" onclick="openNoteFromCard(\'' + task.linked_note_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" style="margin-bottom:6px;width:100%;background:rgba(88,166,255,0.15);border-color:rgba(88,166,255,0.4);color:#7ab8ff"><i class="fa-brands fa-markdown"></i> 在Obsidian中打开</button>'
+    ? '<button class="btn" onclick="openNoteFromCard(\'' + safeNotePath + '\')" style="margin-bottom:6px;width:100%;background:rgba(88,166,255,0.15);border-color:rgba(88,166,255,0.4);color:#7ab8ff"><i class="fa-brands fa-markdown"></i> 在Obsidian中打开</button>'
     : '';
   var actions =
     '<button class="btn pri" onclick="startTask(' + task.id + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-play"></i> 开始任务</button>' +
@@ -613,25 +616,24 @@ function renderDrawnCard(task, idx) {
   // 横向布局：左侧任务信息，右侧操作按钮
   var corner = { study: '学习', exercise: '运动', work: '工作', life: '生活', other: '其他' }[task.category] || '任务';
   var repeatLbl = { none: '单次', daily: '每日', weekly: '每周' }[task.repeat_type] || '单次';
-  var tagsHtml = (task.tags || []).map(function(x) { return '<span class="badge bg-gold">' + x + '</span>'; }).join('');
-  var priority = task.priority || '?';
-  var mins = task.estimated_time || '?';
-  var desc = (task.description || '').substring(0, 150);
+  var safeName = escapeHtml(task.name);
+  var safeDesc = escapeHtml((task.description || '').substring(0, 150));
+  var safeTagsHtml = (task.tags || []).map(function(x) { return '<span class="badge bg-gold">' + escapeHtml(x) + '</span>'; }).join('');
 
   var leftHtml =
     '<div class="task-card-header" style="width:100%;border-bottom:1px solid rgba(255,255,255,0.06);padding:8px 10px;background:linear-gradient(180deg,rgba(0,0,0,0.18),transparent)">' +
     '<div style="display:flex;align-items:center;gap:8px">' +
     '<span style="font-size:.68rem;padding:2px 8px;border-radius:8px;background:rgba(0,0,0,0.28);border:1px solid var(--card-border);color:var(--card-accent);font-family:var(--font-heading)">' + corner + '</span>' +
-    '<span style="font-size:.68rem;padding:2px 8px;border-radius:8px;background:rgba(0,0,0,0.28);border:1px solid var(--card-border);color:var(--card-accent);font-family:var(--font-heading)">P' + priority + '</span>' +
+    '<span style="font-size:.68rem;padding:2px 8px;border-radius:8px;background:rgba(0,0,0,0.28);border:1px solid var(--card-border);color:var(--card-accent);font-family:var(--font-heading)">P' + (task.priority || '?') + '</span>' +
     '</div></div>' +
     '<div style="flex:1;padding:8px 10px;display:flex;flex-direction:column;justify-content:center;min-height:0">' +
-    '<div style="font-family:var(--font-heading);font-size:1.05rem;margin-bottom:6px;font-weight:600">' + task.name + '</div>' +
-    '<div style="font-size:.82rem;color:var(--text-secondary);margin-bottom:6px;line-height:1.4">' + desc + '</div>' +
+    '<div style="font-family:var(--font-heading);font-size:1.05rem;margin-bottom:6px;font-weight:600">' + safeName + '</div>' +
+    '<div style="font-size:.82rem;color:var(--text-secondary);margin-bottom:6px;line-height:1.4">' + safeDesc + '</div>' +
     '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
-    '<span style="font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:3px"><i class="fa-solid fa-clock" style="color:var(--gold);font-size:.7rem"></i>' + mins + '分</span>' +
+    '<span style="font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:3px"><i class="fa-solid fa-clock" style="color:var(--gold);font-size:.7rem"></i>' + (task.estimated_time || '?') + '分</span>' +
     '<span style="font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:3px"><i class="fa-solid fa-repeat" style="color:var(--gold);font-size:.7rem"></i>' + repeatLbl + '</span>' +
     '</div>' +
-    (tagsHtml ? '<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">' + tagsHtml + '</div>' : '') +
+    (safeTagsHtml ? '<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">' + safeTagsHtml + '</div>' : '') +
     '</div>';
 
   var rightHtml =
@@ -1135,10 +1137,11 @@ function filterByTag(id) {
 function renderTasks() {
   if (window._renderLock) { window._renderPending = true; return; }
   window._renderLock = true;
+  if (!allTasks) { window._renderLock = false; return; }
   var search = document.getElementById('taskSearch').value.toLowerCase();
   var filter = document.getElementById('taskFilter').value;
   var tasks = allTasks;
-  if (search) tasks = tasks.filter(function (t) { return t.name.toLowerCase().indexOf(search) >= 0; });
+  if (search) tasks = tasks.filter(function (t) { return (t.name || '').toLowerCase().indexOf(search) >= 0; });
   if (filter === 'unlocked') tasks = tasks.filter(function (t) { return !t.completed && t.is_unlocked !== false; });
   if (filter === 'all') { /* no extra filter */ }
   if (filter === 'daily') tasks = tasks.filter(function (t) { return t.repeat_type === 'daily'; });
@@ -2177,7 +2180,12 @@ function previewPromptDiff() {
 }
 
 function escapeHtml(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 async function confirmPromptSave() {
