@@ -282,8 +282,12 @@ class DrawResult:
         self.can_replace = can_replace
         self.is_replacement = is_replacement
 
+SQLITE_BUSY_TIMEOUT_MS = 30_000
+
+
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=SQLITE_BUSY_TIMEOUT_MS / 1000)
+    conn.execute(f'PRAGMA busy_timeout={SQLITE_BUSY_TIMEOUT_MS}')
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -3362,6 +3366,13 @@ def api_get_correlation():
     finally:
         conn.close()
 
+def configure_sqlite(conn):
+    journal_mode = conn.execute('PRAGMA journal_mode=WAL').fetchone()[0]
+    if str(journal_mode).lower() != 'wal':
+        raise RuntimeError(f'Failed to enable SQLite WAL mode: {journal_mode}')
+    print(f'[DB] journal_mode={journal_mode}, busy_timeout={SQLITE_BUSY_TIMEOUT_MS}ms')
+
+
 if __name__ == '__main__':
     port = CONFIG['server']['port']
     host = CONFIG['server']['host']
@@ -3371,6 +3382,7 @@ if __name__ == '__main__':
     migrate_dependency_data()
     conn = get_db_connection()
     try:
+        configure_sqlite(conn)
         ensure_task_dependency_schema(conn)
         ensure_schedule_schema(conn)
         ensure_timer_schema(conn)
