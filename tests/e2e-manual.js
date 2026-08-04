@@ -199,38 +199,144 @@ async function runTests() {
   await test('3.3 开始计时', async (page) => {
     await page.click('[data-page="tasks"]');
     await page.waitForTimeout(1500);
-    // 创建任务
+    // 若已有活动会话，先走 Dock 停止，避免 select 被禁用
+    const activeDock = await page.locator('#timerDockActive').isVisible().catch(() => false);
+    if (activeDock) {
+      page.once('dialog', d => d.accept());
+      await page.click('#timerDockStopBtn');
+      await page.waitForTimeout(2000);
+      // 关闭可能弹出的关怀弹窗
+      const careClose = page.locator('#careModal button, #careModal .btn').first();
+      if (await page.locator('#careModal:not(.hidden)').count().catch(() => 0)) {
+        await page.evaluate(() => {
+          const m = document.getElementById('careModal');
+          if (m) m.classList.add('hidden');
+        });
+      }
+      await page.waitForTimeout(500);
+    }
+
+    // 创建任务（唯一名称，避免后端重名 500）
     await page.click('button:has-text("新建任务")');
     await page.waitForSelector('#taskModal:not(.hidden)', { timeout: 5000 });
-    await page.fill('#tfName', '计时器E2E测试');
+    await page.fill('#tfName', '计时器E2E测试-' + Date.now());
     await page.fill('#tfTime', '30');
     await page.click('#taskModal button:has-text("保存")');
-    await page.waitForSelector('#taskModal.hidden', { timeout: 10000 });
+    // .hidden 为 display:none，不能用默认 visible 等待
+    await page.waitForFunction(() => {
+      const el = document.getElementById('taskModal');
+      return el && el.classList.contains('hidden');
+    }, { timeout: 10000 });
     await page.waitForTimeout(800);
 
     const sel = page.locator('#timerTaskSelect');
-    const opts = await sel.locator('option').count();
-    if (opts > 1) {
-      await sel.selectOption({ index: 1 });
-      await page.fill('#timerPlannedMin', '1');
-      await page.click('#timerStartBtn');
-      await page.waitForTimeout(2000);
-      const timerDisplay = page.locator('#timerElapsedDisplay');
-      assert(await timerDisplay.isVisible());
-      const time = await timerDisplay.textContent();
-      assert(time !== '00:00', `计时器应走动，当前: ${time}`);
-    }
+    await page.waitForFunction(() => {
+      const s = document.getElementById('timerTaskSelect');
+      return s && !s.disabled && s.options.length > 1;
+    }, { timeout: 10000 });
+    await sel.selectOption({ index: 1 });
+    await page.fill('#timerPlannedMin', '1');
+    await page.click('#timerStartBtn');
+    await page.waitForTimeout(2000);
+    const timerDisplay = page.locator('#timerElapsedDisplay');
+    assert(await timerDisplay.isVisible());
+    const time = await timerDisplay.textContent();
+    assert(time !== '00:00', `计时器应走动，当前: ${time}`);
   });
 
   await test('3.4 提前结束计时', async (page) => {
     await page.click('[data-page="gacha"]');
     await page.waitForTimeout(1500);
-    const stopBtn = page.locator('#timerDockStopBtn');
-    if (await stopBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-      page.once('dialog', d => d.accept());
-      await stopBtn.click();
-      await page.waitForTimeout(2000);
+
+    // 优先使用 3.3 遗留的活动会话；否则自行启动
+    let stopBtn = page.locator('#timerDockStopBtn');
+    let hasActive = await stopBtn.isVisible({ timeout: 2000 }).catch(() => false);
+
+    if (!hasActive) {
+      await page.click('[data-page="tasks"]');
+      await page.waitForTimeout(1500);
+      await page.click('button:has-text("新建任务")');
+      await page.waitForSelector('#taskModal:not(.hidden)', { timeout: 5000 });
+      await page.fill('#tfName', '提前结束E2E-' + Date.now());
+      await page.fill('#tfTime', '30');
+      await page.click('#taskModal button:has-text("保存")');
+      await page.waitForFunction(() => {
+        const el = document.getElementById('taskModal');
+        return el && el.classList.contains('hidden');
+      }, { timeout: 10000 });
+      await page.waitForTimeout(800);
+      await page.waitForFunction(() => {
+        const s = document.getElementById('timerTaskSelect');
+        return s && !s.disabled && s.options.length > 1;
+      }, { timeout: 10000 });
+      await page.locator('#timerTaskSelect').selectOption({ index: 1 });
+      await page.fill('#timerPlannedMin', '5');
+      await page.click('#timerStartBtn');
+      await page.waitForTimeout(1500);
+      await page.click('[data-page="gacha"]');
+      await page.waitForTimeout(1000);
+      stopBtn = page.locator('#timerDockStopBtn');
+      hasActive = await stopBtn.isVisible({ timeout: 5000 });
     }
+
+    assert(hasActive, 'Dock 停止按钮应可见（活动计时会话）');
+
+    const feedbackReqs = [];
+    page.on('request', req => {
+      if (req.url().includes('/feedback') && req.method() === 'POST') {
+        feedbackReqs.push(req.postData() || '');
+      }
+    });
+    page.once('dialog', d => d.accept());
+    await stopBtn.click();
+    await page.waitForTimeout(3000);
+
+    const joined = feedbackReqs.join(' ');
+    const idle = await page.locator('#timerDockIdle').isVisible().catch(() => false);
+    assert(
+      joined.includes('finish_early') || idle,
+      `期望 finish_early 上报或 Dock 回到 idle。feedback=${joined}`
+    );
+  });
+
+  // ============ R2 回归：抽卡 XSS / 动画清理 ============
+  console.log('\n【抽卡回归】');
+
+  await test('1.4 XSS转义（抽卡卡牌）', async (page) => {
+    const escaped = await page.evaluate(() => {
+      if (typeof escapeHtml !== 'function') return null;
+      return escapeHtml('<img src=x onerror=alert(1)>');
+    });
+    assert(escaped !== null, 'escapeHtml 应存在');
+    assert(!escaped.includes('<img'), `应转义标签: ${escaped}`);
+    assert(escaped.includes('&lt;img'), `应含 &lt;img: ${escaped}`);
+  });
+
+  await test('1.5 页面切换清理抽卡动画残留', async (page) => {
+    await page.click('[data-page="gacha"]');
+    await page.waitForTimeout(800);
+    await page.evaluate(() => {
+      const layer = document.getElementById('cardFlyLayer');
+      if (layer) layer.innerHTML = '<div class="fly-residue">x</div>';
+      const deck = document.getElementById('gachaDeck');
+      if (deck) {
+        deck.classList.add('is-drawing');
+        deck.classList.add('is-revealing');
+      }
+    });
+    await page.click('[data-page="tasks"]');
+    await page.waitForTimeout(500);
+    const state = await page.evaluate(() => {
+      const layer = document.getElementById('cardFlyLayer');
+      const deck = document.getElementById('gachaDeck');
+      return {
+        flyEmpty: !layer || layer.innerHTML === '',
+        drawing: deck ? deck.classList.contains('is-drawing') : false,
+        revealing: deck ? deck.classList.contains('is-revealing') : false
+      };
+    });
+    assert(state.flyEmpty, 'cardFlyLayer 应被清空');
+    assert(!state.drawing && !state.revealing, `deck 动画类应清除: ${JSON.stringify(state)}`);
   });
 
   // ============ 日程测试 ============
