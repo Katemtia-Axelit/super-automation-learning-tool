@@ -338,8 +338,32 @@ function buildTaskCardHtml(task, opts) {
 }
 
 // ============ 抽卡 ============
-var gachaState = { energy: 'medium', pool: 'fragment', canReplace: true, replacedTaskId: null, feedbackMood: 3, currentTaskId: null };
+var gachaState = { energy: 'medium', pool: 'fragment', canReplace: true, replacedTaskId: null, feedbackMood: 3, currentTaskId: null, selectedTag: '' };
 var isDrawing = false;
+
+// 初始化：加载标签到抽卡选择框
+async function initGachaTagSelect() {
+  var sel = document.getElementById('gachaTagSelect');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">不限</option>';
+  try {
+    var tags = await api('/api/tags');
+    tags.forEach(function (t) {
+      var opt = document.createElement('option');
+      opt.value = t.name;
+      opt.textContent = t.name + ' (' + t.task_count + ')';
+      sel.appendChild(opt);
+    });
+  } catch (e) { /* ignore */ }
+}
+initGachaTagSelect();
+
+// 标签选择联动
+document.getElementById('gachaTagSelect').addEventListener('change', function () {
+  gachaState.selectedTag = this.value;
+  var hint = document.getElementById('gachaTagHint');
+  hint.textContent = this.value ? '🎯 ' + this.value : '';
+});
 
 // 精力和卡池选择保留 JS 逻辑（隐藏 UI 但逻辑可用）
 document.querySelectorAll('.energy-btn').forEach(function (b) {
@@ -492,7 +516,12 @@ async function drawGacha() {
   try {
     var r = await api('/api/gacha/draw', {
       method: 'POST',
-      body: JSON.stringify({ pool: gachaState.pool, energy: gachaState.energy, available_time: 45 })
+      body: JSON.stringify({
+        pool: gachaState.pool,
+        energy: gachaState.energy,
+        available_time: parseInt(document.getElementById('gachaTimeInput').value, 10) || 25,
+        preferred_tag: gachaState.selectedTag || null
+      })
     });
     if (r.task) {
       gachaState.canReplace = r.can_replace !== false;
@@ -564,8 +593,12 @@ function renderDrawnCard(task, idx) {
   var isOneOff = task.repeat_type === 'single';
 
   // 抽卡后的操作按钮
+  var noteBtn = task.linked_note_path
+    ? '<button class="btn" onclick="openNoteFromCard(\'' + task.linked_note_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" style="margin-bottom:6px;width:100%;background:rgba(88,166,255,0.15);border-color:rgba(88,166,255,0.4);color:#7ab8ff"><i class="fa-brands fa-markdown"></i> 在Obsidian中打开</button>'
+    : '';
   var actions =
     '<button class="btn pri" onclick="startTask(' + task.id + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-play"></i> 开始任务</button>' +
+    noteBtn +
     '<button class="btn" onclick="handleSkip(' + task.id + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-forward"></i> 跳过</button>' +
     '<button class="btn danger" onclick="handleRefuse(' + task.id + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-xmark"></i> 拒绝</button>' +
     (gachaState.canReplace ? '<button class="btn" onclick="showReplaceReason(' + task.id + ')" style="width:100%"><i class="fa-solid fa-shuffle"></i> 换一张</button>' : '');
@@ -771,7 +804,13 @@ async function doReplace() {
   try {
     var r = await api('/api/gacha/replace', {
       method: 'POST',
-      body: JSON.stringify({ task_id: rid, reason: reason, pool: gachaState.pool, energy: gachaState.energy })
+      body: JSON.stringify({
+        task_id: rid,
+        reason: reason,
+        pool: gachaState.pool,
+        energy: gachaState.energy,
+        preferred_tag: gachaState.selectedTag || null
+      })
     });
     if (r.task) {
       gachaState.canReplace = false;
@@ -812,17 +851,107 @@ async function completeWithFeedback(id) {
       body: JSON.stringify({ energy_after: 5, mood_after: 3 })
     }).catch(function () { });
 
-    document.getElementById('gachaResult').innerHTML =
-      '<div class="empty-state"><i class="fa-solid fa-circle-check" style="color:var(--gold)"></i><p>太棒了，继续加油！</p></div>';
-
     loadTasks();
     refreshGachaStats();
     updateDiscardPileVisual();
     timerDockSession = null;
     updateTimerDockDisplay();
+
+    // 弹出关怀问询框
+    showCareModal(id, task ? task.category : null);
   } catch (e) {
     toast(e.message || '完成失败', 'err');
   }
+}
+
+// ============ 任务完成关怀问询 ============
+var _careContext = null;
+
+var CARE_ENCOURAGES = [
+  '太棒了！又完成了一项挑战！',
+  '坚持就是胜利，你真棒！',
+  '今天的你比昨天更优秀！',
+  '小步快跑，大目标在前方等你！',
+  '完成就是进步，继续加油！'
+];
+
+var CARE_CATEGORY_LABELS = { study: '学习', exercise: '运动', work: '工作', life: '生活', other: '其他' };
+
+function showCareModal(taskId, category) {
+  _careContext = { taskId: taskId, category: category };
+  var encText = CARE_ENCOURAGES[Math.floor(Math.random() * CARE_ENCOURAGES.length)];
+  document.getElementById('careEncourage').textContent = encText;
+  var catLabel = category ? (CARE_CATEGORY_LABELS[category] || category) : '当前';
+  document.getElementById('careTaskInfo').textContent = '当前科目：' + catLabel;
+  document.getElementById('gachaResult').innerHTML = '';
+  showModal('careModal');
+}
+
+function careSameCategory() {
+  var cat = _careContext ? _careContext.category : null;
+  closeModal('careModal');
+  _careContext = null;
+  if (!cat) {
+    toast('无科目信息，将继续抽卡', 'inf');
+  }
+  drawGachaWithCategory(cat, null);
+}
+
+function careSwitchCategory() {
+  var cat = _careContext ? _careContext.category : null;
+  closeModal('careModal');
+  _careContext = null;
+  drawGachaWithCategory(null, cat);
+}
+
+function careRest() {
+  closeModal('careModal');
+  _careContext = null;
+  document.getElementById('gachaResult').innerHTML =
+    '<div class="empty-state"><i class="fa-solid fa-circle-check" style="color:var(--gold)"></i><p>休息也是一种进步，好好放松！</p></div>';
+}
+
+async function drawGachaWithCategory(includeCategory, excludeCategory) {
+  if (isDrawing) return;
+  isDrawing = true;
+  var btn = document.getElementById('gachaBtn');
+  if (btn) btn.disabled = true;
+  var result = document.getElementById('gachaResult');
+  result.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>正在抽卡...</p></div>';
+
+  try {
+    var r = await api('/api/gacha/care-draw', {
+      method: 'POST',
+      body: JSON.stringify({
+        pool: gachaState.pool,
+        energy: gachaState.energy,
+        available_time: parseInt(document.getElementById('gachaTimeInput').value, 10) || 25,
+        preferred_tag: gachaState.selectedTag || null,
+        include_category: includeCategory || null,
+        exclude_category: excludeCategory || null
+      })
+    });
+    if (r.task) {
+      gachaState.canReplace = r.can_replace !== false;
+      gachaState.currentTaskId = r.task.id;
+      result.innerHTML = '';
+      var stage = renderDrawnCard(r.task, 0);
+      result.appendChild(stage);
+      await playCardFlyAnimation(r.task);
+      updateDiscardPileVisual();
+    } else {
+      result.innerHTML = '<div class="empty-state mt24"><i class="fa-solid fa-box-open"></i><p>卡池空了，明天继续！</p></div>';
+      gachaState.currentTaskId = null;
+    }
+  } catch (e) {
+    toast(e.message || '抽卡失败', 'err');
+    result.innerHTML = '';
+    gachaState.currentTaskId = null;
+  }
+
+  if (btn) btn.disabled = false;
+  isDrawing = false;
+  refreshGachaStats();
 }
 
 // 将卡牌飞向弃牌堆
@@ -1603,6 +1732,18 @@ function mdToHtml(md) {
     .replace(/(<li>.*<\/li>\n?)+/g, function (m) { return '<ul>' + m + '</ul>'; })
     .replace(/\n{2,}/g, '</p><p>');
   return '<p>' + h + '</p>';
+}
+
+async function openNoteFromCard(filePath) {
+  try {
+    await api('/api/knowledge/open-in-obsidian', {
+      method: 'POST',
+      body: JSON.stringify({ file_path: filePath })
+    });
+    toast('已在Obsidian中打开', 'suc');
+  } catch (e) {
+    toast('打开失败: ' + (e.message || e), 'err');
+  }
 }
 
 async function openCurrentInObsidian() {

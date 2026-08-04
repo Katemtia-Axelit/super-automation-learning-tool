@@ -1,0 +1,1132 @@
+{
+  "大学物理": [
+    {
+      "file": "01_质点运动描述的物理量.md",
+      "size": 5738,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "02_质点运动学两类问题与例题.md",
+      "size": 7257,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "03_自然坐标系与加速度分解.md",
+      "size": 5617,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "04_圆周运动的角量与线量.md",
+      "size": 5358,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "05_动力学解题思路与受力分析.md",
+      "size": 5168,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "06_动量定理与解题步骤.md",
+      "size": 5612,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "07_刚体模型与定轴转动运动学.md",
+      "size": 5814,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "08_刚体定轴转动定律与转动惯量.md",
+      "size": 6610,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "09_角动量定理与守恒定律.md",
+      "size": 5280,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "10_三大守恒律复习与简谐振动入门.md",
+      "size": 7465,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "11_旋转矢量法与简谐振动描述.md",
+      "size": 6386,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "12_机械波与波函数概述.md",
+      "size": 4025,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "13_波动方程与相位分析.md",
+      "size": 4858,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "14_气体动理论基础.md",
+      "size": 5120,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "15_分子自由度与速率分布.md",
+      "size": 4223,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "16_热力学第一定律与四大过程.md",
+      "size": 5301,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "17_热力学循环与效率计算.md",
+      "size": 4835,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "18_光的干涉原理与两类装置.md",
+      "size": 4317,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "19_半波损失的原理与判断.md",
+      "size": 2056,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "20_惠更斯-菲涅耳原理与衍射分类.md",
+      "size": 4111,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "21_圆孔衍射与光学仪器分辨本领.md",
+      "size": 4593,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "22_静电场与电场强度.md",
+      "size": 4808,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "23_静电场的环路定理与电势.md",
+      "size": 3275,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "24_电通量与高斯定理.md",
+      "size": 4556,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "25_恒定电流与稳恒磁场引论.md",
+      "size": 3340,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "26_毕奥-萨伐尔定律与磁场典型模型.md",
+      "size": 4276,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "27_磁通量与磁场的高斯定理.md",
+      "size": 3347,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "28_安培环路定理与磁场求解.md",
+      "size": 5598,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "大学物理-光学.md",
+      "size": 377,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "大学物理-刚体与振动.md",
+      "size": 433,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "大学物理-力学.md",
+      "size": 470,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "大学物理-波动.md",
+      "size": 288,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "大学物理-热力学.md",
+      "size": 377,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "大学物理.md",
+      "size": 587,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    }
+  ],
+  "高等数学": [
+    {
+      "file": "01-01_函数的概念与基本要素.md",
+      "size": 4085,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "01-02_数列的极限.md",
+      "size": 3239,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "01-03_函数的极限与运算法则.md",
+      "size": 3038,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "01-04_极限存在准则与重要极限.md",
+      "size": 2975,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "01-05_无穷小与无穷大.md",
+      "size": 3443,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "01-06_函数的连续性与间断点.md",
+      "size": 3564,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "02-01_求导法则与基本公式.md",
+      "size": 3762,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "03-01_导数应用——曲率与函数形态.md",
+      "size": 4533,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "04-01_不定积分的概念与性质.md",
+      "size": 2508,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "04-02_第二换元积分法.md",
+      "size": 2137,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "04-03_分部积分法.md",
+      "size": 1858,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "05-01_反常积分.md",
+      "size": 2737,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "05-02_定积分的概念与牛顿-莱布尼兹公式.md",
+      "size": 3162,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "05-03_定积分的应用——面积计算.md",
+      "size": 1915,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "06-01_向量的数量积.md",
+      "size": 5196,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "06-02_空间平面与直线方程.md",
+      "size": 8271,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "06-03_旋转曲面方程推导.md",
+      "size": 3629,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "06-04_空间曲线与参数方程.md",
+      "size": 4908,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "06-05_空间曲线的切线与法平面.md",
+      "size": 5642,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "06-06_曲面的切平面与空间位置关系.md",
+      "size": 5956,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "07-01_多元函数的概念与极限.md",
+      "size": 4728,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "07-02_偏导数与全微分.md",
+      "size": 7909,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "07-03_多元复合函数求导法则.md",
+      "size": 5811,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "07-04_隐函数求导.md",
+      "size": 4210,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "07-05_隐函数组求导.md",
+      "size": 5850,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "07-06_多元函数的极值与条件极值.md",
+      "size": 3640,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "08-01_二重积分的概念与性质.md",
+      "size": 5559,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "08-02_二重积分的计算方法.md",
+      "size": 5986,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "09-01_对弧长的曲线积分.md",
+      "size": 6028,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "09-02_格林公式及其应用.md",
+      "size": 4783,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "10-01_常数项级数的概念与性质.md",
+      "size": 5254,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "10-02_正项级数的判别法.md",
+      "size": 5318,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "10-03_幂级数的收敛半径与收敛域.md",
+      "size": 3896,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "10-04_幂级数的和函数.md",
+      "size": 5212,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "10-05_泰勒级数与函数展开.md",
+      "size": 3920,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "10-06_函数展开成幂级数的方法.md",
+      "size": 4033,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "11-01_微分方程的概念与分类.md",
+      "size": 4807,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "11-02_一阶微分方程——变量分离与齐次方程.md",
+      "size": 3429,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "11-03_一阶线性微分方程与常数变易法.md",
+      "size": 4612,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "11-04_全微分方程判定与求解.md",
+      "size": 3985,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "11-05_二阶微分方程降阶法.md",
+      "size": 3615,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "11-06_常系数微分方程解法.md",
+      "size": 4531,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "11-07_高阶线性微分方程解的结构.md",
+      "size": 4170,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学-不定积分.md",
+      "size": 313,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学-函数与极限.md",
+      "size": 495,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学-多元函数微分法.md",
+      "size": 458,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学-定积分.md",
+      "size": 347,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学-导数与微分.md",
+      "size": 250,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学-微分中值定理与导数应用.md",
+      "size": 242,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学-微分方程.md",
+      "size": 370,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学-无穷级数.md",
+      "size": 430,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学-曲线积分和曲面积分.md",
+      "size": 285,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学-空间解析几何.md",
+      "size": 461,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学-重积分.md",
+      "size": 263,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "高等数学.md",
+      "size": 2622,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    }
+  ],
+  "线性代数": [
+    {
+      "file": "01_线性相关与无关判定.md",
+      "size": 7964,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "02_线性空间与基底维数.md",
+      "size": 9965,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "03_基与维数习题讲解.md",
+      "size": 7715,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "04_向量组的秩与极大无关组.md",
+      "size": 5770,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "05_向量运算与内积.md",
+      "size": 5319,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "06_矩阵相似与二次型.md",
+      "size": 7201,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "07_行列式展开与逆矩阵.md",
+      "size": 5405,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "08_特征值与特征向量基础.md",
+      "size": 5133,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "09_特征值性质与判定.md",
+      "size": 4822,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "10_初等变换与标准型.md",
+      "size": 3991,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "11_矩阵秩的定义与计算.md",
+      "size": 3148,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "12_相似矩阵与对角化.md",
+      "size": 4276,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "13_行列式的性质与计算.md",
+      "size": 3298,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "线性代数-初等变换与行列式.md",
+      "size": 0,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "线性代数-向量与空间.md",
+      "size": 408,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "线性代数-矩阵与特征值.md",
+      "size": 374,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "线性代数.md",
+      "size": 455,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    }
+  ],
+  "电子技术": [
+    {
+      "file": "01_半导体基础与PN结.md",
+      "size": 5365,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "02_二极管特性与等效模型.md",
+      "size": 8192,
+      "has_example": true,
+      "has_source": true,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "03_半导体三极管原理.md",
+      "size": 7971,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "04_直流电路分析基础.md",
+      "size": 4679,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "05_交流电路分析基础.md",
+      "size": 5062,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "06_三极管放大电路——静态分析.md",
+      "size": 4123,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "07_三极管放大电路——动态分析与多级放大.md",
+      "size": 3478,
+      "has_example": false,
+      "has_source": true,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "08_布尔代数与逻辑门电路.md",
+      "size": 5581,
+      "has_example": false,
+      "has_source": true,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "09_逻辑函数化简——公式法与卡诺图.md",
+      "size": 4615,
+      "has_example": false,
+      "has_source": true,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "10_组合逻辑电路分析与设计.md",
+      "size": 4424,
+      "has_example": false,
+      "has_source": true,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "11_编码器与集成电路实现.md",
+      "size": 4065,
+      "has_example": false,
+      "has_source": true,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "12_数字信号与编码技术.md",
+      "size": 3915,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "13_集成运放与负反馈.md",
+      "size": 7160,
+      "has_example": false,
+      "has_source": true,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "14_直流稳压电源.md",
+      "size": 7890,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "电子技术-半导体器件.md",
+      "size": 336,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "电子技术-数字电路.md",
+      "size": 399,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "电子技术-电路分析.md",
+      "size": 464,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "电子技术.md",
+      "size": 323,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    }
+  ],
+  "计算机": [
+    {
+      "file": "01_计算机系统概述与硬件组成.md",
+      "size": 5339,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "02_程序设计语言发展简史.md",
+      "size": 7078,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "03_计算机层次结构与指令集.md",
+      "size": 5511,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "04_计算机硬件组成与总线.md",
+      "size": 6055,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": true,
+      "has_placeholder": false
+    },
+    {
+      "file": "05_数据表示与编码概述.md",
+      "size": 7294,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "06_数值数据的编码_原码反码补码.md",
+      "size": 5089,
+      "has_example": true,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "07_非数值数据与字符编码.md",
+      "size": 7058,
+      "has_example": false,
+      "has_source": true,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "08_数据存储与单位.md",
+      "size": 4201,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "09_数据运算与位操作.md",
+      "size": 5262,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "10_指令格式与数据传送.md",
+      "size": 5729,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "11_程序的编译链接与符号解析.md",
+      "size": 6343,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "12_指令执行过程详解.md",
+      "size": 3450,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "计算机-指令与程序.md",
+      "size": 327,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "计算机-数据编码.md",
+      "size": 399,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "计算机-系统与硬件.md",
+      "size": 380,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    },
+    {
+      "file": "计算机.md",
+      "size": 320,
+      "has_example": false,
+      "has_source": false,
+      "has_circuit": false,
+      "has_placeholder": false
+    }
+  ]
+}

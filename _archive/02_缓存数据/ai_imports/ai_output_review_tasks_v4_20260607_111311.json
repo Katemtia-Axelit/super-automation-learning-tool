@@ -1,0 +1,4594 @@
+{
+  "action": "batch_tasks",
+  "tasks": [
+    {
+      "name": "高数-07-01-多元函数的概念与极限-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": []
+    },
+    {
+      "name": "高数-07-01-多元函数的概念与极限-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-01-多元函数的概念与极限-复习}"
+      ]
+    },
+    {
+      "name": "高数-07-02-偏导数与全微分-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-01-多元函数的概念与极限-习题}"
+      ]
+    },
+    {
+      "name": "高数-07-02-偏导数与全微分-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-02-偏导数与全微分-复习}"
+      ]
+    },
+    {
+      "name": "高数-07-03-多元复合函数求导法则-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-02-偏导数与全微分-习题}"
+      ]
+    },
+    {
+      "name": "高数-07-03-多元复合函数求导法则-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-03-多元复合函数求导法则-复习}"
+      ]
+    },
+    {
+      "name": "高数-07-04-隐函数求导-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-03-多元复合函数求导法则-习题}"
+      ]
+    },
+    {
+      "name": "高数-07-04-隐函数求导-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-04-隐函数求导-复习}"
+      ]
+    },
+    {
+      "name": "高数-07-05-隐函数组求导-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-04-隐函数求导-习题}"
+      ]
+    },
+    {
+      "name": "高数-07-05-隐函数组求导-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-05-隐函数组求导-复习}"
+      ]
+    },
+    {
+      "name": "高数-07-06-多元函数的极值与条件极值-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-05-隐函数组求导-习题}"
+      ]
+    },
+    {
+      "name": "高数-07-06-多元函数的极值与条件极值-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-06-多元函数的极值与条件极值-复习}"
+      ]
+    },
+    {
+      "name": "高数-第7章-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "章节复习",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-07-06-多元函数的极值与条件极值-习题}"
+      ]
+    },
+    {
+      "name": "高数-第7章-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "章节习题",
+        "第7章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-第7章-章节复习}"
+      ]
+    },
+    {
+      "name": "高数-08-01-二重积分的概念与性质-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第8章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-第7章-章节习题}"
+      ]
+    },
+    {
+      "name": "高数-08-01-二重积分的概念与性质-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第8章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-08-01-二重积分的概念与性质-复习}"
+      ]
+    },
+    {
+      "name": "高数-08-02-二重积分的计算方法-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第8章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-08-01-二重积分的概念与性质-习题}"
+      ]
+    },
+    {
+      "name": "高数-08-02-二重积分的计算方法-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第8章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-08-02-二重积分的计算方法-复习}"
+      ]
+    },
+    {
+      "name": "高数-第8章-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "章节复习",
+        "第8章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-08-02-二重积分的计算方法-习题}"
+      ]
+    },
+    {
+      "name": "高数-第8章-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "章节习题",
+        "第8章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-第8章-章节复习}"
+      ]
+    },
+    {
+      "name": "高数-09-01-对弧长的曲线积分-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第9章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-第8章-章节习题}"
+      ]
+    },
+    {
+      "name": "高数-09-01-对弧长的曲线积分-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第9章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-09-01-对弧长的曲线积分-复习}"
+      ]
+    },
+    {
+      "name": "高数-09-02-格林公式及其应用-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第9章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-09-01-对弧长的曲线积分-习题}"
+      ]
+    },
+    {
+      "name": "高数-09-02-格林公式及其应用-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第9章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-09-02-格林公式及其应用-复习}"
+      ]
+    },
+    {
+      "name": "高数-第9章-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "章节复习",
+        "第9章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-09-02-格林公式及其应用-习题}"
+      ]
+    },
+    {
+      "name": "高数-第9章-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "章节习题",
+        "第9章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-第9章-章节复习}"
+      ]
+    },
+    {
+      "name": "高数-10-01-常数项级数的概念与性质-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-第9章-章节习题}"
+      ]
+    },
+    {
+      "name": "高数-10-01-常数项级数的概念与性质-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-01-常数项级数的概念与性质-复习}"
+      ]
+    },
+    {
+      "name": "高数-10-02-正项级数的判别法-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-01-常数项级数的概念与性质-习题}"
+      ]
+    },
+    {
+      "name": "高数-10-02-正项级数的判别法-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-02-正项级数的判别法-复习}"
+      ]
+    },
+    {
+      "name": "高数-10-03-幂级数的收敛半径与收敛域-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-02-正项级数的判别法-习题}"
+      ]
+    },
+    {
+      "name": "高数-10-03-幂级数的收敛半径与收敛域-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-03-幂级数的收敛半径与收敛域-复习}"
+      ]
+    },
+    {
+      "name": "高数-10-04-幂级数的和函数-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-03-幂级数的收敛半径与收敛域-习题}"
+      ]
+    },
+    {
+      "name": "高数-10-04-幂级数的和函数-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-04-幂级数的和函数-复习}"
+      ]
+    },
+    {
+      "name": "高数-10-05-泰勒级数与函数展开-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-04-幂级数的和函数-习题}"
+      ]
+    },
+    {
+      "name": "高数-10-05-泰勒级数与函数展开-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-05-泰勒级数与函数展开-复习}"
+      ]
+    },
+    {
+      "name": "高数-10-06-函数展开成幂级数的方法-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-05-泰勒级数与函数展开-习题}"
+      ]
+    },
+    {
+      "name": "高数-10-06-函数展开成幂级数的方法-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-06-函数展开成幂级数的方法-复习}"
+      ]
+    },
+    {
+      "name": "高数-第10章-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "章节复习",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-10-06-函数展开成幂级数的方法-习题}"
+      ]
+    },
+    {
+      "name": "高数-第10章-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "章节习题",
+        "第10章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-第10章-章节复习}"
+      ]
+    },
+    {
+      "name": "高数-11-01-微分方程的概念与分类-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-第10章-章节习题}"
+      ]
+    },
+    {
+      "name": "高数-11-01-微分方程的概念与分类-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-01-微分方程的概念与分类-复习}"
+      ]
+    },
+    {
+      "name": "高数-11-02-一阶微分方程——变量分离与齐次方程-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-01-微分方程的概念与分类-习题}"
+      ]
+    },
+    {
+      "name": "高数-11-02-一阶微分方程——变量分离与齐次方程-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-02-一阶微分方程——变量分离与齐次方程-复习}"
+      ]
+    },
+    {
+      "name": "高数-11-03-一阶线性微分方程与常数变易法-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-02-一阶微分方程——变量分离与齐次方程-习题}"
+      ]
+    },
+    {
+      "name": "高数-11-03-一阶线性微分方程与常数变易法-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-03-一阶线性微分方程与常数变易法-复习}"
+      ]
+    },
+    {
+      "name": "高数-11-04-全微分方程判定与求解-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-03-一阶线性微分方程与常数变易法-习题}"
+      ]
+    },
+    {
+      "name": "高数-11-04-全微分方程判定与求解-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-04-全微分方程判定与求解-复习}"
+      ]
+    },
+    {
+      "name": "高数-11-05-二阶微分方程降阶法-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-04-全微分方程判定与求解-习题}"
+      ]
+    },
+    {
+      "name": "高数-11-05-二阶微分方程降阶法-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-05-二阶微分方程降阶法-复习}"
+      ]
+    },
+    {
+      "name": "高数-11-06-常系数微分方程解法-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-05-二阶微分方程降阶法-习题}"
+      ]
+    },
+    {
+      "name": "高数-11-06-常系数微分方程解法-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-06-常系数微分方程解法-复习}"
+      ]
+    },
+    {
+      "name": "高数-11-07-高阶线性微分方程解的结构-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "复习",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-06-常系数微分方程解法-习题}"
+      ]
+    },
+    {
+      "name": "高数-11-07-高阶线性微分方程解的结构-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "习题",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-07-高阶线性微分方程解的结构-复习}"
+      ]
+    },
+    {
+      "name": "高数-第11章-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "章节复习",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-11-07-高阶线性微分方程解的结构-习题}"
+      ]
+    },
+    {
+      "name": "高数-第11章-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "章节习题",
+        "第11章"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-第11章-章节复习}"
+      ]
+    },
+    {
+      "name": "高数-真题-2023年春",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-第11章-章节习题}"
+      ]
+    },
+    {
+      "name": "高数-真题-2024年春",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-真题-2023年春}"
+      ]
+    },
+    {
+      "name": "高数-真题-2025年春",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "高数",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:高数-真题-2024年春}"
+      ]
+    },
+    {
+      "name": "线代-01-线性相关与无关判定-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": []
+    },
+    {
+      "name": "线代-01-线性相关与无关判定-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-01-线性相关与无关判定-复习}"
+      ]
+    },
+    {
+      "name": "线代-02-线性空间与基底维数-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-01-线性相关与无关判定-习题}"
+      ]
+    },
+    {
+      "name": "线代-02-线性空间与基底维数-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-02-线性空间与基底维数-复习}"
+      ]
+    },
+    {
+      "name": "线代-03-基与维数习题讲解-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-02-线性空间与基底维数-习题}"
+      ]
+    },
+    {
+      "name": "线代-03-基与维数习题讲解-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-03-基与维数习题讲解-复习}"
+      ]
+    },
+    {
+      "name": "线代-04-向量组的秩与极大无关组-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-03-基与维数习题讲解-习题}"
+      ]
+    },
+    {
+      "name": "线代-04-向量组的秩与极大无关组-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-04-向量组的秩与极大无关组-复习}"
+      ]
+    },
+    {
+      "name": "线代-第1章-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "章节复习",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-04-向量组的秩与极大无关组-习题}"
+      ]
+    },
+    {
+      "name": "线代-第1章-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "章节习题",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-第1章-章节复习}"
+      ]
+    },
+    {
+      "name": "线代-05-向量运算与内积-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-第1章-章节习题}"
+      ]
+    },
+    {
+      "name": "线代-05-向量运算与内积-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-05-向量运算与内积-复习}"
+      ]
+    },
+    {
+      "name": "线代-06-矩阵相似与二次型-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-05-向量运算与内积-习题}"
+      ]
+    },
+    {
+      "name": "线代-06-矩阵相似与二次型-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-06-矩阵相似与二次型-复习}"
+      ]
+    },
+    {
+      "name": "线代-07-行列式展开与逆矩阵-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-06-矩阵相似与二次型-习题}"
+      ]
+    },
+    {
+      "name": "线代-07-行列式展开与逆矩阵-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-07-行列式展开与逆矩阵-复习}"
+      ]
+    },
+    {
+      "name": "线代-08-特征值与特征向量基础-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-07-行列式展开与逆矩阵-习题}"
+      ]
+    },
+    {
+      "name": "线代-08-特征值与特征向量基础-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-08-特征值与特征向量基础-复习}"
+      ]
+    },
+    {
+      "name": "线代-第2章-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "章节复习",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-08-特征值与特征向量基础-习题}"
+      ]
+    },
+    {
+      "name": "线代-第2章-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "章节习题",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-第2章-章节复习}"
+      ]
+    },
+    {
+      "name": "线代-09-特征值性质与判定-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-第2章-章节习题}"
+      ]
+    },
+    {
+      "name": "线代-09-特征值性质与判定-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-09-特征值性质与判定-复习}"
+      ]
+    },
+    {
+      "name": "线代-10-初等变换与标准型-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-09-特征值性质与判定-习题}"
+      ]
+    },
+    {
+      "name": "线代-10-初等变换与标准型-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-10-初等变换与标准型-复习}"
+      ]
+    },
+    {
+      "name": "线代-11-矩阵秩的定义与计算-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-10-初等变换与标准型-习题}"
+      ]
+    },
+    {
+      "name": "线代-11-矩阵秩的定义与计算-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-11-矩阵秩的定义与计算-复习}"
+      ]
+    },
+    {
+      "name": "线代-12-相似矩阵与对角化-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-11-矩阵秩的定义与计算-习题}"
+      ]
+    },
+    {
+      "name": "线代-12-相似矩阵与对角化-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-12-相似矩阵与对角化-复习}"
+      ]
+    },
+    {
+      "name": "线代-13-行列式的性质与计算-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "复习",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-12-相似矩阵与对角化-习题}"
+      ]
+    },
+    {
+      "name": "线代-13-行列式的性质与计算-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "习题",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-13-行列式的性质与计算-复习}"
+      ]
+    },
+    {
+      "name": "线代-第3章-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "章节复习",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-13-行列式的性质与计算-习题}"
+      ]
+    },
+    {
+      "name": "线代-第3章-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "章节习题",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-第3章-章节复习}"
+      ]
+    },
+    {
+      "name": "线代-真题-2021-2022",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-第3章-章节习题}"
+      ]
+    },
+    {
+      "name": "线代-真题-2022-2023",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-真题-2021-2022}"
+      ]
+    },
+    {
+      "name": "线代-真题-2024-2025",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "线代",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:线代-真题-2022-2023}"
+      ]
+    },
+    {
+      "name": "计算机-01-计算机系统概述与硬件组成-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": []
+    },
+    {
+      "name": "计算机-01-计算机系统概述与硬件组成-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-01-计算机系统概述与硬件组成-复习}"
+      ]
+    },
+    {
+      "name": "计算机-02-程序设计语言发展简史-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-01-计算机系统概述与硬件组成-习题}"
+      ]
+    },
+    {
+      "name": "计算机-02-程序设计语言发展简史-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-02-程序设计语言发展简史-复习}"
+      ]
+    },
+    {
+      "name": "计算机-03-计算机层次结构与指令集-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-02-程序设计语言发展简史-习题}"
+      ]
+    },
+    {
+      "name": "计算机-03-计算机层次结构与指令集-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-03-计算机层次结构与指令集-复习}"
+      ]
+    },
+    {
+      "name": "计算机-04-计算机硬件组成与总线-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-03-计算机层次结构与指令集-习题}"
+      ]
+    },
+    {
+      "name": "计算机-04-计算机硬件组成与总线-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-04-计算机硬件组成与总线-复习}"
+      ]
+    },
+    {
+      "name": "计算机-第1章-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "章节复习",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-04-计算机硬件组成与总线-习题}"
+      ]
+    },
+    {
+      "name": "计算机-第1章-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "章节习题",
+        "第1章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-第1章-章节复习}"
+      ]
+    },
+    {
+      "name": "计算机-05-数据表示与编码概述-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-第1章-章节习题}"
+      ]
+    },
+    {
+      "name": "计算机-05-数据表示与编码概述-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-05-数据表示与编码概述-复习}"
+      ]
+    },
+    {
+      "name": "计算机-06-数值数据的编码_原码反码补码-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-05-数据表示与编码概述-习题}"
+      ]
+    },
+    {
+      "name": "计算机-06-数值数据的编码_原码反码补码-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-06-数值数据的编码_原码反码补码-复习}"
+      ]
+    },
+    {
+      "name": "计算机-07-非数值数据与字符编码-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-06-数值数据的编码_原码反码补码-习题}"
+      ]
+    },
+    {
+      "name": "计算机-07-非数值数据与字符编码-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-07-非数值数据与字符编码-复习}"
+      ]
+    },
+    {
+      "name": "计算机-08-数据存储与单位-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-07-非数值数据与字符编码-习题}"
+      ]
+    },
+    {
+      "name": "计算机-08-数据存储与单位-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-08-数据存储与单位-复习}"
+      ]
+    },
+    {
+      "name": "计算机-第2章-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "章节复习",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-08-数据存储与单位-习题}"
+      ]
+    },
+    {
+      "name": "计算机-第2章-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "章节习题",
+        "第2章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-第2章-章节复习}"
+      ]
+    },
+    {
+      "name": "计算机-09-数据运算与位操作-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-第2章-章节习题}"
+      ]
+    },
+    {
+      "name": "计算机-09-数据运算与位操作-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-09-数据运算与位操作-复习}"
+      ]
+    },
+    {
+      "name": "计算机-10-指令格式与数据传送-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-09-数据运算与位操作-习题}"
+      ]
+    },
+    {
+      "name": "计算机-10-指令格式与数据传送-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-10-指令格式与数据传送-复习}"
+      ]
+    },
+    {
+      "name": "计算机-11-程序的编译链接与符号解析-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-10-指令格式与数据传送-习题}"
+      ]
+    },
+    {
+      "name": "计算机-11-程序的编译链接与符号解析-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-11-程序的编译链接与符号解析-复习}"
+      ]
+    },
+    {
+      "name": "计算机-12-指令执行过程详解-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "复习",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-11-程序的编译链接与符号解析-习题}"
+      ]
+    },
+    {
+      "name": "计算机-12-指令执行过程详解-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "习题",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-12-指令执行过程详解-复习}"
+      ]
+    },
+    {
+      "name": "计算机-第3章-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "章节复习",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-12-指令执行过程详解-习题}"
+      ]
+    },
+    {
+      "name": "计算机-第3章-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "章节习题",
+        "第3章"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-第3章-章节复习}"
+      ]
+    },
+    {
+      "name": "计算机-真题-2024年6月",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-第3章-章节习题}"
+      ]
+    },
+    {
+      "name": "计算机-真题-2025年6月",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "计算机",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 8,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:计算机-真题-2024年6月}"
+      ]
+    },
+    {
+      "name": "电子技术-01-半导体基础与PN结-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第1篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": []
+    },
+    {
+      "name": "电子技术-01-半导体基础与PN结-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第1篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-01-半导体基础与PN结-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-02-二极管特性与等效模型-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第1篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-01-半导体基础与PN结-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-02-二极管特性与等效模型-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第1篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-02-二极管特性与等效模型-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-03-半导体三极管原理-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第1篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-02-二极管特性与等效模型-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-03-半导体三极管原理-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第1篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-03-半导体三极管原理-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-04-直流电路分析基础-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第1篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-03-半导体三极管原理-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-04-直流电路分析基础-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第1篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-04-直流电路分析基础-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-第1篇-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "章节复习",
+        "第1篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-04-直流电路分析基础-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-第1篇-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "章节习题",
+        "第1篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-第1篇-章节复习}"
+      ]
+    },
+    {
+      "name": "电子技术-05-交流电路分析基础-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第2篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-第1篇-章节习题}"
+      ]
+    },
+    {
+      "name": "电子技术-05-交流电路分析基础-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第2篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-05-交流电路分析基础-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-06-三极管放大电路——静态分析-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第2篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-05-交流电路分析基础-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-06-三极管放大电路——静态分析-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第2篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-06-三极管放大电路——静态分析-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-07-三极管放大电路——动态分析与多级放大-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第2篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-06-三极管放大电路——静态分析-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-07-三极管放大电路——动态分析与多级放大-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第2篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-07-三极管放大电路——动态分析与多级放大-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-08-布尔代数与逻辑门电路-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第2篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-07-三极管放大电路——动态分析与多级放大-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-08-布尔代数与逻辑门电路-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第2篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-08-布尔代数与逻辑门电路-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-第2篇-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "章节复习",
+        "第2篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-08-布尔代数与逻辑门电路-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-第2篇-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "章节习题",
+        "第2篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-第2篇-章节复习}"
+      ]
+    },
+    {
+      "name": "电子技术-09-逻辑函数化简——公式法与卡诺图-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第3篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-第2篇-章节习题}"
+      ]
+    },
+    {
+      "name": "电子技术-09-逻辑函数化简——公式法与卡诺图-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第3篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-09-逻辑函数化简——公式法与卡诺图-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-10-组合逻辑电路分析与设计-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第3篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-09-逻辑函数化简——公式法与卡诺图-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-10-组合逻辑电路分析与设计-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第3篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-10-组合逻辑电路分析与设计-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-11-编码器与集成电路实现-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第3篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-10-组合逻辑电路分析与设计-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-11-编码器与集成电路实现-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第3篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-11-编码器与集成电路实现-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-12-数字信号与编码技术-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "复习",
+        "第3篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-11-编码器与集成电路实现-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-12-数字信号与编码技术-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "习题",
+        "第3篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-12-数字信号与编码技术-复习}"
+      ]
+    },
+    {
+      "name": "电子技术-第3篇-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "章节复习",
+        "第3篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-12-数字信号与编码技术-习题}"
+      ]
+    },
+    {
+      "name": "电子技术-第3篇-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "章节习题",
+        "第3篇"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-第3篇-章节复习}"
+      ]
+    },
+    {
+      "name": "电子技术-真题-2024年6月",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-第3篇-章节习题}"
+      ]
+    },
+    {
+      "name": "电子技术-真题-2025年6月",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "电子技术",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 9,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:电子技术-真题-2024年6月}"
+      ]
+    },
+    {
+      "name": "大物-力学-质点运动描述的物理量-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": []
+    },
+    {
+      "name": "大物-力学-质点运动描述的物理量-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-质点运动描述的物理量-复习}"
+      ]
+    },
+    {
+      "name": "大物-力学-质点运动学两类问题与例题-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-质点运动描述的物理量-习题}"
+      ]
+    },
+    {
+      "name": "大物-力学-质点运动学两类问题与例题-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-质点运动学两类问题与例题-复习}"
+      ]
+    },
+    {
+      "name": "大物-力学-自然坐标系与加速度分解-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-质点运动学两类问题与例题-习题}"
+      ]
+    },
+    {
+      "name": "大物-力学-自然坐标系与加速度分解-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-自然坐标系与加速度分解-复习}"
+      ]
+    },
+    {
+      "name": "大物-力学-圆周运动的角量与线量-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-自然坐标系与加速度分解-习题}"
+      ]
+    },
+    {
+      "name": "大物-力学-圆周运动的角量与线量-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-圆周运动的角量与线量-复习}"
+      ]
+    },
+    {
+      "name": "大物-力学-动力学解题思路与受力分析-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-圆周运动的角量与线量-习题}"
+      ]
+    },
+    {
+      "name": "大物-力学-动力学解题思路与受力分析-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-动力学解题思路与受力分析-复习}"
+      ]
+    },
+    {
+      "name": "大物-力学-动量定理与解题步骤-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-动力学解题思路与受力分析-习题}"
+      ]
+    },
+    {
+      "name": "大物-力学-动量定理与解题步骤-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-动量定理与解题步骤-复习}"
+      ]
+    },
+    {
+      "name": "大物-力学-刚体模型与定轴转动运动学-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-动量定理与解题步骤-习题}"
+      ]
+    },
+    {
+      "name": "大物-力学-刚体模型与定轴转动运动学-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-刚体模型与定轴转动运动学-复习}"
+      ]
+    },
+    {
+      "name": "大物-力学-刚体定轴转动定律与转动惯量-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-刚体模型与定轴转动运动学-习题}"
+      ]
+    },
+    {
+      "name": "大物-力学-刚体定轴转动定律与转动惯量-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-刚体定轴转动定律与转动惯量-复习}"
+      ]
+    },
+    {
+      "name": "大物-力学-角动量定理与守恒定律-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-刚体定轴转动定律与转动惯量-习题}"
+      ]
+    },
+    {
+      "name": "大物-力学-角动量定理与守恒定律-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-角动量定理与守恒定律-复习}"
+      ]
+    },
+    {
+      "name": "大物-力学-三大守恒律复习与简谐振动入门-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-角动量定理与守恒定律-习题}"
+      ]
+    },
+    {
+      "name": "大物-力学-三大守恒律复习与简谐振动入门-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-三大守恒律复习与简谐振动入门-复习}"
+      ]
+    },
+    {
+      "name": "大物-力学-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "章节复习",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-三大守恒律复习与简谐振动入门-习题}"
+      ]
+    },
+    {
+      "name": "大物-力学-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "章节习题",
+        "力学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-章节复习}"
+      ]
+    },
+    {
+      "name": "大物-热学-气体动理论基础-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "热学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-力学-章节习题}"
+      ]
+    },
+    {
+      "name": "大物-热学-气体动理论基础-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "热学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-热学-气体动理论基础-复习}"
+      ]
+    },
+    {
+      "name": "大物-热学-分子自由度与速率分布-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "热学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-热学-气体动理论基础-习题}"
+      ]
+    },
+    {
+      "name": "大物-热学-分子自由度与速率分布-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "热学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-热学-分子自由度与速率分布-复习}"
+      ]
+    },
+    {
+      "name": "大物-热学-热力学第一定律与四大过程-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "热学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-热学-分子自由度与速率分布-习题}"
+      ]
+    },
+    {
+      "name": "大物-热学-热力学第一定律与四大过程-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "热学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-热学-热力学第一定律与四大过程-复习}"
+      ]
+    },
+    {
+      "name": "大物-热学-热力学循环与效率计算-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "热学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-热学-热力学第一定律与四大过程-习题}"
+      ]
+    },
+    {
+      "name": "大物-热学-热力学循环与效率计算-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "热学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-热学-热力学循环与效率计算-复习}"
+      ]
+    },
+    {
+      "name": "大物-热学-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "章节复习",
+        "热学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-热学-热力学循环与效率计算-习题}"
+      ]
+    },
+    {
+      "name": "大物-热学-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "章节习题",
+        "热学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-热学-章节复习}"
+      ]
+    },
+    {
+      "name": "大物-振动与波-旋转矢量法与简谐振动描述-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "振动与波"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-热学-章节习题}"
+      ]
+    },
+    {
+      "name": "大物-振动与波-旋转矢量法与简谐振动描述-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "振动与波"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-振动与波-旋转矢量法与简谐振动描述-复习}"
+      ]
+    },
+    {
+      "name": "大物-振动与波-机械波与波函数概述-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "振动与波"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-振动与波-旋转矢量法与简谐振动描述-习题}"
+      ]
+    },
+    {
+      "name": "大物-振动与波-机械波与波函数概述-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "振动与波"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-振动与波-机械波与波函数概述-复习}"
+      ]
+    },
+    {
+      "name": "大物-振动与波-波动方程与相位分析-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "振动与波"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-振动与波-机械波与波函数概述-习题}"
+      ]
+    },
+    {
+      "name": "大物-振动与波-波动方程与相位分析-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "振动与波"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-振动与波-波动方程与相位分析-复习}"
+      ]
+    },
+    {
+      "name": "大物-振动与波-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "章节复习",
+        "振动与波"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-振动与波-波动方程与相位分析-习题}"
+      ]
+    },
+    {
+      "name": "大物-振动与波-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "章节习题",
+        "振动与波"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-振动与波-章节复习}"
+      ]
+    },
+    {
+      "name": "大物-静电场-静电场与电场强度-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "静电场"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-振动与波-章节习题}"
+      ]
+    },
+    {
+      "name": "大物-静电场-静电场与电场强度-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "静电场"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-静电场-静电场与电场强度-复习}"
+      ]
+    },
+    {
+      "name": "大物-静电场-电通量与高斯定理-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "静电场"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-静电场-静电场与电场强度-习题}"
+      ]
+    },
+    {
+      "name": "大物-静电场-电通量与高斯定理-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "静电场"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-静电场-电通量与高斯定理-复习}"
+      ]
+    },
+    {
+      "name": "大物-静电场-静电场的环路定理与电势-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "静电场"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-静电场-电通量与高斯定理-习题}"
+      ]
+    },
+    {
+      "name": "大物-静电场-静电场的环路定理与电势-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "静电场"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-静电场-静电场的环路定理与电势-复习}"
+      ]
+    },
+    {
+      "name": "大物-静电场-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "章节复习",
+        "静电场"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-静电场-静电场的环路定理与电势-习题}"
+      ]
+    },
+    {
+      "name": "大物-静电场-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "章节习题",
+        "静电场"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-静电场-章节复习}"
+      ]
+    },
+    {
+      "name": "大物-波动光学-光的干涉原理与两类装置-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "波动光学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-静电场-章节习题}"
+      ]
+    },
+    {
+      "name": "大物-波动光学-光的干涉原理与两类装置-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "波动光学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-波动光学-光的干涉原理与两类装置-复习}"
+      ]
+    },
+    {
+      "name": "大物-波动光学-半波损失的原理与判断-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "波动光学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-波动光学-光的干涉原理与两类装置-习题}"
+      ]
+    },
+    {
+      "name": "大物-波动光学-半波损失的原理与判断-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "波动光学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-波动光学-半波损失的原理与判断-复习}"
+      ]
+    },
+    {
+      "name": "大物-波动光学-惠更斯-菲涅耳原理与衍射分类-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "波动光学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-波动光学-半波损失的原理与判断-习题}"
+      ]
+    },
+    {
+      "name": "大物-波动光学-惠更斯-菲涅耳原理与衍射分类-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "波动光学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-波动光学-惠更斯-菲涅耳原理与衍射分类-复习}"
+      ]
+    },
+    {
+      "name": "大物-波动光学-圆孔衍射与光学仪器分辨本领-复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "复习",
+        "波动光学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-波动光学-惠更斯-菲涅耳原理与衍射分类-习题}"
+      ]
+    },
+    {
+      "name": "大物-波动光学-圆孔衍射与光学仪器分辨本领-习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "习题",
+        "波动光学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-波动光学-圆孔衍射与光学仪器分辨本领-复习}"
+      ]
+    },
+    {
+      "name": "大物-波动光学-章节复习",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "章节复习",
+        "波动光学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-波动光学-圆孔衍射与光学仪器分辨本领-习题}"
+      ]
+    },
+    {
+      "name": "大物-波动光学-章节习题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "章节习题",
+        "波动光学"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-波动光学-章节复习}"
+      ]
+    },
+    {
+      "name": "大物-题库-选择题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "题库"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-波动光学-章节习题}"
+      ]
+    },
+    {
+      "name": "大物-题库-填空题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "题库"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-题库-选择题}"
+      ]
+    },
+    {
+      "name": "大物-题库-判断题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "题库"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-题库-填空题}"
+      ]
+    },
+    {
+      "name": "大物-题库-计算题",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "大物",
+        "题库"
+      ],
+      "difficulty": 2,
+      "priority": 5,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:大物-题库-判断题}"
+      ]
+    },
+    {
+      "name": "CET4-听力-仔细阅读解题方法",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": []
+    },
+    {
+      "name": "CET4-听力-长对话题型解题方法",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-听力-仔细阅读解题方法}"
+      ]
+    },
+    {
+      "name": "CET4-听力-新闻与篇章解题策略",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-听力-长对话题型解题方法}"
+      ]
+    },
+    {
+      "name": "CET4-听力-信号词体系与真题技巧",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-听力-新闻与篇章解题策略}"
+      ]
+    },
+    {
+      "name": "CET4-听力-真题-2025年6月第1套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "听力",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-听力-信号词体系与真题技巧}"
+      ]
+    },
+    {
+      "name": "CET4-听力-真题-2025年6月第2套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "听力",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-听力-真题-2025年6月第1套}"
+      ]
+    },
+    {
+      "name": "CET4-听力-真题-2025年6月第3套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "听力",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-听力-真题-2025年6月第2套}"
+      ]
+    },
+    {
+      "name": "CET4-听力-真题-2025年12月第1套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "听力",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-听力-真题-2025年6月第3套}"
+      ]
+    },
+    {
+      "name": "CET4-阅读-仔细阅读总览与答题策略",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "阅读"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-听力-真题-2025年12月第1套}"
+      ]
+    },
+    {
+      "name": "CET4-阅读-题型分类与主旨题解法",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "阅读"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-阅读-仔细阅读总览与答题策略}"
+      ]
+    },
+    {
+      "name": "CET4-阅读-长篇阅读解题方法",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "阅读"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-阅读-题型分类与主旨题解法}"
+      ]
+    },
+    {
+      "name": "CET4-阅读-选词填空与三步定位法",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "阅读"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-阅读-长篇阅读解题方法}"
+      ]
+    },
+    {
+      "name": "CET4-阅读-真题-2025年6月第1套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "阅读",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-阅读-选词填空与三步定位法}"
+      ]
+    },
+    {
+      "name": "CET4-阅读-真题-2025年6月第2套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "阅读",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-阅读-真题-2025年6月第1套}"
+      ]
+    },
+    {
+      "name": "CET4-阅读-真题-2025年6月第3套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "阅读",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-阅读-真题-2025年6月第2套}"
+      ]
+    },
+    {
+      "name": "CET4-阅读-真题-2025年12月第1套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "阅读",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-阅读-真题-2025年6月第3套}"
+      ]
+    },
+    {
+      "name": "CET4-写作-议论文框架与保底原则",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "写作"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-阅读-真题-2025年12月第1套}"
+      ]
+    },
+    {
+      "name": "CET4-写作-书信模板与三大论证方式",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "写作"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-写作-议论文框架与保底原则}"
+      ]
+    },
+    {
+      "name": "CET4-写作-句子扩写与句型改写",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "写作"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-写作-书信模板与三大论证方式}"
+      ]
+    },
+    {
+      "name": "CET4-写作-非谓语动词与被动语态",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "写作"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-写作-句子扩写与句型改写}"
+      ]
+    },
+    {
+      "name": "CET4-写作-真题-2025年6月第1套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "写作",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-写作-非谓语动词与被动语态}"
+      ]
+    },
+    {
+      "name": "CET4-写作-真题-2025年6月第2套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "写作",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-写作-真题-2025年6月第1套}"
+      ]
+    },
+    {
+      "name": "CET4-写作-真题-2025年6月第3套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "写作",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-写作-真题-2025年6月第2套}"
+      ]
+    },
+    {
+      "name": "CET4-写作-真题-2025年12月第1套",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "CET4",
+        "写作",
+        "真题"
+      ],
+      "difficulty": 2,
+      "priority": 10,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:CET4-写作-真题-2025年6月第3套}"
+      ]
+    },
+    {
+      "name": "英语II-听力-第1单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": []
+    },
+    {
+      "name": "英语II-听力-第2单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第1单元}"
+      ]
+    },
+    {
+      "name": "英语II-听力-第3单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第2单元}"
+      ]
+    },
+    {
+      "name": "英语II-听力-第4单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第3单元}"
+      ]
+    },
+    {
+      "name": "英语II-听力-第5单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第4单元}"
+      ]
+    },
+    {
+      "name": "英语II-听力-第6单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第5单元}"
+      ]
+    },
+    {
+      "name": "英语II-听力-第7单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第6单元}"
+      ]
+    },
+    {
+      "name": "英语II-听力-第8单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第7单元}"
+      ]
+    },
+    {
+      "name": "英语II-听力-第9单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第8单元}"
+      ]
+    },
+    {
+      "name": "英语II-听力-第10单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第9单元}"
+      ]
+    },
+    {
+      "name": "英语II-听力-第11单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第10单元}"
+      ]
+    },
+    {
+      "name": "英语II-听力-第12单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "听力"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第11单元}"
+      ]
+    },
+    {
+      "name": "英语II-阅读-第1单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "阅读"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-听力-第12单元}"
+      ]
+    },
+    {
+      "name": "英语II-阅读-第3单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "阅读"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-阅读-第1单元}"
+      ]
+    },
+    {
+      "name": "英语II-阅读-第4单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "阅读"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-阅读-第3单元}"
+      ]
+    },
+    {
+      "name": "英语II-阅读-第6单元",
+      "estimated_time": 25,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "阅读"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-阅读-第4单元}"
+      ]
+    },
+    {
+      "name": "英语II-长篇阅读-第1单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "长篇"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-阅读-第6单元}"
+      ]
+    },
+    {
+      "name": "英语II-长篇阅读-第2单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "长篇"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-长篇阅读-第1单元}"
+      ]
+    },
+    {
+      "name": "英语II-长篇阅读-第3单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "长篇"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-长篇阅读-第2单元}"
+      ]
+    },
+    {
+      "name": "英语II-长篇阅读-第4单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "长篇"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-长篇阅读-第3单元}"
+      ]
+    },
+    {
+      "name": "英语II-长篇阅读-第5单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "长篇"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-长篇阅读-第4单元}"
+      ]
+    },
+    {
+      "name": "英语II-长篇阅读-第6单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "长篇"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-长篇阅读-第5单元}"
+      ]
+    },
+    {
+      "name": "英语II-长篇阅读-第7单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "长篇"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-长篇阅读-第6单元}"
+      ]
+    },
+    {
+      "name": "英语II-长篇阅读-第8单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "长篇"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-长篇阅读-第7单元}"
+      ]
+    },
+    {
+      "name": "英语II-长篇阅读-第9单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "长篇"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-长篇阅读-第8单元}"
+      ]
+    },
+    {
+      "name": "英语II-长篇阅读-第10单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "长篇"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-长篇阅读-第9单元}"
+      ]
+    },
+    {
+      "name": "英语II-翻译-第1单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "翻译"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-长篇阅读-第10单元}"
+      ]
+    },
+    {
+      "name": "英语II-翻译-第3单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "翻译"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-翻译-第1单元}"
+      ]
+    },
+    {
+      "name": "英语II-翻译-第4单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "翻译"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-翻译-第3单元}"
+      ]
+    },
+    {
+      "name": "英语II-翻译-第6单元",
+      "estimated_time": 20,
+      "repeat_type": "single",
+      "tags": [
+        "英语II",
+        "翻译"
+      ],
+      "difficulty": 2,
+      "priority": 7,
+      "resistance": "medium",
+      "energy_required": "medium",
+      "prerequisite_ids": [
+        "${task_name:英语II-翻译-第4单元}"
+      ]
+    }
+  ],
+  "explanation": "共生成 274 个复习任务，覆盖7门课程。依赖逻辑（模拟真实教学顺序）：讲完本节 -> 做本节习题 -> 讲完一章 -> 做章节习题 -> 整本书讲完 -> 做真题。所有任务控制在20-25分钟。考试顺序：CET-4(6/13) > 电子技术(6/18) > 计算机(6/25) > 线性代数(6/29) > 大学英语II(6/30) > 高等数学(7/8) > 大学物理(7/9)。"
+}

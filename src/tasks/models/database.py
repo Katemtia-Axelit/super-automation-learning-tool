@@ -552,6 +552,9 @@ class Database:
         repeat_type = row['repeat_type']
         task_type = row['task_type']
         
+        # 任务完成后，解锁所有依赖当前任务的后续任务
+        self._unlock_dependent_tasks(task_id, cursor)
+        
         now = datetime.now()
         
         if repeat_type == 'none' or task_type in ['deadline', 'other']:
@@ -736,6 +739,40 @@ class Database:
             except (json.JSONDecodeError, TypeError):
                 pass
         return dependent_tasks
+
+    def _unlock_dependent_tasks(self, completed_task_id: int, cursor: sqlite3.Cursor):
+        """完成任务后，级联解锁所有以前置任务为唯一依赖的待解锁任务。"""
+        def _cascade_unlock(cursor, task_id):
+            """递归：解锁所有只依赖 task_id 的待解锁任务"""
+            cursor.execute(
+                "SELECT id, prerequisite_ids FROM tasks WHERE is_unlocked = 0 AND completed = 0"
+            )
+            for row in cursor.fetchall():
+                prereq_raw = row['prerequisite_ids']
+                try:
+                    prereq_ids = json.loads(prereq_raw) if prereq_raw else []
+                except (json.JSONDecodeError, TypeError):
+                    continue
+
+                if task_id not in prereq_ids:
+                    continue
+
+                remaining = [pid for pid in prereq_ids if pid != task_id]
+                if remaining:
+                    cursor.execute(
+                        "UPDATE tasks SET prerequisite_ids = ?, updated_at = ? WHERE id = ?",
+                        (json.dumps(remaining), datetime.now().isoformat(), row['id'])
+                    )
+                else:
+                    cursor.execute(
+                        "UPDATE tasks SET is_unlocked = 1, prerequisite_ids = '[]', updated_at = ? WHERE id = ?",
+                        (datetime.now().isoformat(), row['id'])
+                    )
+                    # 递归检查更下游的任务
+                    _cascade_unlock(cursor, row['id'])
+
+        _cascade_unlock(cursor, completed_task_id)
+        self.conn.commit()
 
     def get_all_unlocked_tasks(self) -> List[Dict]:
         cursor = self.conn.cursor()
