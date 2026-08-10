@@ -589,6 +589,7 @@ input.full-width, select.full-width, textarea.full-width { width: 100%; }
         <select id="timerTaskSelect" style="flex:1;min-width:160px"><option value="">选择任务...</option></select>
         <input type="number" id="timerPlannedMin" value="30" min="1" max="480" style="width:80px" title="计划时长(分)">
         <button type="button" class="btn pri sm" id="timerStartBtn" title="开始计时"><i class="fa-solid fa-play"></i> 开始</button>
+        <button type="button" class="btn sm hidden" id="timerPauseBtn" title="暂停计时"><i class="fa-solid fa-pause"></i></button>
         <button type="button" class="btn danger sm hidden" id="timerStopBtn" title="停止计时"><i class="fa-solid fa-stop"></i> 停止</button>
       </div>
     </div>
@@ -916,6 +917,7 @@ input.full-width, select.full-width, textarea.full-width { width: 100%; }
 <!-- Flying card animation layer (for flight animation) -->
 <div class="card-fly-layer" id="cardFlyLayer"></div>
 
-<script src="/static/app.js?v=20"></script>
+<script src="/static/vendor/marked.min.js"></script>
+<script src="/static/app.js?v=23"></script>
 </body>
 </html>
