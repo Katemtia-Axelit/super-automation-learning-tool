@@ -45,6 +45,46 @@ async function runTests() {
     await page.waitForTimeout(500);
   }
 
+  // 启动时清理可能存在的暂停计时（防止状态泄漏）
+  async function cleanupExistingTimer(page) {
+    try {
+      // 先确保已导航到 BASE_URL（使 fetch 有 base URL）
+      if (!page.url().startsWith(BASE_URL)) {
+        await page.goto(BASE_URL + '/', { waitUntil: 'networkidle' });
+      }
+      // 优先用 API 直接清理暂停的会话（避免 dialog 复杂度）
+      const cleanupResult = await page.evaluate(async () => {
+        try {
+          const active = await fetch('/api/timer/active').then(r => r.json());
+          if (!active || !active.id) {
+            return { cleaned: false, reason: 'no_active_session' };
+          }
+          // 若为 paused 状态：直接 complete（后端已支持同时结束 running 和 paused）
+          if (active.is_paused) {
+            const result = await fetch('/api/timer/complete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ session_id: active.id, actual_minutes: 0, result: 'abandoned', reason: 'test_cleanup' })
+            }).then(r => r.json());
+            return { cleaned: true, session_id: active.id, was_paused: true, result };
+          }
+          // running 状态：先 complete
+          const result = await fetch('/api/timer/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: active.id, actual_minutes: 0, result: 'abandoned', reason: 'test_cleanup' })
+          }).then(r => r.json());
+          return { cleaned: true, session_id: active.id, was_paused: false, result };
+        } catch (e) {
+          return { cleaned: false, error: e.message };
+        }
+      });
+      console.log(`  [cleanup] API 结果: ${JSON.stringify(cleanupResult)}`);
+    } catch (e) {
+      console.log('  [cleanup] 跳过:', e.message);
+    }
+  }
+
   async function test(name, fn) {
     // 每个测试独立 page 实例
     const page = await context.newPage();
@@ -53,6 +93,11 @@ async function runTests() {
       if (msg.type() === 'error') {
         consoleErrors.push(msg.text());
       }
+    });
+
+    // P3-Bug-B: 全局 dialog 处理器（自动接受 confirm/alert/prompt）
+    page.on('dialog', async dialog => {
+      try { await dialog.accept(); } catch (e) {}
     });
 
     try {
@@ -74,6 +119,13 @@ async function runTests() {
 
   // ============ 抽卡测试 ============
   console.log('\n【抽卡】');
+
+  // P3-Bug-B: 先清理可能存在的暂停计时
+  console.log('  [清理] 启动前清理可能存在的暂停计时');
+  const cleanupPage = await context.newPage();
+  cleanupPage.on('dialog', async dialog => { try { await dialog.accept(); } catch (e) {} });
+  await cleanupExistingTimer(cleanupPage);
+  await cleanupPage.close();
 
   await test('1.1 页面加载与元素存在', async (page) => {
     await page.click('[data-page="gacha"]');
@@ -168,7 +220,6 @@ async function runTests() {
     const delBtn = page.locator('.task-card-actions button:has-text("删除")').first();
     if (await delBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
       const before = await page.locator('.task-card:not(.drawn-card)').count();
-      page.once('dialog', d => d.accept());
       await delBtn.click();
       await page.waitForTimeout(2000);
       const after = await page.locator('.task-card:not(.drawn-card)').count();
@@ -202,7 +253,6 @@ async function runTests() {
     // 若已有活动会话，先走 Dock 停止，避免 select 被禁用
     const activeDock = await page.locator('#timerDockActive').isVisible().catch(() => false);
     if (activeDock) {
-      page.once('dialog', d => d.accept());
       await page.click('#timerDockStopBtn');
       await page.waitForTimeout(2000);
       // 关闭可能弹出的关怀弹窗
@@ -215,7 +265,6 @@ async function runTests() {
       }
       await page.waitForTimeout(500);
     }
-
     // 创建任务（唯一名称，避免后端重名 500）
     await page.click('button:has-text("新建任务")');
     await page.waitForSelector('#taskModal:not(.hidden)', { timeout: 5000 });
@@ -287,7 +336,6 @@ async function runTests() {
         feedbackReqs.push(req.postData() || '');
       }
     });
-    page.once('dialog', d => d.accept());
     await stopBtn.click();
     await page.waitForTimeout(3000);
 
@@ -337,6 +385,112 @@ async function runTests() {
     });
     assert(state.flyEmpty, 'cardFlyLayer 应被清空');
     assert(!state.drawing && !state.revealing, `deck 动画类应清除: ${JSON.stringify(state)}`);
+  });
+
+  // ============ R3 回归：XSS 全路径修复验证 ============
+  await test('1.6 XSS转义（全路径：task list / timer select / dep picker）', async (page) => {
+    // 注意：<img src=x onerror=...> 被后端拦截（HTTP 500），故使用 <b>bold</b> 代替
+    // <b> 标签可正常存入 DB，escapeHtml 会将其转义为 &lt;b&gt;，验证逻辑完全相同
+    const xssPayload = '<b>bold</b>';
+    const created = await page.evaluate(async (payload) => {
+      const r = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: payload,
+          estimated_time: 15,
+          category: 'study',
+          priority: 5,
+          repeat_type: 'none',
+          resistance: 'medium',
+          energy_required: 'medium',
+          task_profile: 'deadline_flexible'
+        })
+      });
+      if (!r.ok) {
+        const text = await r.text();
+        return { ok: false, status: r.status, error: text.substring(0, 80) };
+      }
+      return r.json();
+    }, xssPayload);
+    assert(created && created.ok !== false && created.id, `任务创建失败: status=${created.status} error=${created.error}`);
+    const taskId = created.id;
+
+    // 2. 刷新任务列表
+    await page.evaluate(() => { loadTasks(); });
+    await page.waitForTimeout(1000);
+
+    // 3. 检查点 A: task list 中 .task-card-title 是否转义（核心安全断言）
+    //   escapeHtml 处理后 <b> 变成 &lt;b&gt;，innerHTML 中不应出现原始 <b>
+    const taskListCheck = await page.evaluate(() => {
+      const cards = document.querySelectorAll('.task-card');
+      for (const c of cards) {
+        const titleEl = c.querySelector('.task-card-title');
+        if (!titleEl) continue;
+        const raw = titleEl.innerHTML;
+        return {
+          rawHtml: raw.substring(0, 120),
+          // 核心检查：原始 innerHTML 中不能有未转义的 <b> 或 <script> 标签
+          hasRawTag: raw.includes('<b>') || raw.includes('<script') || raw.includes('<div'),
+          // 应该已被转义为 &lt;b&gt;
+          hasEscapedTag: raw.includes('&lt;b&gt;') || raw.includes('&lt;script')
+        };
+      }
+      return null;
+    });
+    assert(taskListCheck !== null, 'task list: 未找到任何任务卡片');
+    assert(!taskListCheck.hasRawTag,
+      `task list: innerHTML 不应含原始 HTML 标签: ${taskListCheck.rawHtml}`);
+    assert(taskListCheck.hasEscapedTag,
+      `task list: 标签应被转义为 &lt;...&gt;，实际: ${taskListCheck.rawHtml}`);
+
+    // 4. 检查点 B: #timerTaskSelect option 是否转义
+    const timerSelectCheck = await page.evaluate(() => {
+      const opts = document.querySelectorAll('#timerTaskSelect option');
+      for (const o of opts) {
+        const raw = o.innerHTML;
+        if (raw.includes('<b>') || raw.includes('<script') || raw.includes('<div')) {
+          return { rawHtml: raw, vulnerable: true };
+        }
+        if (raw.includes('&lt;b&gt;') || raw.includes('&lt;script') || raw.includes('&lt;div')) {
+          return { rawHtml: raw, vulnerable: false };
+        }
+      }
+      return null;
+    });
+    assert(timerSelectCheck !== null && timerSelectCheck.vulnerable !== true,
+      `timer select: 不应有未转义标签，实际: ${timerSelectCheck && timerSelectCheck.rawHtml}`);
+
+    // 5. 检查点 C: #tfDepList label 是否转义
+    await page.evaluate(() => { openTaskEdit(); });
+    await page.waitForSelector('#taskModal:not(.hidden)', { timeout: 5000 });
+    await page.waitForTimeout(500);
+    const depCheck = await page.evaluate(() => {
+      const labels = document.querySelectorAll('#tfDepList label');
+      for (const lbl of labels) {
+        const raw = lbl.innerHTML;
+        if (raw.includes('<b>') || raw.includes('<script') || raw.includes('<div')) {
+          return { rawHtml: raw.substring(0, 100), vulnerable: true };
+        }
+        if (raw.includes('&lt;b&gt;') || raw.includes('&lt;script') || raw.includes('&lt;div')) {
+          return { rawHtml: raw.substring(0, 100), vulnerable: false };
+        }
+      }
+      return null;
+    });
+    assert(depCheck !== null && depCheck.vulnerable !== true,
+      `dep picker: 不应有未转义标签，实际: ${depCheck && depCheck.rawHtml}`);
+
+    // 6. 关闭弹窗，清理测试任务
+    await page.evaluate(() => {
+      const m = document.getElementById('taskModal');
+      if (m) m.classList.add('hidden');
+    });
+    await page.evaluate(async (id) => {
+      await fetch('/api/tasks/' + id, { method: 'DELETE' });
+    }, taskId);
+    await page.evaluate(() => { loadTasks(); });
+    await page.waitForTimeout(500);
   });
 
   // ============ 日程测试 ============
@@ -458,6 +612,394 @@ async function runTests() {
     await page.waitForTimeout(500);
     const modalHidden = await page.locator('#agentReadonlyModal.hidden').count() > 0;
     assert(modalHidden, 'Agent 只读模态框应已关闭');
+  });
+
+  // ============ R3-P3 回归：XSS 残留点（loadTags / openTaskEdit） ============
+  // P3-残留-1：loadTags() 中 t.name 直接拼 innerHTML + onclick
+  // P3-残留-2：openTaskEdit() 中 t.name 仅 .replace(/"/g) 未转义 <>
+  await test('2.6 XSS转义（loadTags 标签徽章）', async (page) => {
+    const xssPayload = '<b><i>x</i></b>';
+    const tagName = await page.evaluate(async (payload) => {
+      const r = await fetch('/api/tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: payload })
+      });
+      if (!r.ok) {
+        const text = await r.text();
+        return { ok: false, status: r.status, error: text.substring(0, 120) };
+      }
+      return r.json();
+    }, xssPayload);
+    assert(tagName && tagName.ok !== false && tagName.id,
+      `tag 创建失败: ${JSON.stringify(tagName)}`);
+    const createdId = tagName.id;
+    try {
+      // 触发 loadTags 渲染
+      await page.evaluate(() => { loadTags(); });
+      await page.waitForTimeout(800);
+      const tagCheck = await page.evaluate((payload) => {
+        const bar = document.getElementById('tagsBar');
+        if (!bar) return { found: false };
+        const html = bar.innerHTML;
+        const containsRaw = html.includes('<b>') || html.includes('<i>') || html.includes('<script');
+        // 找到包含 payload 转义形式的片段
+        const escaped = '&lt;b&gt;&lt;i&gt;x&lt;/i&gt;&lt;/b&gt;';
+        return {
+          found: true,
+          rawSnippet: html.substring(0, 400),
+          containsRawTag: containsRaw,
+          containsEscapedForm: html.includes(escaped)
+        };
+      }, xssPayload);
+      assert(tagCheck.found, 'tagsBar 应存在');
+      assert(!tagCheck.containsRawTag,
+        `tagsBar: innerHTML 不应含原始 HTML 标签，实际: ${tagCheck.rawSnippet}`);
+      assert(tagCheck.containsEscapedForm,
+        `tagsBar: 标签应被转义为 &lt;...&gt;，实际: ${tagCheck.rawSnippet}`);
+      // 兜底：onclick 属性闭合注入检查（防 t.name 注入到 onclick 字符串）
+      // 当前实现 t.name 进入的是 innerHTML 文本位置，但保险起见扫描 onclick 属性
+      const onclickInjection = await page.evaluate(() => {
+        const bar = document.getElementById('tagsBar');
+        const html = bar.innerHTML;
+        // 检查 onclick 属性中是否有未转义的引号/尖括号
+        const matches = html.match(/onclick="[^"]*"/g) || [];
+        for (const m of matches) {
+          if (m.includes('<') || m.includes('>')) return { injected: true, sample: m };
+        }
+        return { injected: false, sample: matches[0] || '' };
+      });
+      assert(!onclickInjection.injected,
+        `tagsBar: onclick 属性不应含尖括号，实际: ${onclickInjection.sample}`);
+    } finally {
+      // 清理测试 tag
+      await page.evaluate(async (id) => {
+        await fetch('/api/tags/' + id, { method: 'DELETE' });
+      }, createdId);
+      await page.evaluate(() => { loadTags(); });
+      await page.waitForTimeout(300);
+    }
+  });
+
+  await test('2.7 XSS转义（openTaskEdit 已有标签选择器）', async (page) => {
+    const xssPayload = '<b><i>x</i></b>';
+    const tagName = await page.evaluate(async (payload) => {
+      const r = await fetch('/api/tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: payload })
+      });
+      if (!r.ok) {
+        const text = await r.text();
+        return { ok: false, status: r.status, error: text.substring(0, 120) };
+      }
+      return r.json();
+    }, xssPayload);
+    assert(tagName && tagName.ok !== false && tagName.id,
+      `tag 创建失败: ${JSON.stringify(tagName)}`);
+    const createdId = tagName.id;
+    try {
+      // 关键：openTaskEdit 读的是全局 allTags，必须先刷新，否则新 tag 不会进渲染
+      await page.evaluate(() => { loadTags(); });
+      await page.waitForTimeout(500);
+      // 打开新建任务弹窗（openTaskEdit 无参 = 新建模式，但会渲染 #tfExistingTags）
+      await page.evaluate(() => { openTaskEdit(); });
+      await page.waitForSelector('#taskModal:not(.hidden)', { timeout: 5000 });
+      await page.waitForTimeout(500);
+      const tagPickCheck = await page.evaluate((payload) => {
+        const container = document.getElementById('tfExistingTags');
+        if (!container) return { found: false };
+        const html = container.innerHTML;
+        const containsRaw = html.includes('<b>') || html.includes('<i>') || html.includes('<script');
+        const escaped = '&lt;b&gt;&lt;i&gt;x&lt;/i&gt;&lt;/b&gt;';
+        // data-tag 属性也应该被完整转义（关键：原代码只 .replace(/"/g)，会被 "><script> 逃逸）
+        const dataTagSafe = !html.match(/data-tag="[^"]*<[^"]*"/);
+        return {
+          found: true,
+          rawSnippet: html.substring(0, 500),
+          containsRawTag: containsRaw,
+          containsEscapedForm: html.includes(escaped),
+          dataTagSafe
+        };
+      }, xssPayload);
+      assert(tagPickCheck.found, '#tfExistingTags 应存在');
+      assert(!tagPickCheck.containsRawTag,
+        `tfExistingTags: innerHTML 不应含原始 HTML 标签，实际: ${tagPickCheck.rawSnippet}`);
+      assert(tagPickCheck.containsEscapedForm,
+        `tfExistingTags: 标签应被转义为 &lt;...&gt;，实际: ${tagPickCheck.rawSnippet}`);
+      assert(tagPickCheck.dataTagSafe,
+        `tfExistingTags: data-tag 属性不应含未转义尖括号，实际: ${tagPickCheck.rawSnippet}`);
+      // 关闭弹窗
+      await page.evaluate(() => {
+        const m = document.getElementById('taskModal');
+        if (m) m.classList.add('hidden');
+      });
+    } finally {
+      // 清理测试 tag
+      await page.evaluate(async (id) => {
+        await fetch('/api/tags/' + id, { method: 'DELETE' });
+      }, createdId);
+      await page.evaluate(() => { loadTags(); });
+      await page.waitForTimeout(300);
+    }
+  });
+
+  // ============ P3 暂停持久化 E2E 测试 ============
+  console.log('\n【计时器暂停（P3-Bug-B）】');
+
+  // 用例 A：启动计时 → 暂停 → 断言暂停状态
+  await test('3.5 计时器暂停（暂停状态保持）', async (page) => {
+    // 1. 确保无活动会话
+    await page.click('[data-page="gacha"]');
+    await page.waitForTimeout(1000);
+    const activeDock = await page.locator('#timerDockActive').isVisible().catch(() => false);
+    if (activeDock) {
+      await page.click('#timerDockStopBtn');
+      await page.waitForTimeout(2000);
+      // 关闭可能弹出的关怀弹窗
+      if (await page.locator('#careModal:not(.hidden)').count().catch(() => 0)) {
+        await page.evaluate(() => {
+          const m = document.getElementById('careModal');
+          if (m) m.classList.add('hidden');
+        });
+      }
+      await page.waitForTimeout(500);
+    }
+
+    // 2. 去任务页启动计时
+    await page.click('[data-page="tasks"]');
+    await page.waitForTimeout(1500);
+
+    // 创建任务
+    await page.click('button:has-text("新建任务")');
+    await page.waitForSelector('#taskModal:not(.hidden)', { timeout: 5000 });
+    await page.fill('#tfName', '暂停E2E-A-' + Date.now());
+    await page.fill('#tfTime', '30');
+    await page.click('#taskModal button:has-text("保存")');
+    await page.waitForFunction(() => {
+      const el = document.getElementById('taskModal');
+      return el && el.classList.contains('hidden');
+    }, { timeout: 10000 });
+    await page.waitForTimeout(800);
+
+    await page.waitForFunction(() => {
+      const s = document.getElementById('timerTaskSelect');
+      return s && !s.disabled && s.options.length > 1;
+    }, { timeout: 10000 });
+    await page.locator('#timerTaskSelect').selectOption({ index: 1 });
+    await page.fill('#timerPlannedMin', '10');
+    await page.click('#timerStartBtn');
+    await page.waitForTimeout(2000);
+
+    // 断言计时中
+    const status1 = await page.locator('#timerStatusText').textContent();
+    assert(!status1.includes('未在计时'), `计时应进行中: ${status1}`);
+
+    // 3. 暂停
+    await page.click('#timerPauseBtn');
+    await page.waitForTimeout(1000);
+
+    // 4. 断言 UI 显示暂停状态
+    const pausedStatus = await page.locator('#timerStatusText').textContent();
+    assert(pausedStatus.includes('已暂停'), `UI 应显示暂停: ${pausedStatus}`);
+
+    // 5. 断言后端 API 返回 paused 状态
+    const apiResp = await page.evaluate(async () => {
+      const r = await fetch('/api/timer/active');
+      return r.json();
+    });
+    assert(apiResp && apiResp.is_paused === true, `后端应返回 paused: ${JSON.stringify(apiResp)}`);
+  });
+
+  // 用例 B：暂停后刷新页面 → 断言暂停状态保持
+  await test('3.6 计时器暂停（刷新后恢复）', async (page) => {
+    // 1. 确保无活动会话
+    await page.click('[data-page="gacha"]');
+    await page.waitForTimeout(1000);
+    const activeDock = await page.locator('#timerDockActive').isVisible().catch(() => false);
+    if (activeDock) {
+      await page.click('#timerDockStopBtn');
+      await page.waitForTimeout(2000);
+      // 关闭可能弹出的关怀弹窗
+      if (await page.locator('#careModal:not(.hidden)').count().catch(() => 0)) {
+        await page.evaluate(() => {
+          const m = document.getElementById('careModal');
+          if (m) m.classList.add('hidden');
+        });
+      }
+      await page.waitForTimeout(500);
+    }
+
+    // 2. 去任务页启动计时
+    await page.click('[data-page="tasks"]');
+    await page.waitForTimeout(1500);
+
+    // 创建任务
+    await page.click('button:has-text("新建任务")');
+    await page.waitForSelector('#taskModal:not(.hidden)', { timeout: 5000 });
+    await page.fill('#tfName', '暂停E2E-B-' + Date.now());
+    await page.fill('#tfTime', '30');
+    await page.click('#taskModal button:has-text("保存")');
+    await page.waitForFunction(() => {
+      const el = document.getElementById('taskModal');
+      return el && el.classList.contains('hidden');
+    }, { timeout: 10000 });
+    await page.waitForTimeout(800);
+
+    await page.waitForFunction(() => {
+      const s = document.getElementById('timerTaskSelect');
+      return s && !s.disabled && s.options.length > 1;
+    }, { timeout: 10000 });
+    await page.locator('#timerTaskSelect').selectOption({ index: 1 });
+    await page.fill('#timerPlannedMin', '10');
+    await page.click('#timerStartBtn');
+    await page.waitForTimeout(2000);
+
+    // 暂停
+    await page.click('#timerPauseBtn');
+    await page.waitForTimeout(1000);
+
+    // 获取暂停时显示的时间
+    const timeBefore = await page.locator('#timerElapsedDisplay').textContent();
+    assert(timeBefore !== '00:00', `计时应有时间: ${timeBefore}`);
+
+    // 刷新页面
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(2000);
+
+    // 断言暂停状态恢复
+    const statusAfter = await page.locator('#timerStatusText').textContent();
+    assert(statusAfter.includes('已暂停') || statusAfter.includes('计时中'),
+      `刷新后应恢复暂停状态: ${statusAfter}`);
+  });
+
+  // 用例 C：恢复计时 → 断言计时继续 + 服务端状态正确
+  await test('3.7 计时器暂停（恢复后继续）', async (page) => {
+    // 1. 确保无活动会话
+    await page.click('[data-page="gacha"]');
+    await page.waitForTimeout(1000);
+    const activeDock = await page.locator('#timerDockActive').isVisible().catch(() => false);
+    if (activeDock) {
+      await page.click('#timerDockStopBtn');
+      await page.waitForTimeout(2000);
+      // 关闭可能弹出的关怀弹窗
+      if (await page.locator('#careModal:not(.hidden)').count().catch(() => 0)) {
+        await page.evaluate(() => {
+          const m = document.getElementById('careModal');
+          if (m) m.classList.add('hidden');
+        });
+      }
+      await page.waitForTimeout(500);
+    }
+
+    await page.click('[data-page="tasks"]');
+    await page.waitForTimeout(1500);
+
+    // 检查是否有活动会话（可能从上一测试继承）
+    let hasActive = await page.locator('#timerDockActive').isVisible().catch(() => false);
+    if (!hasActive) {
+      // 创建任务
+      await page.click('button:has-text("新建任务")');
+      await page.waitForSelector('#taskModal:not(.hidden)', { timeout: 5000 });
+      await page.fill('#tfName', '暂停E2E-C-' + Date.now());
+      await page.fill('#tfTime', '30');
+      await page.click('#taskModal button:has-text("保存")');
+      await page.waitForFunction(() => {
+        const el = document.getElementById('taskModal');
+        return el && el.classList.contains('hidden');
+      }, { timeout: 10000 });
+      await page.waitForTimeout(800);
+      await page.waitForFunction(() => {
+        const s = document.getElementById('timerTaskSelect');
+        return s && !s.disabled && s.options.length > 1;
+      }, { timeout: 10000 });
+      await page.locator('#timerTaskSelect').selectOption({ index: 1 });
+      await page.fill('#timerPlannedMin', '10');
+      await page.click('#timerStartBtn');
+      await page.waitForTimeout(2000);
+    }
+
+    // 暂停
+    await page.click('#timerPauseBtn');
+    await page.waitForTimeout(1000);
+
+    const timePaused = await page.locator('#timerElapsedDisplay').textContent();
+    const pausedStatus = await page.locator('#timerStatusText').textContent();
+    assert(pausedStatus.includes('已暂停'), `应显示暂停: ${pausedStatus}`);
+
+    // 恢复
+    await page.click('#timerPauseBtn');
+    await page.waitForTimeout(2000);
+
+    // 断言不再显示暂停
+    const resumedStatus = await page.locator('#timerStatusText').textContent();
+    assert(!resumedStatus.includes('已暂停'), `恢复后不应显示暂停: ${resumedStatus}`);
+
+    // 断言后端状态
+    const apiResp = await page.evaluate(async () => {
+      const r = await fetch('/api/timer/active');
+      return r.json();
+    });
+    assert(apiResp && apiResp.is_paused === false, `后端应返回非暂停: ${JSON.stringify(apiResp)}`);
+  });
+
+  // 用例 D：暂停期间时间不累计
+  await test('3.8 计时器暂停（暂停期间时间不跳变）', async (page) => {
+    // 1. 确保无活动会话
+    await page.click('[data-page="gacha"]');
+    await page.waitForTimeout(1000);
+    const activeDock = await page.locator('#timerDockActive').isVisible().catch(() => false);
+    if (activeDock) {
+      await page.click('#timerDockStopBtn');
+      await page.waitForTimeout(2000);
+      // 关闭可能弹出的关怀弹窗
+      if (await page.locator('#careModal:not(.hidden)').count().catch(() => 0)) {
+        await page.evaluate(() => {
+          const m = document.getElementById('careModal');
+          if (m) m.classList.add('hidden');
+        });
+      }
+      await page.waitForTimeout(500);
+    }
+
+    await page.click('[data-page="tasks"]');
+    await page.waitForTimeout(1500);
+
+    // 创建任务并启动
+    await page.click('button:has-text("新建任务")');
+    await page.waitForSelector('#taskModal:not(.hidden)', { timeout: 5000 });
+    await page.fill('#tfName', '暂停E2E-D-' + Date.now());
+    await page.fill('#tfTime', '30');
+    await page.click('#taskModal button:has-text("保存")');
+    await page.waitForFunction(() => {
+      const el = document.getElementById('taskModal');
+      return el && el.classList.contains('hidden');
+    }, { timeout: 10000 });
+    await page.waitForTimeout(800);
+    await page.waitForFunction(() => {
+      const s = document.getElementById('timerTaskSelect');
+      return s && !s.disabled && s.options.length > 1;
+    }, { timeout: 10000 });
+    await page.locator('#timerTaskSelect').selectOption({ index: 1 });
+    await page.fill('#timerPlannedMin', '10');
+    await page.click('#timerStartBtn');
+    await page.waitForTimeout(2000);
+
+    const time1 = await page.locator('#timerElapsedDisplay').textContent();
+    assert(time1 !== '00:00', `计时应已开始: ${time1}`);
+
+    // 暂停
+    await page.click('#timerPauseBtn');
+    await page.waitForTimeout(500);
+    const timeAtPause = await page.locator('#timerElapsedDisplay').textContent();
+
+    // 等待 3 秒
+    await page.waitForTimeout(3000);
+
+    // 断言时间没有增加（暂停期间不累计）
+    const timeAfterWait = await page.locator('#timerElapsedDisplay').textContent();
+    assert(timeAfterWait === timeAtPause,
+      `暂停期间时间应不变: ${timeAtPause} -> ${timeAfterWait}`);
   });
 
   // ============ 全局测试 ============

@@ -737,6 +737,8 @@ def ensure_timer_schema(conn):
         ('reason', 'TEXT', None),
         ('notes', 'TEXT', None),
         ('created_at', 'TEXT', 'CURRENT_TIMESTAMP'),
+        # P3-Bug: 暂停持久化支持（累计暂停秒数，刷新后可恢复）
+        ('paused_seconds', 'INTEGER', '0'),
     ])
     conn.commit()
 
@@ -3032,8 +3034,9 @@ def api_timer_complete():
     try:
         cur = conn.cursor()
         now = datetime.now().isoformat()
+        # P3-Bug-B: 允许结束 running 或 paused 状态的会话
         cur.execute('''UPDATE timer_sessions SET ended_at=?, actual_minutes=?, status="ended", result=?, reason=?
-                       WHERE id=? AND status="running"''',
+                       WHERE id=? AND status IN ("running", "paused")''',
                    (now, actual_minutes, result, reason, session_id))
         conn.commit()
         if cur.rowcount == 0:
@@ -3047,13 +3050,80 @@ def api_timer_active():
     conn = get_db_connection()
     try:
         cur = conn.cursor()
-        cur.execute('''SELECT ts.id, ts.task_id, ts.started_at, ts.planned_minutes, t.name as task_name
+        cur.execute('''SELECT ts.id, ts.task_id, ts.started_at, ts.planned_minutes,
+                              ts.paused_seconds, ts.status, t.name as task_name
                        FROM timer_sessions ts JOIN tasks t ON ts.task_id=t.id
-                       WHERE ts.status="running" ORDER BY ts.started_at DESC LIMIT 1''')
+                       WHERE ts.status IN ('running', 'paused') ORDER BY ts.started_at DESC LIMIT 1''')
         row = cur.fetchone()
         if row:
-            return jsonify(dict(row))
+            result = dict(row)
+            # P3-Bug: 以 status 字段为准（resume 时重置暂停计数）
+            result['is_paused'] = (result.get('status') == 'paused')
+            return jsonify(result)
         return jsonify(None)
+    finally:
+        conn.close()
+
+@app.route('/api/timer/pause', methods=['POST'])
+def api_timer_pause():
+    """暂停当前活动计时器，累积已流逝时间到 paused_seconds"""
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        now = datetime.now().isoformat()
+        # 查找当前活动计时器（running 状态）
+        cur.execute('''SELECT id, started_at, paused_seconds FROM timer_sessions
+                       WHERE status="running" ORDER BY started_at DESC LIMIT 1''')
+        row = cur.fetchone()
+        if not row:
+            return jsonify({'error': '没有活动中的计时器'}), 404
+        session_id, started_at, paused_secs = row
+        paused_secs = paused_secs or 0
+        # 计算从上次恢复/开始到现在经过的秒数
+        last_started = datetime.fromisoformat(started_at)
+        elapsed_since_start = (datetime.now() - last_started).total_seconds()
+        # 总 paused 时间 = 已有 paused 时间 + 本次暂停时的已流逝时间
+        new_paused = int(paused_secs + elapsed_since_start)
+        # 更新 started_at 为当前时间（作为下次 resume 的基准），重置 started_at
+        cur.execute('''UPDATE timer_sessions
+                       SET paused_seconds=?, started_at=?, status="paused"
+                       WHERE id=?''',
+                    (new_paused, now, session_id))
+        conn.commit()
+        return jsonify({
+            'session_id': session_id,
+            'is_paused': True,
+            'paused_seconds': new_paused,
+            'started_at': now
+        })
+    finally:
+        conn.close()
+
+@app.route('/api/timer/resume', methods=['POST'])
+def api_timer_resume():
+    """恢复暂停中的计时器，重新设置 started_at 为当前时间"""
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        now = datetime.now().isoformat()
+        # 查找暂停中的计时器
+        cur.execute('''SELECT id, paused_seconds FROM timer_sessions
+                       WHERE status="paused" ORDER BY started_at DESC LIMIT 1''')
+        row = cur.fetchone()
+        if not row:
+            return jsonify({'error': '没有暂停中的计时器'}), 404
+        session_id, paused_secs = row
+        # 重启 started_at，状态恢复为 running
+        cur.execute('''UPDATE timer_sessions
+                       SET started_at=?, status="running"
+                       WHERE id=?''',
+                    (now, session_id))
+        conn.commit()
+        return jsonify({
+            'session_id': session_id,
+            'is_paused': False,
+            'started_at': now
+        })
     finally:
         conn.close()
 

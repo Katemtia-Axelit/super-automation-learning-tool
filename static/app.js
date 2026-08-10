@@ -311,7 +311,7 @@ function buildTaskCardBodyHtml(task, opts) {
   var sym = CARD_THEME_SYMBOLS[theme] || '\u25C6';
   var corner = CARD_CORNER_LABELS[task.category] || '任务';
   var tags = (task.tags || []).map(function (x) {
-    return '<span class="badge bg-gold">' + x + '</span>';
+    return '<span class="badge bg-gold">' + escapeHtml(x) + '</span>';
   }).join('');
   var repeatLbl = CARD_REPEAT_LABELS[task.repeat_type] || '单次';
   var mins = task.estimated_time || '?';
@@ -330,8 +330,8 @@ function buildTaskCardBodyHtml(task, opts) {
     '<span class="task-card-mark" title="优先级">P' + priority + '</span>' +
     '</div>' +
     '<div class="task-card-body-zone">' +
-    '<div class="task-card-title">' + task.name + '</div>' +
-    '<div class="task-card-desc">' + (task.description || '').substring(0, opts.descLen || 100) + '</div>' +
+    '<div class="task-card-title">' + escapeHtml(task.name) + '</div>' +
+    '<div class="task-card-desc">' + escapeHtml((task.description || '').substring(0, opts.descLen || 100)) + '</div>' +
     (opts.blockedNote || '') +
     '<div class="task-card-meta">' +
     '<span class="task-card-stat"><i class="fa-solid fa-clock"></i>' + mins + ' 分</span>' +
@@ -412,11 +412,21 @@ async function loadTimerDockActive() {
   try {
     var r = await api('/api/timer/active');
     timerDockSession = r && r.id ? r : null;
-    timerDockPaused = false;
-    timerDockPausedElapsed = 0;
+    // P3-Bug: 从后端读取 paused 状态（刷新后可恢复）
+    timerDockPaused = !!(r && r.is_paused);
+    timerDockPausedElapsed = (r && r.paused_seconds) ? r.paused_seconds * 1000 : 0;
     updateTimerDockDisplay();
+    // P3-Bug-A: 同步到任务页计时器状态（统一状态源）
+    if (timerActiveSession !== timerDockSession) {
+      timerActiveSession = timerDockSession;
+      if (document.getElementById('page-tasks') && document.getElementById('page-tasks').classList.contains('active')) {
+        updateTimerDisplay();
+      }
+    }
   } catch (e) {
     timerDockSession = null;
+    timerDockPaused = false;
+    timerDockPausedElapsed = 0;
     updateTimerDockDisplay();
   }
 }
@@ -442,7 +452,14 @@ function updateTimerDockDisplay() {
 
   var started = new Date(timerDockSession.started_at).getTime();
   var elapsed = Date.now() - started;
-  if (timerDockPaused) elapsed = timerDockPausedElapsed;
+  // P3-Bug-B: 暂停状态时 elapsed 已被后端暂停累积值覆盖
+  if (timerDockPaused) {
+    elapsed = timerDockPausedElapsed;
+  } else {
+    // 运行时：加入历史暂停时间（resume 后 paused_seconds 仍保留）
+    var sessionPausedMs = (timerDockSession.paused_seconds || 0) * 1000;
+    elapsed += sessionPausedMs;
+  }
 
   var sec = Math.floor(elapsed / 1000);
   var m = Math.floor(sec / 60);
@@ -467,17 +484,51 @@ function updateTimerDockDisplay() {
   }
 }
 
-function toggleTimerDockPause() {
+async function toggleTimerDockPause() {
   if (!timerDockSession) return;
   if (!timerDockPaused) {
-    // 暂停：记录当前已流逝的时间
-    timerDockPaused = true;
-    var started = new Date(timerDockSession.started_at).getTime();
-    timerDockPausedElapsed = Date.now() - started;
+    // P3-Bug-B: 调用后端 API 暂停（持久化）
+    try {
+      var r = await api('/api/timer/pause', {
+        method: 'POST',
+        body: JSON.stringify({ session_id: timerDockSession.id })
+      });
+      timerDockPaused = true;
+      timerDockPausedElapsed = (r && r.paused_seconds) ? r.paused_seconds * 1000 : timerDockPausedElapsed;
+      // P3-Bug-A: 同步到任务页
+      if (timerActiveSession && timerActiveSession.id === timerDockSession.id) {
+        timerActiveSession = timerDockSession;
+        if (document.getElementById('page-tasks') && document.getElementById('page-tasks').classList.contains('active')) {
+          updateTimerDisplay();
+        }
+      }
+    } catch (e) {
+      toast(e.message || '暂停失败', 'err');
+      return;
+    }
   } else {
-    // 继续：重置 started_at 为"当前时间 - 已流逝时间"
-    timerDockPaused = false;
-    timerDockSession.started_at = new Date(Date.now() - timerDockPausedElapsed).toISOString();
+    // P3-Bug-B: 调用后端 API 恢复（持久化）
+    try {
+      var r2 = await api('/api/timer/resume', {
+        method: 'POST',
+        body: JSON.stringify({ session_id: timerDockSession.id })
+      });
+      timerDockPaused = false;
+      // 更新 started_at（后端返回的新起点时间）
+      if (r2 && r2.started_at) {
+        timerDockSession.started_at = r2.started_at;
+      }
+      // P3-Bug-A: 同步到任务页
+      if (timerActiveSession && timerActiveSession.id === timerDockSession.id) {
+        timerActiveSession = timerDockSession;
+        if (document.getElementById('page-tasks') && document.getElementById('page-tasks').classList.contains('active')) {
+          updateTimerDisplay();
+        }
+      }
+    } catch (e) {
+      toast(e.message || '恢复失败', 'err');
+      return;
+    }
   }
   updateTimerDockDisplay();
 }
@@ -493,17 +544,23 @@ async function stopTimerFromDock(sessionId) {
   var session = timerDockSession;
   try {
     if (session && session.id) {
+      // P3-Bug-A: 计算实际时间（考虑暂停时间）
       var started = new Date(session.started_at).getTime();
-      var actualMin = Math.max(1, Math.round((Date.now() - started) / 60000));
+      var elapsedMs = Date.now() - started;
+      // 如果当前是暂停状态，用 paused_seconds 计算
+      if (timerDockPaused) elapsedMs = timerDockPausedElapsed;
+      var actualMin = Math.max(1, Math.round(elapsedMs / 60000));
       await api('/api/timer/complete', {
         method: 'POST',
         body: JSON.stringify({ session_id: session.id, actual_minutes: actualMin, result: 'completed', reason: 'early_finish' })
       });
     }
     timerDockSession = null;
+    timerActiveSession = null;  // P3-Bug-A: 同步清空
     timerDockPaused = false;
     timerDockPausedElapsed = 0;
     updateTimerDockDisplay();
+    updateTimerDisplay();  // P3-Bug-A: 两处 UI 同步更新
     if (session && session.task_id) {
       await completeWithFeedback(session.task_id, { finishEarly: true });
     } else {
@@ -1154,7 +1211,7 @@ async function loadTags() {
     var bar = document.getElementById('tagsBar');
     bar.innerHTML = allTags.map(function (t) {
       return '<span class="badge ' + (selectedTagFilter === t.id ? 'bg-gold' : 'bg-blue') +
-        '" onclick="filterByTag(' + t.id + ')">' + t.name + ' (' + t.task_count + ')</span>';
+        '" onclick="filterByTag(' + escapeHtml(String(t.id)) + ')">' + escapeHtml(t.name) + ' (' + escapeHtml(String(t.task_count)) + ')</span>';
     }).join('');
     if (selectedTagFilter) {
       bar.innerHTML += '<span class="badge bg-red" onclick="filterByTag(null)">清除</span>';
@@ -1355,7 +1412,7 @@ function openTaskEdit(id) {
   document.getElementById('taskDelBtn').style.display = 'none';
   loadNoteOptionsForTaskModal();
   document.getElementById('tfExistingTags').innerHTML = allTags.map(function (t) {
-    return '<span class="badge bg-blue tag-pick" data-tag="' + t.name.replace(/"/g, '&quot;') + '">' + t.name + '</span>';
+    return '<span class="badge bg-blue tag-pick" data-tag="' + escapeHtml(t.name) + '">' + escapeHtml(t.name) + '</span>';
   }).join('');
   document.querySelectorAll('#tfExistingTags .tag-pick').forEach(function (el) {
     el.addEventListener('click', function () { toggleExistingTag(el.getAttribute('data-tag')); });
@@ -1428,7 +1485,7 @@ function buildDepList(selectedIds) {
     var done = t.completed ? ' (已完成)' : '';
     return '<label class="note-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">' +
       '<input type="checkbox" class="dep-cb" value="' + t.id + '"' + checked + ' style="width:auto"> ' +
-      t.name + done + ' <span class="note-meta">ID:' + t.id + '</span></label>';
+      escapeHtml(t.name) + done + ' <span class="note-meta">ID:' + t.id + '</span></label>';
   }).join('');
   listEl.querySelectorAll('.dep-cb').forEach(function (cb) {
     cb.addEventListener('change', function () { window._depSelected = readSelectedPrereqs(); });
@@ -1700,6 +1757,10 @@ function closeActivityMgr() {
 // ============ KNOWLEDGE ============
 var currentNotePath = '';
 
+// P3-Bug-D: 前端缓存已加载的笔记数据（按分类）
+var _noteCache = {};
+var _noteCacheCat = null;
+
 async function loadCategories() {
   try {
     var cats = await api('/api/knowledge/categories');
@@ -1724,7 +1785,15 @@ async function loadCategoryNotes(catId, catName) {
     x.classList.toggle('active', x.getAttribute('data-name') === catName);
   });
   try {
-    var notes = await api('/api/knowledge/notes');
+    var notes;
+    // P3-Bug-D: 缓存逻辑——同分类复用已加载数据
+    if (_noteCacheCat === catName && _noteCache[catName]) {
+      notes = _noteCache[catName];
+    } else {
+      notes = await api('/api/knowledge/notes');
+      _noteCache[catName] = notes;
+      _noteCacheCat = catName;
+    }
     var filtered = notes.filter(function (n) { return n.category === catName; });
     var list = document.getElementById('noteList');
     list.innerHTML = '<div class="cat-item" style="font-size:.8rem;color:var(--text-muted)">' +
@@ -1755,8 +1824,24 @@ async function loadNote(path) {
   }
 }
 
+// P3-Bug-C: 使用 marked.js 解析 Markdown（支持代码块、表格、删除线等）
 function mdToHtml(md) {
   if (!md) return '';
+  // 配置 marked 选项
+  if (typeof marked !== 'undefined') {
+    marked.setOptions({
+      breaks: true,      // GFM 换行符
+      gfm: true,        // 启用 GFM（表格、删除线等）
+      headerIds: false, // 不生成 header id（避免冲突）
+      mangle: false     // 不转义内容
+    });
+    try {
+      return marked.parse(md);
+    } catch (e) {
+      console.warn('marked.js 解析失败，回退到正则:', e);
+    }
+  }
+  // 备用正则解析（仅基础功能）
   var h = md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -2470,7 +2555,7 @@ function populateTimerTaskSelect() {
   var opts = '<option value="">选择任务...</option>';
   (allTasks || []).forEach(function (t) {
     if (t.completed || t.in_discard_pile) return;
-    opts += '<option value="' + t.id + '">' + String(t.name).replace(/</g, '&lt;') + '</option>';
+    opts += '<option value="' + t.id + '">' + escapeHtml(t.name) + '</option>';
   });
   sel.innerHTML = opts;
   if (current) sel.value = current;
@@ -2480,6 +2565,7 @@ function updateTimerDisplay() {
   var statusEl = document.getElementById('timerStatusText');
   var elapsedEl = document.getElementById('timerElapsedDisplay');
   var startBtn = document.getElementById('timerStartBtn');
+  var pauseBtn = document.getElementById('timerPauseBtn');
   var stopBtn = document.getElementById('timerStopBtn');
   var sel = document.getElementById('timerTaskSelect');
   var planned = document.getElementById('timerPlannedMin');
@@ -2488,12 +2574,31 @@ function updateTimerDisplay() {
   if (timerActiveSession && timerActiveSession.started_at) {
     var started = new Date(timerActiveSession.started_at).getTime();
     var elapsed = Date.now() - started;
+    // P3-Bug-A: 从全局读取暂停状态（两处 UI 同步）
+    if (timerDockPaused) {
+      elapsed = timerDockPausedElapsed;
+    } else {
+      // 运行时：加入历史暂停时间（resume 后 paused_seconds 仍保留）
+      var sessionPausedMs = (timerActiveSession.paused_seconds || 0) * 1000;
+      elapsed += sessionPausedMs;
+    }
     elapsedEl.textContent = formatElapsed(elapsed);
     var name = timerActiveSession.task_name || taskNameById(timerActiveSession.task_id);
-    statusEl.textContent = '计时中 · ' + name + '（计划 ' + (timerActiveSession.planned_minutes || '?') + ' 分）';
-    statusEl.className = '';
+    var pauseIndicator = timerDockPaused ? ' (已暂停)' : '';
+    statusEl.textContent = '计时中 · ' + name + '（计划 ' + (timerActiveSession.planned_minutes || '?') + ' 分）' + pauseIndicator;
+    statusEl.className = timerDockPaused ? 'timer-paused' : '';
     if (startBtn) startBtn.classList.add('hidden');
     if (stopBtn) stopBtn.classList.remove('hidden');
+    if (pauseBtn) {
+      pauseBtn.classList.remove('hidden');
+      if (timerDockPaused) {
+        pauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        pauseBtn.title = '继续计时器';
+      } else {
+        pauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        pauseBtn.title = '暂停计时器';
+      }
+    }
     if (sel) sel.disabled = true;
     if (planned) planned.disabled = true;
   } else {
@@ -2502,6 +2607,7 @@ function updateTimerDisplay() {
     statusEl.className = 'timer-idle';
     if (startBtn) startBtn.classList.remove('hidden');
     if (stopBtn) stopBtn.classList.add('hidden');
+    if (pauseBtn) pauseBtn.classList.add('hidden');
     if (sel) sel.disabled = false;
     if (planned) planned.disabled = false;
   }
@@ -2518,7 +2624,13 @@ async function loadTimerPanel() {
   if (statusEl) statusEl.textContent = '加载中...';
   try {
     var r = await api('/api/timer/active');
+    // P3-Bug-A: 统一状态源——任务页也使用同一个 timerDockSession
     timerActiveSession = r && r.id ? r : null;
+    // 同步 paused 状态到全局
+    if (timerDockSession && timerDockSession.id === timerActiveSession?.id) {
+      timerDockPaused = !!(r && r.is_paused);
+      timerDockPausedElapsed = (r && r.paused_seconds) ? r.paused_seconds * 1000 : 0;
+    }
     updateTimerDisplay();
     startTimerTick();
   } catch (e) {
@@ -2554,6 +2666,11 @@ async function startTimer() {
       planned_minutes: r.planned_minutes,
       task_name: taskNameById(r.task_id)
     };
+    // P3-Bug-A: 同步到抽卡页 Dock（统一状态源）
+    timerDockSession = timerActiveSession;
+    timerDockPaused = false;
+    timerDockPausedElapsed = 0;
+    updateTimerDockDisplay();
     toast('计时已开始', 'suc');
     updateTimerDisplay();
   } catch (e) {
@@ -2574,8 +2691,11 @@ async function handleTimerOutcome(outcome) {
   if (!timerActiveSession || !timerActiveSession.id) return;
 
   var session = timerActiveSession;
+  // P3-Bug-A: 计算实际时间（考虑暂停时间）
   var started = new Date(session.started_at).getTime();
-  var actualMinutes = Math.max(1, Math.round((Date.now() - started) / 60000));
+  var elapsedMs = Date.now() - started;
+  if (timerDockPaused) elapsedMs = timerDockPausedElapsed;
+  var actualMinutes = Math.max(1, Math.round(elapsedMs / 60000));
   var planned = session.planned_minutes || 30;
   var timerResult = outcome === 'completed' ? 'completed' : 'abandoned';
 
@@ -2590,7 +2710,12 @@ async function handleTimerOutcome(outcome) {
       })
     });
     timerActiveSession = null;
+    // P3-Bug-A: 同步清空 dock 状态
+    timerDockSession = null;
+    timerDockPaused = false;
+    timerDockPausedElapsed = 0;
     updateTimerDisplay();
+    updateTimerDockDisplay();
     toast('计时已结束（' + actualMinutes + ' 分钟）', 'suc');
 
     var fbCtx = {
@@ -2721,6 +2846,7 @@ document.getElementById('stateAssessmentOpenBtn').addEventListener('click', open
 document.getElementById('stateAssessmentCancelBtn').addEventListener('click', closeStateAssessmentModal);
 document.getElementById('stateAssessmentSaveBtn').addEventListener('click', saveStateAssessment);
 document.getElementById('timerStartBtn').addEventListener('click', startTimer);
+document.getElementById('timerPauseBtn').addEventListener('click', toggleTimerDockPause);
 document.getElementById('timerStopBtn').addEventListener('click', stopTimer);
 document.getElementById('timerOutcomeCancelBtn').addEventListener('click', function () {
   closeModal('timerOutcomeModal');
