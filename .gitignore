@@ -53,7 +53,7 @@ TODO.md
 # ============================
 node_modules/
 test-results/
-static/vendor/
+static/vendor/*
 !static/vendor/marked.min.js
 
 # ============================
