@@ -167,6 +167,12 @@ function showPage(id) {
       deck.classList.remove('is-drawing');
       deck.classList.remove('is-revealing');
     }
+    // P0-3: 清除抽卡结果区里残留 .drawn-card 的 is-drawing 状态
+    // 双 rAF 在页面隐藏时可能被节流，导致卡片卡在 is-drawing 永不 is-revealing
+    var drawnCards = document.querySelectorAll('#gachaResult .task-card.drawn-card');
+    drawnCards.forEach(function (c) {
+      c.classList.remove('is-drawing');
+    });
     if (window._inlineTimerHandle) {
       clearInterval(window._inlineTimerHandle);
       window._inlineTimerHandle = null;
@@ -540,7 +546,7 @@ document.getElementById('timerDockStopBtn').addEventListener('click', function (
 });
 
 async function stopTimerFromDock(sessionId) {
-  if (!confirm('确定提前完成此任务？')) return;
+  if (!confirm('确定提前结束此任务？')) return;
   var session = timerDockSession;
   try {
     if (session && session.id) {
@@ -550,9 +556,11 @@ async function stopTimerFromDock(sessionId) {
       // 如果当前是暂停状态，用 paused_seconds 计算
       if (timerDockPaused) elapsedMs = timerDockPausedElapsed;
       var actualMin = Math.max(1, Math.round(elapsedMs / 60000));
+      // P0-2 (bug 3.4) 修复：提前结束 → result=abandoned，不标记任务为完成
+      // 任务保持"可用/未完成"状态，可重新计时；仅 timer_sessions.result='abandoned' 留痕
       await api('/api/timer/complete', {
         method: 'POST',
-        body: JSON.stringify({ session_id: session.id, actual_minutes: actualMin, result: 'completed', reason: 'early_finish' })
+        body: JSON.stringify({ session_id: session.id, actual_minutes: actualMin, result: 'abandoned', reason: 'early_finish' })
       });
     }
     timerDockSession = null;
@@ -562,12 +570,15 @@ async function stopTimerFromDock(sessionId) {
     updateTimerDockDisplay();
     updateTimerDisplay();  // P3-Bug-A: 两处 UI 同步更新
     if (session && session.task_id) {
-      await completeWithFeedback(session.task_id, { finishEarly: true });
+      // P0-2: 不调用 completeWithFeedback（它会把任务标记完成并放入弃牌堆）
+      // 任务保持可用，仅刷新列表让 UI 显示最新状态
+      await loadTasks();
+      await refreshGachaStats();
     } else {
       loadTasks();
       refreshGachaStats();
     }
-    toast('已标记提前完成', 'suc');
+    toast('已中断任务，任务可重新计时', 'inf');
   } catch (e) {
     toast(e.message || '停止失败', 'err');
   }

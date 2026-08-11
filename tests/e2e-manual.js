@@ -1002,6 +1002,237 @@ async function runTests() {
       `暂停期间时间应不变: ${timeAtPause} -> ${timeAfterWait}`);
   });
 
+  // ============ P3 P0 回归：3.8 / 3.4 / 1.3 ============
+  console.log('\n【P0 回归：计时器 interval / abandoned / 切页残留】');
+
+  // ---- P0-1 (bug 3.8): initTimerDock 多次调用不重复创建 interval ----
+  await test('P0-1 initTimerDock 不重复创建 interval', async (page) => {
+    // 用 monkey-patch 统计 setInterval 调用次数
+    await page.evaluate(() => {
+      window.__intervalCounter = { calls: 0, cleared: 0 };
+      const origSet = window.setInterval;
+      const origClear = window.clearInterval;
+      window.setInterval = function (fn, ms) {
+        // 只统计 1000ms 的（即 timerDockTick / timerTickHandle）
+        if (ms === 1000) {
+          window.__intervalCounter.calls += 1;
+          window.__lastTimerId = window.__lastTimerId || {};
+          const id = origSet.call(window, fn, ms);
+          window.__lastTimerId[id] = true;
+          return id;
+        }
+        return origSet.call(window, fn, ms);
+      };
+      window.clearInterval = function (id) {
+        if (window.__lastTimerId && window.__lastTimerId[id]) {
+          window.__intervalCounter.cleared += 1;
+          delete window.__lastTimerId[id];
+        }
+        return origClear.call(window, id);
+      };
+    });
+
+    // 触发多次 initTimerDock 调用（模拟页面反复切换的路径）
+    await page.evaluate(async () => {
+      // 通过全局作用域调用：app.js 中 initTimerDock 是全局函数
+      if (typeof initTimerDock === 'function') {
+        for (var i = 0; i < 5; i++) {
+          initTimerDock();
+        }
+      }
+    });
+    await page.waitForTimeout(500);
+
+    const stats = await page.evaluate(() => window.__intervalCounter);
+    // 期望：5 次 initTimerDock 调用，setInterval 应被调用 5 次（每次都创建新 interval），
+    // 但 clearInterval 应至少被调用 4 次（保留最后一个）。最关键：实际运行的 interval 数量应 ≤ 1。
+    // 由于 initTimerDock 内部已 clearInterval 重置，这里验证 "cleared >= calls - 1"
+    assert(stats.calls >= 1, `setInterval 应至少被调 1 次: ${JSON.stringify(stats)}`);
+    assert(
+      stats.cleared >= stats.calls - 1,
+      `期望 clearInterval >= setInterval-1（保留最后一个）。实际: set=${stats.calls} clear=${stats.cleared}`
+    );
+  });
+
+  // ---- P0-2 (bug 3.4): 提前结束后 abandoned 状态正确，任务保持可用 ----
+  await test('P0-2 stopTimerFromDock 走 abandoned 流程，任务保持可用', async (page) => {
+    // 1. 清理可能存在的活动会话
+    await page.click('[data-page="gacha"]');
+    await page.waitForTimeout(800);
+    const activeDock = await page.locator('#timerDockActive').isVisible().catch(() => false);
+    if (activeDock) {
+      await page.click('#timerDockStopBtn');
+      await page.waitForTimeout(2000);
+      if (await page.locator('#careModal:not(.hidden)').count().catch(() => 0)) {
+        await page.evaluate(() => {
+          const m = document.getElementById('careModal');
+          if (m) m.classList.add('hidden');
+        });
+      }
+      await page.waitForTimeout(500);
+    }
+
+    // 2. 去任务页新建任务
+    await page.click('[data-page="tasks"]');
+    await page.waitForTimeout(1500);
+    const taskName = 'P0-2-abandoned-' + Date.now();
+    await page.click('button:has-text("新建任务")');
+    await page.waitForSelector('#taskModal:not(.hidden)', { timeout: 5000 });
+    await page.fill('#tfName', taskName);
+    await page.fill('#tfTime', '30');
+    await page.click('#taskModal button:has-text("保存")');
+    await page.waitForFunction(() => {
+      const el = document.getElementById('taskModal');
+      return el && el.classList.contains('hidden');
+    }, { timeout: 10000 });
+    await page.waitForTimeout(800);
+
+    // 3. 获取任务 ID 并启动计时
+    const taskId = await page.evaluate((name) => {
+      const t = (window.allTasks || []).find(x => x.name === name);
+      return t ? t.id : null;
+    }, taskName);
+    assert(taskId, `任务应已创建: ${taskName}`);
+
+    await page.waitForFunction(() => {
+      const s = document.getElementById('timerTaskSelect');
+      return s && !s.disabled && s.options.length > 1;
+    }, { timeout: 10000 });
+    await page.locator('#timerTaskSelect').selectOption({ index: 1 });
+    await page.fill('#timerPlannedMin', '10');
+    await page.click('#timerStartBtn');
+    await page.waitForTimeout(2000);
+
+    // 4. 切到抽卡页，点 Dock 停止按钮
+    await page.click('[data-page="gacha"]');
+    await page.waitForTimeout(1000);
+    const dockStopVisible = await page.locator('#timerDockStopBtn').isVisible().catch(() => false);
+    assert(dockStopVisible, 'Dock 停止按钮应可见');
+
+    // 5. 监听 /api/timer/complete 请求，捕获 result 字段
+    const completeReqs = [];
+    page.on('request', req => {
+      if (req.url().includes('/api/timer/complete') && req.method() === 'POST') {
+        completeReqs.push(req.postData() || '');
+      }
+    });
+    // 监听 /api/tasks/{id}/complete（不应被调用——任务不应被标记完成）
+    const taskCompleteReqs = [];
+    page.on('request', req => {
+      const m = req.url().match(/\/api\/tasks\/(\d+)\/complete/);
+      if (m && req.method() === 'POST') {
+        taskCompleteReqs.push({ taskId: m[1], body: req.postData() || '' });
+      }
+    });
+
+    await page.click('#timerDockStopBtn');
+    // 等待弹窗（abandoned 不应弹关怀弹窗，但容错等待）
+    await page.waitForTimeout(3000);
+    // 若弹出关怀弹窗（说明走了 completed 路径），关闭它
+    if (await page.locator('#careModal:not(.hidden)').count().catch(() => 0)) {
+      await page.evaluate(() => {
+        const m = document.getElementById('careModal');
+        if (m) m.classList.add('hidden');
+      });
+      await page.waitForTimeout(500);
+    }
+
+    // 6. 断言 /api/timer/complete 传了 result=abandoned
+    const completeBody = completeReqs.join(' ');
+    assert(
+      completeBody.includes('"result":"abandoned"'),
+      `/api/timer/complete 应传 result=abandoned，实际: ${completeBody.substring(0, 200)}`
+    );
+
+    // 7. 断言任务未被标记完成（不应调用 /api/tasks/{id}/complete）
+    const taskCompleteForOurTask = taskCompleteReqs.filter(r => r.taskId === String(taskId));
+    assert(
+      taskCompleteForOurTask.length === 0,
+      `任务不应被标记完成，实际触发了 ${taskCompleteForOurTask.length} 次 /api/tasks/{id}/complete`
+    );
+
+    // 8. 刷新任务列表，断言任务仍可用（completed=false）
+    await page.evaluate(async (name) => {
+      const tasks = await fetch('/api/tasks').then(r => r.json());
+      window.allTasks = tasks;
+    }, taskName);
+    await page.waitForTimeout(500);
+    const finalTask = await page.evaluate((id) => {
+      const t = (window.allTasks || []).find(x => x.id === id);
+      return t ? { id: t.id, name: t.name, completed: t.completed, in_discard_pile: t.in_discard_pile } : null;
+    }, taskId);
+    assert(finalTask, `任务应仍存在: id=${taskId}`);
+    assert(finalTask.completed !== true, `任务不应被标记 completed: ${JSON.stringify(finalTask)}`);
+    assert(finalTask.in_discard_pile !== true, `任务不应进入弃牌堆: ${JSON.stringify(finalTask)}`);
+
+    // 清理测试任务
+    await page.evaluate(async (id) => {
+      await fetch('/api/tasks/' + id, { method: 'DELETE' });
+    }, taskId);
+  });
+
+  // ---- P0-3 (bug 1.3): 抽卡后切页无残留动画类 ----
+  await test('P0-3 抽卡动画进行中切页，无残留 is-drawing', async (page) => {
+    await page.click('[data-page="gacha"]');
+    await page.waitForTimeout(800);
+
+    // 模拟 renderDrawnCard 后的状态：卡片停在 is-drawing（双 rAF 第二个还没跑）
+    await page.evaluate(() => {
+      const result = document.getElementById('gachaResult');
+      const deck = document.getElementById('gachaDeck');
+      if (!result || !deck) return;
+      // 清理旧残留
+      result.innerHTML = '';
+      const flyLayer = document.getElementById('cardFlyLayer');
+      if (flyLayer) flyLayer.innerHTML = '';
+      deck.classList.remove('is-drawing');
+      deck.classList.remove('is-revealing');
+      // 注入一张模拟卡：停在 is-drawing 状态（模拟 rAF 内层被打断）
+      const wrap = document.createElement('div');
+      wrap.className = 'drawn-card-stage';
+      const card = document.createElement('div');
+      card.className = 'task-card card drawn-card theme-default';
+      card.setAttribute('data-task-id', '99999');
+      card.classList.add('is-drawing');
+      // 关键：故意不加 is-revealing——模拟 rAF 链被切断
+      wrap.appendChild(card);
+      result.appendChild(wrap);
+    });
+
+    // 切走
+    await page.click('[data-page="tasks"]');
+    await page.waitForTimeout(500);
+
+    // 切回
+    await page.click('[data-page="gacha"]');
+    await page.waitForTimeout(500);
+
+    // 检查残留：是否有卡片卡在 is-drawing 但未 is-revealing
+    const stuckCards = await page.evaluate(() => {
+      const cards = document.querySelectorAll('.task-card.drawn-card');
+      const stuck = [];
+      cards.forEach(c => {
+        if (c.classList.contains('is-drawing') && !c.classList.contains('is-revealing')) {
+          stuck.push({
+            taskId: c.getAttribute('data-task-id'),
+            classes: c.className
+          });
+        }
+      });
+      return stuck;
+    });
+    assert(
+      stuckCards.length === 0,
+      `切回后不应有卡在 is-drawing 的卡片，实际残留: ${JSON.stringify(stuckCards)}`
+    );
+
+    // 清理
+    await page.evaluate(() => {
+      const r = document.getElementById('gachaResult');
+      if (r) r.innerHTML = '';
+    });
+  });
+
   // ============ 全局测试 ============
   console.log('\n【全局】');
 
