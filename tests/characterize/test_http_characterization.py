@@ -45,15 +45,67 @@ class CharacterizationTests(unittest.TestCase):
                     parent = db.execute("SELECT completed, success_rate FROM tasks WHERE id=1").fetchone()
                     child = db.execute("SELECT is_unlocked FROM tasks WHERE id=2").fetchone()
                 self.assertEqual(parent[0], 1)
-                if mode == "legacy":
-                    self.assertEqual(child[0], 1)
-                    self.assertIn("synthetic-child", completed["unlocked_tasks"])
-                    self.assertAlmostEqual(parent[1], 0.1)
-                else:
-                    # Known gap: update to Legacy parity after the M2 fix.
-                    self.assertEqual(child[0], 0)
-                    self.assertEqual(completed["unlocked_tasks"], [])
-                    self.assertAlmostEqual(parent[1], 0.0)
+                self.assertEqual(child[0], 1, mode)
+                self.assertIn("synthetic-child", completed["unlocked_tasks"], mode)
+                self.assertAlmostEqual(parent[1], 0.1, msg=mode)
+
+    def test_skip_unlocks_without_success_rate_increment(self):
+        for mode in ("legacy", "factory"):
+            with self.subTest(mode=mode), TemporaryDirectory(prefix="lt_skip_") as temp:
+                port = available_port()
+                root = make_fixture(Path(temp), port)
+                with server(root, mode, port) as base:
+                    status, reply = request_json(base, "/api/tasks/3/skip", {})
+                    self.assertEqual(status, 200, (mode, reply))
+                    self.assertIn("synthetic-locked", reply["unlocked_tasks"])
+                with closing(sqlite3.connect(root / "data" / "synthetic.sqlite3")) as db:
+                    done, rate = db.execute(
+                        "SELECT completed,success_rate FROM tasks WHERE id=3"
+                    ).fetchone()
+                    unlocked = db.execute(
+                        "SELECT is_unlocked FROM tasks WHERE id=4"
+                    ).fetchone()[0]
+                self.assertEqual((done,unlocked), (1,1), mode)
+                self.assertAlmostEqual(rate, 0.0, msg=mode)
+
+    def test_create_task_writes_dependency_edge(self):
+        for mode in ("legacy", "factory"):
+            with self.subTest(mode=mode), TemporaryDirectory(prefix="lt_create_") as temp:
+                port = available_port()
+                root = make_fixture(Path(temp), port)
+                with server(root, mode, port) as base:
+                    status, created = request_json(base, "/api/tasks", {
+                        "name":"synthetic-new-dependent",
+                        "category":"daily",
+                        "prerequisite_ids":[1],
+                    })
+                    self.assertEqual(status, 201, (mode, created))
+                    child_id = created["id"]
+                    dependent_status, dependents = request_json(
+                        base, "/api/tasks/1/dependents"
+                    )
+                    self.assertEqual(dependent_status, 200, (mode, dependents))
+                    self.assertIn(child_id, [r["id"] for r in dependents["dependents"]])
+                with closing(sqlite3.connect(root / "data" / "synthetic.sqlite3")) as db:
+                    edge = db.execute(
+                        "SELECT count(*) FROM task_dependencies WHERE task_id=? AND depends_on_task_id=1",
+                        (child_id,),
+                    ).fetchone()[0]
+                self.assertEqual(edge, 1, mode)
+
+    def test_refuse_increments_synthetic_counter(self):
+        for mode in ("legacy", "factory"):
+            with self.subTest(mode=mode), TemporaryDirectory(prefix="lt_refuse_") as temp:
+                port = available_port()
+                root = make_fixture(Path(temp), port)
+                with server(root, mode, port) as base:
+                    status, response = request_json(base, "/api/tasks/1/refuse", {})
+                    self.assertEqual(status, 200, (mode, response))
+                with closing(sqlite3.connect(root / "data" / "synthetic.sqlite3")) as db:
+                    count = db.execute(
+                        "SELECT refusal_count FROM tasks WHERE id=1"
+                    ).fetchone()[0]
+                self.assertEqual(count, 1, mode)
 
     def test_gacha_invalid_pool_no_data_change(self):
         for mode in ("legacy", "factory"):

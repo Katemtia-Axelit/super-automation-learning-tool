@@ -99,6 +99,63 @@ def _validate_prereqs_no_cycle(conn, task_id, prereq_ids):
     return None
 
 
+def _sync_dependency_edges(conn, task_id, prereq_ids):
+    conn.execute("DELETE FROM task_dependencies WHERE task_id=?", (task_id,))
+    conn.executemany(
+        "INSERT INTO task_dependencies (task_id,depends_on_task_id) VALUES (?,?)",
+        [(task_id, pid) for pid in prereq_ids],
+    )
+
+
+def _all_prereqs_completed(conn, prereq_ids):
+    if not prereq_ids:
+        return True
+    unique = list(dict.fromkeys(prereq_ids))
+    markers = ",".join("?" for _ in unique)
+    completed = conn.execute(
+        f"SELECT id FROM tasks WHERE id IN ({markers}) AND completed=1", unique
+    ).fetchall()
+    return len(completed) == len(unique)
+
+
+def _blocked_message(conn, task):
+    if task.get("is_unlocked") or task.get("completed"):
+        return None
+    prereqs = task.get("prerequisite_ids") or []
+    if not prereqs:
+        return "任务当前不可执行"
+    markers = ",".join("?" for _ in prereqs)
+    rows = conn.execute(
+        f"SELECT id,name FROM tasks WHERE id IN ({markers})", prereqs
+    ).fetchall()
+    names = {r["id"]:r["name"] for r in rows}
+    return "前置任务未完成：" + "、".join(
+        names.get(pid, f"ID={pid}") for pid in prereqs
+    )
+
+
+def _unlock_dependents(conn, parent_id):
+    rows = conn.execute(
+        """SELECT DISTINCT t.id,t.name,t.prerequisite_ids
+           FROM task_dependencies td JOIN tasks t ON td.task_id=t.id
+           WHERE td.depends_on_task_id=? AND t.completed=0 AND t.is_unlocked=0""",
+        (parent_id,),
+    ).fetchall()
+    unlocked = []
+    for row in rows:
+        try:
+            required = json.loads(row["prerequisite_ids"] or "[]")
+        except (TypeError, ValueError):
+            required = []
+        if _all_prereqs_completed(conn, required):
+            conn.execute(
+                "UPDATE tasks SET is_unlocked=1,updated_at=CURRENT_TIMESTAMP WHERE id=?",
+                (row["id"],),
+            )
+            unlocked.append(row["name"])
+    return unlocked
+
+
 @tasks_bp.route("/tasks", methods=["GET"])
 def list_tasks():
     include_completed = request.args.get("include_completed", "false").lower() == "true"
@@ -142,19 +199,16 @@ def create_task():
 
     conn = _conn()
     try:
-        # 1) validate prereqs no cycle (self-edge is fine for create; skip)
-        # 2) compute is_unlocked
-        is_unlocked = 1 if not prereq_ids else 0
-        # any prereq not completed → still locked
+        if any(type(pid) is not int or pid <= 0 for pid in prereq_ids):
+            return jsonify({"error":"invalid prerequisite_ids"}), 400
         if prereq_ids:
-            placeholders = ",".join("?" * len(prereq_ids))
-            cur = conn.cursor()
-            cur.execute(
-                f"SELECT COUNT(*) AS c FROM tasks WHERE id IN ({placeholders}) AND completed = 1",
-                prereq_ids,
-            )
-            if cur.fetchone()["c"] != len(prereq_ids):
-                is_unlocked = 0
+            markers = ",".join("?" for _ in prereq_ids)
+            rows = conn.execute(
+                f"SELECT id FROM tasks WHERE id IN ({markers})", prereq_ids
+            ).fetchall()
+            if len(rows) != len(set(prereq_ids)):
+                return jsonify({"error":"前置任务不存在"}), 400
+        is_unlocked = int(_all_prereqs_completed(conn, prereq_ids))
 
         now = datetime.now().isoformat()
         cur = conn.cursor()
@@ -189,8 +243,10 @@ def create_task():
                 data.get("linked_note_path"),
             ),
         )
+        task_id = cur.lastrowid
+        _sync_dependency_edges(conn, task_id, prereq_ids)
         conn.commit()
-        return jsonify({"id": cur.lastrowid, "message": "Task created"}), 201
+        return jsonify({"id": task_id, "message": "Task created successfully"}), 201
     finally:
         conn.close()
 
@@ -209,18 +265,21 @@ def update_task(task_id):
         # build new prereqs
         if "prerequisite_ids" in data:
             new_prereqs = data["prerequisite_ids"] or []
+            if not isinstance(new_prereqs, list) or any(
+                type(pid) is not int or pid <= 0 for pid in new_prereqs
+            ):
+                return jsonify({"error":"invalid prerequisite_ids"}), 400
+            if new_prereqs:
+                markers = ",".join("?" for _ in new_prereqs)
+                ids = conn.execute(
+                    f"SELECT id FROM tasks WHERE id IN ({markers})", new_prereqs
+                ).fetchall()
+                if len(ids) != len(set(new_prereqs)):
+                    return jsonify({"error":"前置任务不存在"}), 400
             cycle = _validate_prereqs_no_cycle(conn, task_id, new_prereqs)
             if cycle:
                 return jsonify({"error": f"检测到循环依赖: {cycle}"}), 400
-            is_unlocked = 1 if not new_prereqs else 0
-            if new_prereqs:
-                placeholders = ",".join("?" * len(new_prereqs))
-                cur.execute(
-                    f"SELECT COUNT(*) AS c FROM tasks WHERE id IN ({placeholders}) AND completed = 1",
-                    new_prereqs,
-                )
-                if cur.fetchone()["c"] != len(new_prereqs):
-                    is_unlocked = 0
+            is_unlocked = int(_all_prereqs_completed(conn, new_prereqs))
         else:
             new_prereqs = None
             is_unlocked = None
@@ -257,6 +316,8 @@ def update_task(task_id):
         sets.append("updated_at=CURRENT_TIMESTAMP")
         vals.append(task_id)
         cur.execute(f"UPDATE tasks SET {', '.join(sets)} WHERE id = ?", vals)
+        if new_prereqs is not None:
+            _sync_dependency_edges(conn, task_id, new_prereqs)
         conn.commit()
         return jsonify({"message": "Task updated successfully"})
     finally:
@@ -289,6 +350,8 @@ def get_dependents(task_id):
     conn = _conn()
     try:
         cur = conn.cursor()
+        if not cur.execute("SELECT id FROM tasks WHERE id=?", (task_id,)).fetchone():
+            return jsonify({"error":"Task not found"}), 404
         cur.execute(
             """
             SELECT t.id, t.name, t.completed
@@ -298,60 +361,56 @@ def get_dependents(task_id):
         """,
             (task_id,),
         )
+        dependents = [dict(r) for r in cur.fetchall()]
         return jsonify(
             {
                 "task_id": task_id,
-                "dependents": [dict(r) for r in cur.fetchall()],
+                "dependents": dependents,
+                "count": len(dependents),
             }
         )
     finally:
         conn.close()
 
 
-@tasks_bp.route("/tasks/<int:task_id>/complete", methods=["POST"])
-def complete_task(task_id):
+def _finish_task(task_id, *, update_rate):
+    """Preserve the Legacy complete/skip side effects and unlocked name list."""
     conn = _conn()
     try:
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
-        row = cur.fetchone()
-        if not row:
+        row = conn.execute("SELECT * FROM tasks WHERE id=?", (task_id,)).fetchone()
+        if row is None:
             return jsonify({"error": "Task not found"}), 404
-        d = _row_to_dict(row)
-        if not (d.get("is_unlocked") or d.get("completed")):
-            return jsonify({"error": "前置任务未完成，任务当前不可执行"}), 400
-        cur.execute(
-            "UPDATE tasks SET completed=1, last_completed_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE id=?",
+        blocked = _blocked_message(conn, _row_to_dict(row))
+        if blocked:
+            return jsonify({"error":blocked}), 400
+        conn.execute(
+            "UPDATE tasks SET completed=1,updated_at=CURRENT_TIMESTAMP WHERE id=?",
             (task_id,),
         )
+        if update_rate:
+            rate = row["success_rate"] or 0.0
+            conn.execute(
+                "UPDATE tasks SET success_rate=? WHERE id=?",
+                (min(1.0, rate + 0.1), task_id),
+            )
+        unlocked = _unlock_dependents(conn, task_id)
         conn.commit()
-        return jsonify(
-            {"message": "Task completed successfully", "unlocked_tasks": []}
-        )
+        return jsonify({
+            "message": "Task completed successfully" if update_rate else "Task skipped",
+            "unlocked_tasks": unlocked,
+        })
     finally:
         conn.close()
+
+
+@tasks_bp.route("/tasks/<int:task_id>/complete", methods=["POST"])
+def complete_task(task_id):
+    return _finish_task(task_id, update_rate=True)
 
 
 @tasks_bp.route("/tasks/<int:task_id>/skip", methods=["POST"])
 def skip_task(task_id):
-    conn = _conn()
-    try:
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
-        row = cur.fetchone()
-        if not row:
-            return jsonify({"error": "Task not found"}), 404
-        d = _row_to_dict(row)
-        if not (d.get("is_unlocked") or d.get("completed")):
-            return jsonify({"error": "前置任务未完成，任务当前不可执行"}), 400
-        cur.execute(
-            "UPDATE tasks SET completed=1, last_completed_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE id=?",
-            (task_id,),
-        )
-        conn.commit()
-        return jsonify({"message": "Task skipped", "unlocked_tasks": []})
-    finally:
-        conn.close()
+    return _finish_task(task_id, update_rate=False)
 
 
 @tasks_bp.route("/tasks/<int:task_id>/refuse", methods=["POST"])
