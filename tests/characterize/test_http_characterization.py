@@ -107,6 +107,51 @@ class CharacterizationTests(unittest.TestCase):
                     ).fetchone()[0]
                 self.assertEqual(count, 1, mode)
 
+    def test_gacha_draw_replace_and_statistics(self):
+        for mode in ("legacy", "factory"):
+            with self.subTest(mode=mode), TemporaryDirectory(prefix="lt_replace_") as temp:
+                port = available_port()
+                root = make_fixture(Path(temp), port)
+                with server(root, mode, port) as base:
+                    status, detail = request_json(base, "/api/gacha/pools/detail")
+                    self.assertEqual(status, 200, (mode, detail))
+                    self.assertIn("tomato", detail)
+                    self.assertIn("tasks", detail["tomato"])
+                    status, draw = request_json(
+                        base, "/api/gacha/draw",
+                        {"pool":"tomato","energy":"medium"},
+                    )
+                    self.assertEqual(status, 200, (mode, draw))
+                    self.assertEqual(draw["pool"], "tomato")
+                    self.assertEqual(draw["can_replace"], True)
+                    self.assertIn("id", draw["task"])
+                    task_id = draw["task"]["id"]
+                    status, replaced = request_json(
+                        base, "/api/gacha/replace",
+                        {"task_id":task_id, "pool":"tomato", "reason":"too_hard"},
+                    )
+                    self.assertEqual(status, 200, (mode, replaced))
+                    self.assertEqual(replaced["replaced"], task_id)
+                    self.assertEqual(replaced["reason"], "too_hard")
+                    self.assertIn("task", replaced)
+                    status, stats = request_json(base, "/api/gacha/statistics")
+                    self.assertEqual(status, 200, (mode, stats))
+                    self.assertEqual(stats["total_draws"], 1)
+                    self.assertEqual(stats["rejections"], 1)
+                    self.assertEqual(stats["accepted"], 0)
+                with closing(sqlite3.connect(root / "data" / "synthetic.sqlite3")) as db:
+                    row = db.execute(
+                        "SELECT refusal_count,draw_count_today FROM tasks WHERE id=?",
+                        (task_id,),
+                    ).fetchone()
+                    rejection = db.execute(
+                        "SELECT reason FROM task_rejection_log WHERE task_id=?",
+                        (task_id,),
+                    ).fetchone()
+                self.assertEqual(row[0], 1, mode)
+                self.assertGreaterEqual(row[1], 1, mode)
+                self.assertEqual(rejection[0], "too_hard", mode)
+
     def test_gacha_invalid_pool_no_data_change(self):
         for mode in ("legacy", "factory"):
             with self.subTest(mode=mode), TemporaryDirectory(prefix="lt_gacha_") as temp:

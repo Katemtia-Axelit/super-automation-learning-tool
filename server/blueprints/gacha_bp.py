@@ -21,6 +21,9 @@ import os
 import random
 import sqlite3
 from datetime import datetime
+from types import SimpleNamespace
+
+from server.services.gacha import DefaultGachaAlgo, WeightInputs
 
 from flask import Blueprint, current_app, jsonify, request
 
@@ -86,7 +89,20 @@ def _available_tasks(conn):
     """,
         (now,),
     )
-    return [dict(r) for r in cur.fetchall()]
+    tasks = [dict(r) for r in cur.fetchall()]
+    ids = [task["id"] for task in tasks]
+    tag_map = {task_id: [] for task_id in ids}
+    if ids:
+        markers = ",".join("?" for _ in ids)
+        cur.execute(
+            f"SELECT tt.task_id,t.name FROM task_tags tt JOIN tags t ON t.id=tt.tag_id WHERE tt.task_id IN ({markers})",
+            ids,
+        )
+        for row in cur.fetchall():
+            tag_map[row["task_id"]].append(row["name"])
+    for task in tasks:
+        task["tags"] = tag_map.get(task["id"], [])
+    return tasks
 
 
 def _filter_pool(tasks, pool_id, preferred_tag=None, include_category=None, exclude_category=None):
@@ -113,7 +129,23 @@ def _draw(conn, tasks, pool_id, energy="medium", preferred_tag=None, include_cat
     pool = _filter_pool(tasks, pool_id, preferred_tag, include_category, exclude_category)
     if not pool:
         return None
-    return random.choice(pool)
+    session = SimpleNamespace(
+        last_drawn_task_id=None,
+        last_drawn_category=None,
+        category_count_in_last_3={},
+    )
+    algo = DefaultGachaAlgo()
+    weights = [
+        algo.compute_weight(WeightInputs(
+            task=SimpleNamespace(**task),
+            current_energy=energy,
+            session_context=session,
+            draw_count_today=task.get("draw_count_today") or 0,
+        ))
+        for task in pool
+    ]
+    index = algo.pick(len(pool), weights, random)
+    return pool[index]
 
 
 def _record_draw(conn, task_id):
@@ -138,15 +170,33 @@ def list_pools():
 
 @gacha_bp.route("/gacha/pools/detail", methods=["GET"])
 def pools_detail():
+    """Legacy response is keyed by pool id, with eligible task arrays."""
     conn = _conn()
     try:
-        tasks = _available_tasks(conn)
-        out = []
-        for p in _POOLS:
-            lo, hi = _TIME_RANGES.get(p["id"], (0, 9999))
-            count = sum(1 for t in tasks if lo <= (t.get("estimated_time", 0) or 0) < hi)
-            out.append({**p, "available_count": count})
-        return jsonify(out)
+        pools = {
+            "fragment": {"name":"碎片卡池","time_range":"0-15分钟","min":0,"max":15,"tasks":[]},
+            "tomato": {"name":"番茄卡池","time_range":"15-45分钟","min":15,"max":45,"tasks":[]},
+            "deep": {"name":"深度卡池","time_range":"45分钟以上","min":45,"max":999,"tasks":[]},
+        }
+        rows = conn.execute(
+            "SELECT * FROM tasks WHERE completed=0 AND in_discard_pile=0 AND is_unlocked=1"
+        ).fetchall()
+        tasks = [dict(r) for r in rows]
+        ids = [t["id"] for t in tasks]
+        tags = {tid:[] for tid in ids}
+        if ids:
+            markers = ",".join("?" for _ in ids)
+            for row in conn.execute(
+                f"SELECT tt.task_id,t.name FROM task_tags tt JOIN tags t ON t.id=tt.tag_id WHERE tt.task_id IN ({markers})",
+                ids,
+            ):
+                tags[row["task_id"]].append(row["name"])
+        for task in tasks:
+            task["tags"] = tags.get(task["id"], [])
+            minutes = task.get("estimated_time") or 0
+            key = "fragment" if minutes <= 15 else ("tomato" if minutes <= 45 else "deep")
+            pools[key]["tasks"].append(task)
+        return jsonify(pools)
     finally:
         conn.close()
 
@@ -158,10 +208,11 @@ def draw():
     if pool_id not in _TIME_RANGES:
         return jsonify({"error": "Invalid pool"}), 400
     preferred_tag = data.get("preferred_tag")
+    energy = data.get("energy", "medium")
     conn = _conn()
     try:
         tasks = _available_tasks(conn)
-        selected = _draw(conn, tasks, pool_id, preferred_tag=preferred_tag)
+        selected = _draw(conn, tasks, pool_id, energy=energy, preferred_tag=preferred_tag)
         if not selected:
             return jsonify({"error": "No tasks available"}), 404
         _record_draw(conn, selected["id"])
@@ -184,6 +235,7 @@ def care_draw():
     if pool_id not in _TIME_RANGES:
         return jsonify({"error": "Invalid pool"}), 400
     preferred_tag = data.get("preferred_tag")
+    energy = data.get("energy", "medium")
     include_category = data.get("include_category")
     exclude_category = data.get("exclude_category")
     conn = _conn()
@@ -193,6 +245,7 @@ def care_draw():
             conn,
             tasks,
             pool_id,
+            energy=energy,
             preferred_tag=preferred_tag,
             include_category=include_category,
             exclude_category=exclude_category,
@@ -216,38 +269,70 @@ def care_draw():
 def gacha_statistics():
     conn = _conn()
     try:
-        cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) AS c FROM gacha_records")
-        try:
-            total = cur.fetchone()["c"]
-        except sqlite3.OperationalError:
-            total = 0
-        cur.execute("SELECT pool, COUNT(*) AS c FROM gacha_records GROUP BY pool")
-        try:
-            by_pool = [dict(r) for r in cur.fetchall()]
-        except sqlite3.OperationalError:
-            by_pool = []
-        return jsonify({"total": total, "by_pool": by_pool})
+        total = conn.execute("SELECT COUNT(*) AS n FROM gacha_records").fetchone()["n"]
+        accepted = conn.execute(
+            "SELECT COUNT(*) AS n FROM gacha_records WHERE accepted=1"
+        ).fetchone()["n"]
+        by_pool = [dict(r) for r in conn.execute(
+            "SELECT pool_name,COUNT(*) AS cnt FROM gacha_records GROUP BY pool_name ORDER BY cnt DESC"
+        ).fetchall()]
+        rejections = conn.execute(
+            "SELECT COUNT(*) AS n FROM task_rejection_log"
+        ).fetchone()["n"]
+        reasons = [dict(r) for r in conn.execute(
+            "SELECT reason,COUNT(*) AS cnt FROM task_rejection_log "
+            "WHERE timestamp>=date('now','-30 days') GROUP BY reason ORDER BY cnt DESC"
+        ).fetchall()]
+        return jsonify({
+            "total_draws":total,"accepted":accepted,"rejections":rejections,
+            "acceptance_rate":round(accepted/total*100,1) if total else 0,
+            "by_pool":by_pool,"reject_reasons":reasons,
+        })
     finally:
         conn.close()
 
 
 @gacha_bp.route("/gacha/replace", methods=["POST"])
 def gacha_replace():
-    """Replace last drawn task: clear last_drawn_at + reset draw_count_today."""
+    """Record refusal/history, then perform the legacy weighted redraw."""
     data = request.json or {}
     task_id = data.get("task_id")
     if not task_id:
-        return jsonify({"error": "task_id required"}), 400
+        return jsonify({"error":"task_id required"}), 400
+    reason = data.get("reason", "other")
+    pool_id = data.get("pool", "fragment")
+    if pool_id not in _TIME_RANGES:
+        return jsonify({"error":"Invalid pool"}), 400
+    energy = data.get("energy", "medium")
     conn = _conn()
     try:
-        cur = conn.cursor()
-        cur.execute(
-            "UPDATE tasks SET last_drawn_at=NULL, draw_count_today=0 WHERE id=?",
+        now = datetime.now().isoformat()
+        conn.execute(
+            "INSERT INTO task_rejection_log (task_id,reason,timestamp) VALUES (?,?,?)",
+            (task_id, reason, now),
+        )
+        conn.execute(
+            "UPDATE tasks SET refusal_count=refusal_count+1 WHERE id=?",
             (task_id,),
         )
+        conn.execute(
+            "INSERT INTO gacha_records (timestamp,pool_name,available_time,task_id,accepted,refusal_reason) "
+            "VALUES (?,?,?,?,?,?)",
+            (now, pool_id, 30, task_id, 0, reason),
+        )
         conn.commit()
-        return jsonify({"message": "Task replaced", "task_id": task_id})
+        tasks = _available_tasks(conn)
+        selected = _draw(
+            conn, tasks, pool_id, energy=energy,
+            preferred_tag=data.get("preferred_tag"),
+            exclude_category=data.get("exclude_category"),
+        )
+        if not selected:
+            return jsonify({"error":"No replacement available"}), 404
+        _record_draw(conn, selected["id"])
+        return jsonify({
+            "task":_row_to_dict(selected),"replaced":task_id,"reason":reason,
+        })
     finally:
         conn.close()
 

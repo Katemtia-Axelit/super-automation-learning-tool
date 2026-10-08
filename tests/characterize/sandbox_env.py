@@ -107,8 +107,13 @@ def seed(root: Path) -> None:
         CREATE TABLE tags (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE);
         CREATE TABLE task_tags (task_id INTEGER, tag_id INTEGER);
         CREATE TABLE gacha_records (
-          id INTEGER PRIMARY KEY, task_id INTEGER, pool TEXT,
-          accepted INTEGER DEFAULT 1, created_at TEXT DEFAULT CURRENT_TIMESTAMP
+          id INTEGER PRIMARY KEY, task_id INTEGER, pool_name TEXT,
+          timestamp TEXT DEFAULT CURRENT_TIMESTAMP, available_time INTEGER,
+          accepted INTEGER DEFAULT 1, refusal_reason TEXT
+        );
+        CREATE TABLE task_rejection_log (
+          id INTEGER PRIMARY KEY, task_id INTEGER, reason TEXT,
+          timestamp TEXT DEFAULT CURRENT_TIMESTAMP
         );
         INSERT INTO tasks (id,name,priority,completed,prerequisite_ids,is_unlocked)
         VALUES (1,'synthetic-parent',8,0,'[]',1);
