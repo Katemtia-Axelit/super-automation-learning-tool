@@ -107,6 +107,31 @@ class CharacterizationTests(unittest.TestCase):
                     ).fetchone()[0]
                 self.assertEqual(count, 1, mode)
 
+    def test_remaining_legacy_api_coverage(self):
+        endpoints = {
+            "/api/config": dict,
+            "/api/agent/agents": list,
+            "/api/prompts": list,
+            "/api/discard-pile": list,
+            "/api/dependencies": dict,
+        }
+        for mode in ("legacy", "factory"):
+            with self.subTest(mode=mode), TemporaryDirectory(prefix="lt_compat_") as temp:
+                port = available_port()
+                root = make_fixture(Path(temp), port)
+                with server(root, mode, port) as base:
+                    for endpoint, expected_type in endpoints.items():
+                        status, payload = request_json(base, endpoint)
+                        self.assertEqual(status, 200, (mode, endpoint, payload))
+                        self.assertIsInstance(payload, expected_type, (mode, endpoint))
+                    if mode == "factory":
+                        status, payload = request_json(
+                            base, "/api/agent/save-note",
+                            {"filename":"forbidden","content":"never write user notes"},
+                        )
+                        self.assertEqual(status, 403, payload)
+                self.assertEqual(list((root / "vault").iterdir()), [])
+
     def test_gacha_draw_replace_and_statistics(self):
         for mode in ("legacy", "factory"):
             with self.subTest(mode=mode), TemporaryDirectory(prefix="lt_replace_") as temp:
