@@ -62,6 +62,7 @@ def materialize(root: Path, port: int) -> Path:
         output.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(original, output, follow_symlinks=False)
     (root / "static").mkdir()
+    (root / "index.html").write_text("SYNTHETIC_ONLY_UI", encoding="utf-8")
     (root / "vault").mkdir()
     (root / "data").mkdir()
     (root / "config").mkdir()
@@ -147,19 +148,10 @@ def server(root: Path, mode: str, port: int):
         runner = root / "server" / "backend_api.py"
         args = [sys.executable, "-I", str(runner)]
     else:
-        runner = root / "_factory_runner.py"
-        runner.write_text(
-            "import sys\n"
-            "from pathlib import Path\n"
-            "sys.path.insert(0,str(Path(__file__).resolve().parent))\n"
-            "from server.app.app_factory import create_app\n"
-            "from server.app.config import load_config\n"
-            "cfg=load_config()\n"
-            "app=create_app(cfg)\n"
-            "app.run(host='127.0.0.1',port=int(sys.argv[1]),debug=False,use_reloader=False)\n",
-            encoding="utf-8",
-        )
-        args = [sys.executable, "-I", str(runner), str(port)]
+        # Exercise the real Factory launcher code inside the synthetic root.
+        runner = root / "run_app.py"
+        shutil.copyfile(SOURCE_ROOT / "run_app.py", runner)
+        args = [sys.executable, "-I", str(runner)]
     env = {k:v for k,v in os.environ.items() if not (
         k.upper() in {"PYTHONPATH","PYTHONHOME"} or
         any(secret in k.upper() for secret in ("API_KEY","TOKEN","SECRET"))

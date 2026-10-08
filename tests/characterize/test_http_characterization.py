@@ -107,6 +107,16 @@ class CharacterizationTests(unittest.TestCase):
                     ).fetchone()[0]
                 self.assertEqual(count, 1, mode)
 
+    def test_ui_entrypoint_renders_synthetic_index(self):
+        for mode in ("legacy", "factory"):
+            with self.subTest(mode=mode), TemporaryDirectory(prefix="lt_ui_") as temp:
+                port = available_port()
+                root = make_fixture(Path(temp), port)
+                with server(root, mode, port) as base:
+                    with urlopen(base + "/", timeout=3) as response:
+                        self.assertEqual(response.status, 200)
+                        self.assertIn("SYNTHETIC_ONLY_UI", response.read().decode("utf-8"))
+
     def test_remaining_legacy_api_coverage(self):
         endpoints = {
             "/api/config": dict,
@@ -195,7 +205,7 @@ class CharacterizationTests(unittest.TestCase):
             self.assertTrue((root / "server" / "backend_api.py").is_file())
             self.assertTrue((root / "config" / "config.json").is_file())
             self.assertEqual(sorted(x.name for x in root.iterdir()),
-                             ["config", "data", "server", "static", "vault"])
+                             ["config", "data", "index.html", "server", "static", "vault"])
             with self.assertRaises(FileExistsError):
                 materialize(root, available_port())
 
