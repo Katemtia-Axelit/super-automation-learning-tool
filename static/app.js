@@ -156,10 +156,164 @@ function getTaskFeedbackContext(taskId) {
   };
 }
 
+// ============ M02-S03-G02-W03：统一抽卡行为事件上报 =============
+// 合同（LT_M02_S03_G02）：本 W03 **只** 覆盖"抽卡 / 展示 / 帮我选 / 换卡"。
+// - 复用既有 POST /api/task-feedback（后端 server/services/feedback.py 已验收）；
+// - note = {schema_version:1, event_id, session_id, source:'unified_gacha', context:{...}}
+// - 只记录 **真实** 发生的事：真实 task_id、真实 session/event id、真实参数；
+//   绝不虚构时间、完成状态或用户文本（计时/弃牌那 6 个类型留给后续 W04）。
+// - 失败必须 **可见**（toast 提示"未送达"），绝不谎称已保存；
+// - 发送是 fire-and-forget：**不 await、不阻塞**用户主操作，也不伪造成功。
+
+var UNIFIED_GACHA_EVENT_SOURCE = 'unified_gacha';
+var UNIFIED_GACHA_EVENT_SCHEMA_VERSION = 1;
+
+// 本轮抽卡 session：新的 draw / multi / care 开启新 session；
+// 同一条连续换卡链 **沿用** 同一个 session；离开抽卡页即结束。
+var _unifiedGachaSessionId = null;
+// 事件序号：保证同一页面生命周期内 event_id 互不相同。
+var _unifiedGachaEventSeq = 0;
+// 未送达状态（可复用）：成功 / 失败 / 在途计数 + 最近一次错误 + 可重放的载荷。
+// lastFailed 保留 **原 event_id**，所以重发同一个行为仍然是同一个 id（后端幂等）。
+var _unifiedGachaEventDelivery = {
+  sent: 0,
+  failed: 0,
+  pending: 0,
+  lastError: null,
+  lastFailed: null
+};
+window.unifiedGachaEventDelivery = _unifiedGachaEventDelivery;
+
+// 生成一个真实的 event_id（非空字符串、无控制字符、长度 < 128）。
+function newUnifiedGachaEventId(prefix) {
+  _unifiedGachaEventSeq += 1;
+  return String(prefix || 'evt') + '-' + Date.now().toString(36) +
+    '-' + _unifiedGachaEventSeq.toString(36) +
+    '-' + Math.random().toString(36).slice(2, 10);
+}
+
+// 一次 **真实用户动作** 的标识（一次点击 = 一个 action id）。
+// 同一动作派生出的多个事件（card_drawn / card_shown …）共用它，
+// 因此重发该动作时 event_id 保持不变（后端按 event_id 幂等）。
+function newUnifiedGachaActionId(kind) {
+  return newUnifiedGachaEventId('act-' + (kind || 'draw'));
+}
+
+// 由 action id 派生出某类事件的稳定 event_id。
+function unifiedGachaEventId(actionId, eventType, taskId) {
+  var id = String(actionId) + ':' + String(eventType);
+  if (taskId !== undefined && taskId !== null) id += ':' + String(taskId);
+  return id;
+}
+
+// 卡片 **真正渲染进结果区** 后记录 card_shown。
+// 去重键 = session + task + 展示面（surface）+ 动作（action）：
+// 同一动作内的重复渲染不会造成事件洪水；不同展示面（连抽列表 vs 激活到主卡位）
+// 与换牌链上再次出现的同一张卡，都是各自真实的"展示"时刻，分别记一条。
+var _unifiedGachaShownKeys = {};
+function reportUnifiedGachaCardShown(taskId, context, actionId) {
+  var tid = unifiedGachaTaskId(taskId);
+  if (tid === null) return Promise.resolve({ ok: false, error: 'invalid task_id' });
+  var surface = (context && context.surface) ? String(context.surface) : 'default';
+  var action = actionId || ('shown-' + tid);
+  var key = getUnifiedGachaSessionId() + '#' + tid + '#' + surface + '#' + action;
+  if (_unifiedGachaShownKeys[key]) {
+    return Promise.resolve({ ok: true, duplicate: true, skipped: true });
+  }
+  _unifiedGachaShownKeys[key] = true;
+  return sendUnifiedGachaEvent('card_shown', tid, context,
+    unifiedGachaEventId(action, 'card_shown', tid));
+}
+
+// 开启新 session（一次新的抽卡动作）。
+function beginUnifiedGachaSession() {
+  _unifiedGachaEventSeq += 1;
+  _unifiedGachaSessionId = 'sess-' + Date.now().toString(36) +
+    '-' + _unifiedGachaEventSeq.toString(36) +
+    '-' + Math.random().toString(36).slice(2, 8);
+  // 新 session → card_shown 去重表重置。
+  _unifiedGachaShownKeys = {};
+  return _unifiedGachaSessionId;
+}
+
+// 结束 session（离开抽卡页）。
+function endUnifiedGachaSession() {
+  _unifiedGachaSessionId = null;
+}
+
+// 取当前 session id；没有就开一个（保证 session_id 永远非空）。
+function getUnifiedGachaSessionId() {
+  if (!_unifiedGachaSessionId) beginUnifiedGachaSession();
+  return _unifiedGachaSessionId;
+}
+
+// 严格取正整数 task id；不是正整数返回 null（绝不伪造 id）。
+function unifiedGachaTaskId(value) {
+  var n = (typeof value === 'number') ? value : Number(value);
+  if (!isFinite(n) || Math.floor(n) !== n || n <= 0) return null;
+  return n;
+}
+
+// 发送一条统一抽卡行为事件。
+// eventType ∈ {card_drawn, card_shown, help_me_choose, card_replaced}
+// context  只放 **真实已知** 的实际参数。
+// eventId  由调用方在"用户动作发生的那一刻"生成一次；同一动作重发用同一个
+//           id（后端按 event_id 幂等）。
+function sendUnifiedGachaEvent(eventType, taskId, context, eventId) {
+  var tid = unifiedGachaTaskId(taskId);
+  if (tid === null) {
+    // 没有真实 task id → 绝不发送，也绝不谎称成功。
+    return Promise.resolve({ ok: false, error: 'invalid task_id' });
+  }
+  var eid = eventId || newUnifiedGachaEventId(eventType);
+  var note = {
+    schema_version: UNIFIED_GACHA_EVENT_SCHEMA_VERSION,
+    event_id: eid,
+    session_id: getUnifiedGachaSessionId(),
+    source: UNIFIED_GACHA_EVENT_SOURCE,
+    context: (context && typeof context === 'object') ? context : {}
+  };
+  _unifiedGachaEventDelivery.pending += 1;
+  var payload = {
+    task_id: tid,
+    event_type: eventType,
+    reason_category: 'other',
+    note: JSON.stringify(note)
+  };
+  return api('/api/task-feedback', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  }).then(function (res) {
+    _unifiedGachaEventDelivery.pending -= 1;
+    _unifiedGachaEventDelivery.sent += 1;
+    _unifiedGachaEventDelivery.lastFailed = null;
+    return {
+      ok: true,
+      id: res && res.id,
+      status: res && res.status,
+      duplicate: !!(res && res.duplicate)
+    };
+  }).catch(function (e) {
+    _unifiedGachaEventDelivery.pending -= 1;
+    _unifiedGachaEventDelivery.failed += 1;
+    _unifiedGachaEventDelivery.lastError = (e && e.message) ? e.message : '未知错误';
+    // 保留未送达载荷（供重试；event_id 不变）。
+    _unifiedGachaEventDelivery.lastFailed = payload;
+    // 可见的失败提示：没送达就说没送达，绝不谎称保存成功。
+    toast('行为记录未送达（' + _unifiedGachaEventDelivery.lastError + '）', 'err');
+    return { ok: false, error: e };
+  });
+}
+
 // ============ 页面切换 ============
 function showPage(id) {
   // 离开页面时清理抽卡动画残留（P0-3 修复）
   if (id !== 'gacha') {
+    // M02-S03-G01-W04：离开抽卡页即结束本链（清空已换掉的卡、
+    // 开关 A 回到默认关闭；开关 B 本就是每次表单默认不勾选）。
+    if (typeof resetReplaceChain === 'function') resetReplaceChain();
+    // M02-S03-G02-W03：离开抽卡页 → 结束本轮行为事件 session。
+    if (typeof endUnifiedGachaSession === 'function') endUnifiedGachaSession();
     var flyLayer = document.getElementById('cardFlyLayer');
     if (flyLayer) flyLayer.innerHTML = '';
     var deck = document.getElementById('gachaDeck');
@@ -173,9 +327,10 @@ function showPage(id) {
     drawnCards.forEach(function (c) {
       c.classList.remove('is-drawing');
     });
-    if (window._inlineTimerHandle) {
-      clearInterval(window._inlineTimerHandle);
-      window._inlineTimerHandle = null;
+    // AR03-G08：内嵌计时的句柄归 ESM timer owner 所有，离开抽卡页
+    // 由 owner 停止（app.js 不再持有内嵌计时句柄副本）。
+    if (_timerOwner) {
+      _timerOwner.stopInlineTimer();
     }
   }
   document.querySelectorAll('.page').forEach(function (p) { p.classList.remove('active'); });
@@ -206,25 +361,6 @@ function prereqHint(task) {
   var ids = task.prerequisite_ids || [];
   if (!ids.length) return '';
   return '等待前置：' + ids.map(taskNameById).join('、');
-}
-
-function readSelectedPrereqs() {
-  var boxes = document.querySelectorAll('#tfDepList input[type=checkbox]:checked');
-  var ids = [];
-  boxes.forEach(function (b) {
-    var v = parseInt(b.value, 10);
-    if (v) ids.push(v);
-  });
-  return ids;
-}
-
-function validatePrereqsLocal(taskId, prereqIds) {
-  taskId = parseInt(taskId, 10) || 0;
-  prereqIds = prereqIds || [];
-  if (taskId && prereqIds.indexOf(taskId) >= 0) {
-    return '任务不能依赖自身';
-  }
-  return null;
 }
 
 // ============ 导航事件 ============
@@ -260,6 +396,45 @@ var CARD_THEME_SYMBOLS = {
 };
 var CARD_CORNER_LABELS = { study: '学习', exercise: '运动', work: '工作', life: '生活', other: '其他' };
 var CARD_REPEAT_LABELS = { none: '单次', daily: '每日', weekly: '每周', accumulation: '积累' };
+
+// ============ 卡类型（M02-S01-G02-W03）============
+// 卡类型（tasks.task_type）与「类别」（tasks.category）**正交**：
+//   category = 内容维度 —— 这张卡是关于什么的（学习／锻炼／工作／生活／其他）
+//   task_type = 卡类型维度 —— 这张卡是哪一类的卡（标准／自由／微型／目标）
+// 两者互不覆盖、互不猜测、互不改写。
+//
+// 归一规则（**纯展示侧**）：只有严格的四个小写正式值被保留，
+// 其余一切（历史值 normal/other/daily/...、NULL、空串、非字符串、
+// 未知未来值）**一律** 归一为 'standard'。
+// 归一只影响「怎么解释它」，**绝不** 改写用户旧数据。
+var CARD_TYPE_LABELS = { standard: '标准卡', free: '自由卡', micro: '微型卡', goal: '目标卡' };
+var CARD_TYPE_VALUES = ['standard', 'free', 'micro', 'goal'];
+
+// 归一：只有**严格小写**的四个正式值被保留；其余一切
+// （历史值 normal/other/daily/…、NULL、空串、非字符串、未知未来值、
+//  大小写变体如 'FREE'、以及 '__proto__' 之类的原型链污染串）
+// **一律**归一为 'standard'。
+//
+// 用 Object.prototype.hasOwnProperty.call 而不是 `in`，是为了让
+// '__proto__' / 'constructor' / 'toString' 这类原型链上的键
+// **不会**被当成合法卡类型。
+function normalizeCardType(value) {
+  if (typeof value !== 'string') return 'standard';
+  // Preserve the exact public card-type vocabulary; padded values are not official types.
+  for (var i = 0; i < CARD_TYPE_VALUES.length; i++) {
+    if (value === CARD_TYPE_VALUES[i]) return value;
+  }
+  return 'standard';
+}
+
+// 标签映射：结果永远来自上面那张**静态**表，绝不来自用户输入，
+// 因此不可能携带 HTML 注入载荷（调用方仍应 escapeHtml 以策万全）。
+function cardTypeLabel(value) {
+  var v = normalizeCardType(value);
+  return Object.prototype.hasOwnProperty.call(CARD_TYPE_LABELS, v)
+    ? CARD_TYPE_LABELS[v]
+    : '标准卡';
+}
 
 function taskTextBlob(task) {
   var tags = (task.tags || []).join(' ');
@@ -316,6 +491,8 @@ function buildTaskCardBodyHtml(task, opts) {
   var theme = resolveTaskCardTheme(task);
   var sym = CARD_THEME_SYMBOLS[theme] || '\u25C6';
   var corner = CARD_CORNER_LABELS[task.category] || '任务';
+  // 独立的卡类型角标（与上面的内容类别角标并存，互不替代）。
+  var cardType = cardTypeLabel(task.task_type);
   var tags = (task.tags || []).map(function (x) {
     return '<span class="badge bg-gold">' + escapeHtml(x) + '</span>';
   }).join('');
@@ -331,6 +508,7 @@ function buildTaskCardBodyHtml(task, opts) {
     '<div class="task-card-header">' +
     '<div class="task-card-header-main">' +
     '<span class="task-card-corner">' + corner + '</span>' +
+    '<span class="task-card-corner" title="卡类型" style="color:var(--gold)">' + escapeHtml(cardType) + '</span>' +
     (opts.statusHtml || '') +
     '</div>' +
     '<span class="task-card-mark" title="优先级">P' + priority + '</span>' +
@@ -358,8 +536,23 @@ function buildTaskCardHtml(task, opts) {
 }
 
 // ============ 抽卡 ============
-var gachaState = { energy: 'medium', pool: 'fragment', canReplace: true, replacedTaskId: null, feedbackMood: 3, currentTaskId: null, selectedTag: '' };
+// M02-S03-G01-W04：连续换卡链。
+//   replacedTaskIds    —— 本链 **已成功换掉** 的 task id（去重数组）。
+//   allowRepeatReplaced —— 开关 A 的状态（新链默认关闭，链内保持用户选择）。
+// 链的结束点是 开始/接受卡片、跳过/拒绝、重新抽卡、离开抽卡页（showPage）。
+// hide_today（开关 B）只作用于本次被换掉的卡，每次打开表单默认不勾选，
+// 因此 **不** 存进 gachaState，而是每次从表单读取。
+var gachaState = { energy: 'medium', pool: 'fragment', canReplace: true, replacedTaskId: null, replacedTaskIds: [], allowRepeatReplaced: false, feedbackMood: 3, currentTaskId: null, selectedTag: '' };
 var isDrawing = false;
+
+// 结束本链：清空已换掉的卡并恢复开关 A 的默认（关闭）状态。
+function resetReplaceChain() {
+  if (typeof gachaState !== 'object' || !gachaState) return;
+  gachaState.replacedTaskIds = [];
+  gachaState.allowRepeatReplaced = false;
+  gachaState.replacedTaskId = null;
+}
+window.resetReplaceChain = resetReplaceChain;
 
 // 初始化：加载标签到抽卡选择框
 async function initGachaTagSelect() {
@@ -402,173 +595,232 @@ document.querySelectorAll('.pool-btn').forEach(function (b) {
 });
 
 // ============ 计时器Dock（主页面常驻）============
-var timerDockSession = null;
-var timerDockTick = null;
-var timerDockPaused = false;
-var timerDockPausedElapsed = 0;
+// AR03-G08：计时状态与计时生命周期的 **唯一** 所有者是 ESM timer owner
+// （static/modules/timer/index.js）。本节只保留最薄 classic facade：
+//   - app.js **不** 持有任何会话 / 暂停 / interval 副本；
+//   - app.js **不** 直连计时接口（active/start/pause/resume/complete
+//     全部集中在 owner 内，method 与 body 字段逐字保持不变）；
+//   - app.js 只负责流程编排（toast、任务列表刷新、自由卡反馈分流）。
+//
+// 单一共享的 owner promise：并发调用与每秒 tick 不会重复加载模块；
+// 加载失败时清空 promise，允许后续重试。
+var _timerOwner = null;
+var _timerOwnerPromise = null;
+
+function _getTimerOwner() {
+  if (_timerOwner) return Promise.resolve(_timerOwner);
+  if (!_timerOwnerPromise) {
+    // 动态 import 放在 Promise 链里：即便运行环境完全不支持 ESM 动态导入，
+    // 失败也只是 **一个被拒绝的 promise**（绝不抛出到调用栈上、绝不中断
+    // app.js 的启动流程），且下一次调用可以重试。
+    _timerOwnerPromise = Promise.resolve()
+      .then(function () {
+        return import('/static/modules/timer/index.js');
+      })
+      .then(function (mod) {
+        _timerOwner = mod.createTimerOwner({
+          api: api,
+          taskNameById: taskNameById,
+          formatElapsed: formatElapsed
+        });
+        return _timerOwner;
+      })
+      .catch(function (err) {
+        // 允许重试：下一次调用会重新 import。
+        _timerOwnerPromise = null;
+        throw err;
+      });
+  }
+  return _timerOwnerPromise;
+}
+
+// 同步读取 owner 快照（只读）。owner 尚未就绪时返回空快照 —— 此时不可能
+// 存在任何进行中的计时（计时只能由 owner 启动）。
+function _timerSnapshot() {
+  if (!_timerOwner) return { session: null, paused: false, pausedElapsedMs: 0 };
+  return _timerOwner.getSnapshot();
+}
+
+// 是否存在"正在运行的内嵌计时"（用于多抽 / 激活卡的互斥判断）。
+function _timerRunning() {
+  if (!_timerOwner) return false;
+  var snap = _timerOwner.getSnapshot();
+  return !!(snap.session && _timerOwner.hasInlineTimer());
+}
+
+// 两处计时 UI 同步刷新（任务页只有在其可见时才需要重绘）。
+function _refreshTimerViews() {
+  if (!_timerOwner) return;
+  _timerOwner.updateDock();
+  var page = document.getElementById('page-tasks');
+  if (page && page.classList.contains('active')) {
+    _timerOwner.updatePanel();
+  }
+}
 
 function initTimerDock() {
+  // Dock 每秒刷新（句柄归 owner 所有）。
+  _getTimerOwner().then(function (owner) {
+    owner.startDockTick();
+  }).catch(function (e) {
+    console.error('[timer] initTimerDock', e);
+  });
+  // 读取活动计时（刷新后从服务端恢复唯一 session）。
   loadTimerDockActive();
-  // 每秒更新
-  if (timerDockTick) clearInterval(timerDockTick);
-  timerDockTick = setInterval(updateTimerDockDisplay, 1000);
 }
 
 async function loadTimerDockActive() {
   try {
-    var r = await api('/api/timer/active');
-    timerDockSession = r && r.id ? r : null;
-    // P3-Bug: 从后端读取 paused 状态（刷新后可恢复）
-    timerDockPaused = !!(r && r.is_paused);
-    timerDockPausedElapsed = (r && r.paused_seconds) ? r.paused_seconds * 1000 : 0;
-    updateTimerDockDisplay();
-    // P3-Bug-A: 同步到任务页计时器状态（统一状态源）
-    if (timerActiveSession !== timerDockSession) {
-      timerActiveSession = timerDockSession;
-      if (document.getElementById('page-tasks') && document.getElementById('page-tasks').classList.contains('active')) {
-        updateTimerDisplay();
-      }
-    }
+    var owner = await _getTimerOwner();
+    await owner.loadActive();
   } catch (e) {
-    timerDockSession = null;
-    timerDockPaused = false;
-    timerDockPausedElapsed = 0;
-    updateTimerDockDisplay();
+    // 读取失败 → 视为无活动计时（与迁移前语义一致），并清空 owner，
+    // 绝不让 Dock 与任务页各自保留一份副本。
+    if (_timerOwner) _timerOwner.clear();
   }
+  _refreshTimerViews();
 }
 
-function updateTimerDockDisplay() {
-  var idleEl = document.getElementById('timerDockIdle');
-  var activeEl = document.getElementById('timerDockActive');
-  var taskNameEl = document.getElementById('timerDockTaskName');
-  var timeEl = document.getElementById('timerDockTime');
-  var barEl = document.getElementById('timerDockBar');
-  var pauseBtn = document.getElementById('timerDockPauseBtn');
-
-  if (!idleEl || !activeEl) return;
-
-  if (!timerDockSession || !timerDockSession.started_at) {
-    idleEl.classList.remove('hidden');
-    activeEl.classList.add('hidden');
-    return;
-  }
-
-  idleEl.classList.add('hidden');
-  activeEl.classList.remove('hidden');
-
-  var started = new Date(timerDockSession.started_at).getTime();
-  var elapsed = Date.now() - started;
-  // P3-Bug-B: 暂停状态时 elapsed 已被后端暂停累积值覆盖
-  if (timerDockPaused) {
-    elapsed = timerDockPausedElapsed;
-  } else {
-    // 运行时：加入历史暂停时间（resume 后 paused_seconds 仍保留）
-    var sessionPausedMs = (timerDockSession.paused_seconds || 0) * 1000;
-    elapsed += sessionPausedMs;
-  }
-
-  var sec = Math.floor(elapsed / 1000);
-  var m = Math.floor(sec / 60);
-  var s = sec % 60;
-  var timeStr = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-
-  var name = timerDockSession.task_name || taskNameById(timerDockSession.task_id) || '进行中';
-  var planned = timerDockSession.planned_minutes || 30;
-  var progress = Math.min(100, (elapsed / 1000 / 60 / planned) * 100);
-
-  if (taskNameEl) taskNameEl.textContent = name;
-  if (timeEl) timeEl.textContent = timeStr;
-  if (barEl) barEl.style.width = progress + '%';
-  if (pauseBtn) {
-    if (timerDockPaused) {
-      pauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-      pauseBtn.title = '继续计时器';
-    } else {
-      pauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-      pauseBtn.title = '暂停计时器';
-    }
+// AR03-G08：Dock / 任务页计时 DOM 呈现已迁至
+// static/modules/timer/presentation.js（真实生产 ESM owner，导出
+// updateTimerDockDisplay / updateTimerDisplay），并由 ESM timer owner
+// （static/modules/timer/index.js）调用。
+//
+// app.js 这里只保留 **最薄 classic facade**：
+//   - 状态一律来自 owner 快照（getter 注入直接读 owner，不持有镜像）；
+//   - 暂停 / 恢复一律经 owner 的 pauseSession / resumeSession，
+//     失败时 owner 不改状态，facade 只提示错误。
+async function updateTimerDockDisplay() {
+  try {
+    var owner = await _getTimerOwner();
+    owner.updateDock();
+  } catch (e) {
+    console.error('[timer] updateTimerDockDisplay', e);
   }
 }
 
 async function toggleTimerDockPause() {
-  if (!timerDockSession) return;
-  if (!timerDockPaused) {
-    // P3-Bug-B: 调用后端 API 暂停（持久化）
-    try {
-      var r = await api('/api/timer/pause', {
-        method: 'POST',
-        body: JSON.stringify({ session_id: timerDockSession.id })
-      });
-      timerDockPaused = true;
-      timerDockPausedElapsed = (r && r.paused_seconds) ? r.paused_seconds * 1000 : timerDockPausedElapsed;
-      // P3-Bug-A: 同步到任务页
-      if (timerActiveSession && timerActiveSession.id === timerDockSession.id) {
-        timerActiveSession = timerDockSession;
-        if (document.getElementById('page-tasks') && document.getElementById('page-tasks').classList.contains('active')) {
-          updateTimerDisplay();
-        }
-      }
-    } catch (e) {
-      toast(e.message || '暂停失败', 'err');
-      return;
+  try {
+    var owner = await _getTimerOwner();
+    var snap = owner.getSnapshot();
+    if (!snap.session) return;
+    if (snap.paused) {
+      // P3-Bug-B: 调用后端 API 恢复（持久化）。失败 → 状态不变。
+      await owner.resumeSession();
+    } else {
+      // P3-Bug-B: 调用后端 API 暂停（持久化）。失败 → 状态不变。
+      await owner.pauseSession();
     }
-  } else {
-    // P3-Bug-B: 调用后端 API 恢复（持久化）
-    try {
-      var r2 = await api('/api/timer/resume', {
-        method: 'POST',
-        body: JSON.stringify({ session_id: timerDockSession.id })
-      });
-      timerDockPaused = false;
-      // 更新 started_at（后端返回的新起点时间）
-      if (r2 && r2.started_at) {
-        timerDockSession.started_at = r2.started_at;
-      }
-      // P3-Bug-A: 同步到任务页
-      if (timerActiveSession && timerActiveSession.id === timerDockSession.id) {
-        timerActiveSession = timerDockSession;
-        if (document.getElementById('page-tasks') && document.getElementById('page-tasks').classList.contains('active')) {
-          updateTimerDisplay();
-        }
-      }
-    } catch (e) {
-      toast(e.message || '恢复失败', 'err');
-      return;
-    }
+  } catch (e) {
+    var msg = e && e.message ? e.message : '';
+    toast(msg || (_timerSnapshot().paused ? '恢复失败' : '暂停失败'), 'err');
+    return;
   }
-  updateTimerDockDisplay();
+  _refreshTimerViews();
 }
 
 document.getElementById('timerDockPauseBtn').addEventListener('click', toggleTimerDockPause);
 document.getElementById('timerDockStopBtn').addEventListener('click', function () {
-  if (!timerDockSession) return;
-  stopTimerFromDock(timerDockSession.id);
+  // AR03-G08：唯一活动 session 来自 ESM timer owner 快照。
+  var snap = _timerSnapshot();
+  if (!snap.session) return;
+  stopTimerFromDock(snap.session.id);
 });
 
+// M02-S02-G03：识别 Dock 里正在计时的 session 是否属于
+// **当前正在执行的正式自由卡**（最小、可靠；不发明新的卡型判定规则）。
+//
+// 判定顺序：
+//   1. session 必须带合法的 task_id；
+//   2. 该 task_id 对应的卡必须能被既有缓存找到（findDrawnTask：
+//      _currentDrawnTask → multiDrawResults → allTasks）且是正式自由卡
+//      （isFreeCardTask → normalizeCardType，沿用既有卡型词表）；
+//   3. 屏幕上的卡片元素（.task-card.drawn-card[data-task-id=...]）自带
+//      data-card-type="free" 时同样算自由卡（缓存尚未加载时的兜底）。
+//
+// 识别不出来 → 一律走既有 Dock 提前结束路径（语义逐字不变）。
+function resolveDockFreeCardTaskId(session) {
+  if (!session) return null;
+  var numericId = parseInt(session.task_id, 10);
+  if (!isFinite(numericId) || numericId <= 0) return null;
+  var task = null;
+  try { task = findDrawnTask(numericId); } catch (e) { task = null; }
+  var freeByTask = !!(task && isFreeCardTask(task));
+  var freeByCard = false;
+  try {
+    var card = document.querySelector('.task-card.drawn-card[data-task-id="' + numericId + '"]');
+    freeByCard = !!(card && card.getAttribute && card.getAttribute('data-card-type') === 'free');
+  } catch (e) { freeByCard = false; }
+  if (!freeByTask && !freeByCard) return null;
+  return numericId;
+}
+
+// M02-S02-G03：从 Dock 停止按钮打开 **既有** 的自由卡结束反馈表单
+// （openFreeCardEndForm → submitFreeCardEnd，绝不另建表单 / 状态 / API）。
+//
+// 硬约束：
+//   - **绝不** 先弹旧的"提前结束"确认、**绝不** 直接调用计时完成接口、
+//     **绝不** 清空活动 session：计时停止与事件记录完全交给
+//     submitFreeCardEnd 现有流程；
+//   - 找不到这张卡的表单 → **fail closed**：保留计时与 Dock 状态并明确
+//     提示用户，绝不静默退回旧的"直接中断"路径。
+function openFreeCardEndFormFromDock(taskId) {
+  var numericId = parseInt(taskId, 10);
+  var card = null;
+  var rightPanel = null;
+  try {
+    card = document.querySelector('.task-card.drawn-card[data-task-id="' + numericId + '"]');
+    rightPanel = card ? card.querySelector('.drawn-card-right-panel') : null;
+  } catch (e) { card = null; rightPanel = null; }
+  if (!card || !rightPanel) {
+    // Fail closed：绝不静默退回旧的"直接中断"路径（那会绕过 G03 反馈）。
+    // 保留计时与 Dock 状态，并明确提示用户去哪里结束。
+    // （刻意 **不** 切页：计时 Dock 就在统一抽卡页上，且切页会触发
+    //   updateTimerDock() → loadTimerDockActive() 的异步重载，
+    //   在网络异常时可能把 Dock 状态清空。）
+    toast('找不到这张自由卡的结束反馈表单，计时仍在继续（未被中断）；请在抽卡页找到这张卡后再结束', 'err');
+    return;
+  }
+  openFreeCardEndForm(numericId);
+}
+
 async function stopTimerFromDock(sessionId) {
+  // M02-S02-G03：Dock 停止按钮属于 **当前正式自由卡** 时，
+  // 必须先走自由卡结束反馈表单（是否顺利 / 是否中断 / 实际活动 / 原因），
+  // 绝不直接中断计时、绝不绕过 G03 反馈。
+  var owner = null;
+  try {
+    owner = await _getTimerOwner();
+  } catch (e) {
+    toast('计时模块加载失败，计时状态未改变', 'err');
+    return;
+  }
+  var snap = owner.getSnapshot();
+  var freeCardTaskId = resolveDockFreeCardTaskId(snap.session);
+  if (freeCardTaskId !== null) {
+    openFreeCardEndFormFromDock(freeCardTaskId);
+    return;
+  }
   if (!confirm('确定提前结束此任务？')) return;
-  var session = timerDockSession;
+  var session = snap.session;
   try {
     if (session && session.id) {
-      // P3-Bug-A: 计算实际时间（考虑暂停时间）
-      var started = new Date(session.started_at).getTime();
-      var elapsedMs = Date.now() - started;
-      // 如果当前是暂停状态，用 paused_seconds 计算
-      if (timerDockPaused) elapsedMs = timerDockPausedElapsed;
-      var actualMin = Math.max(1, Math.round(elapsedMs / 60000));
+      // P3-Bug-A：实际分钟数由 owner 统一计算（考虑历史暂停时间，下限 1）。
+      var actualMin = owner.getActualMinutes();
       // P0-2 (bug 3.4) 修复：提前结束 → result=abandoned，不标记任务为完成
       // 任务保持"可用/未完成"状态，可重新计时；仅 timer_sessions.result='abandoned' 留痕
-      await api('/api/timer/complete', {
-        method: 'POST',
-        body: JSON.stringify({ session_id: session.id, actual_minutes: actualMin, result: 'abandoned', reason: 'early_finish' })
+      // 失败 → owner 保留活动 session（可重试），绝不谎报"已中断"。
+      await owner.completeSession({
+        sessionId: session.id,
+        actualMinutes: actualMin,
+        result: 'abandoned',
+        reason: 'early_finish'
       });
+    } else {
+      owner.clear();
     }
-    timerDockSession = null;
-    timerActiveSession = null;  // P3-Bug-A: 同步清空
-    timerDockPaused = false;
-    timerDockPausedElapsed = 0;
-    updateTimerDockDisplay();
-    updateTimerDisplay();  // P3-Bug-A: 两处 UI 同步更新
+    owner.stopInlineTimer();
+    _refreshTimerViews();
     if (session && session.task_id) {
       // P0-2: 不调用 completeWithFeedback（它会把任务标记完成并放入弃牌堆）
       // 任务保持可用，仅刷新列表让 UI 显示最新状态
@@ -591,19 +843,38 @@ function updateTimerDock() {
 // ============ 抽卡主流程 ============
 document.getElementById('gachaBtn').addEventListener('click', drawGacha);
 
+function getGachaAvailableMinutes() {
+  var input = document.getElementById('gachaTimeInput');
+  var raw = input ? input.value.trim() : '';
+  var minutes = Number(raw);
+  if (!/^[0-9]+$/.test(raw) || !Number.isInteger(minutes) || minutes < 1 || minutes > 480) {
+    throw new Error('可用时间请输入 1–480 之间的整数分钟');
+  }
+  return minutes;
+}
+
 async function drawGacha() {
   if (isDrawing) return;
   var btn = document.getElementById('gachaBtn');
   if (btn) btn.disabled = true;
   isDrawing = true;
+  // 发起新抽卡 → 本链结束。
+  resetReplaceChain();
+  // M02-S03-G02-W03：一次新的抽卡 → 开启新的行为事件 session。
+  beginUnifiedGachaSession();
+  var actionId = newUnifiedGachaActionId('draw');
 
   var result = document.getElementById('gachaResult');
   var deck = document.getElementById('gachaDeck');
   var flyLayer = document.getElementById('cardFlyLayer');
+  var multiResultArea = document.getElementById('gachaMultiResult');
   // 清掉上一次的飞行卡片残留，防止快速二次抽卡时动画叠层（P0-3）
   if (flyLayer) flyLayer.innerHTML = '';
   // 清掉抽卡结果区，避免新旧卡牌同时显示
   if (result) result.innerHTML = '';
+  // 切换到单抽时隐藏多抽结果（但不清理计时器或已选任务）
+  if (multiResultArea) multiResultArea.classList.add('hidden');
+  multiDrawResults = [];
   if (deck) {
     deck.classList.remove('is-drawing');
     deck.classList.remove('is-revealing');
@@ -611,20 +882,39 @@ async function drawGacha() {
   }
 
   try {
+    var availableMinutes = getGachaAvailableMinutes();
     var r = await api('/api/gacha/draw', {
       method: 'POST',
       body: JSON.stringify({
         pool: gachaState.pool,
         energy: gachaState.energy,
-        available_time: parseInt(document.getElementById('gachaTimeInput').value, 10) || 25,
+        available_time: availableMinutes,
         preferred_tag: gachaState.selectedTag || null
       })
     });
     if (r.task) {
+      if (r.pool) gachaState.pool = r.pool;
       gachaState.canReplace = r.can_replace !== false;
       gachaState.currentTaskId = r.task.id;
+      // M1.3A: cache the active drawn task so startTask() can find it
+      // even when allTasks has not yet been populated by /api/tasks.
+      _currentDrawnTask = r.task;
+      // M02-S03-G02-W03：服务端返回真实 task 后才记录 card_drawn。
+      var drawnTaskId = unifiedGachaTaskId(r.task.id);
+      var drawContext = {
+        source: 'single_draw',
+        pool: r.pool || gachaState.pool,
+        energy: gachaState.energy,
+        available_time: availableMinutes,
+        preferred_tag: gachaState.selectedTag || null
+      };
+      sendUnifiedGachaEvent('card_drawn', drawnTaskId, drawContext,
+        unifiedGachaEventId(actionId, 'card_drawn', drawnTaskId));
       var stage = renderDrawnCard(r.task, 0);
       result.appendChild(stage);
+      // 卡片真正进入结果区后才记录 card_shown。
+      reportUnifiedGachaCardShown(drawnTaskId,
+        { source: 'single_draw', surface: 'result', pool: drawContext.pool }, actionId);
       // 播放飞行动画
       await playCardFlyAnimation(r.task);
       updateDiscardPileVisual();
@@ -643,7 +933,261 @@ async function drawGacha() {
   refreshGachaStats();
 }
 
-// 飞行动画：从牌堆飞向中央
+// ============ 多抽连抽功能 ============
+// 存储多抽结果（用于点击激活）
+var multiDrawResults = [];
+
+// 多抽按钮事件绑定
+document.getElementById('gachaMultiBtn').addEventListener('click', drawGachaMulti);
+
+async function drawGachaMulti() {
+  // 检查共享锁
+  if (isDrawing) return;
+
+  // 检查计时器状态
+  if (window._inlineTimerHandle && timerDockSession) {
+    var taskId = timerDockSession.task_id;
+    var activeCard = document.querySelector('.task-card.drawn-card[data-task-id="' + taskId + '"]');
+    if (activeCard) {
+      toast('请先完成当前计时任务', 'inf');
+      return;
+    }
+  }
+
+  var multiBtn = document.getElementById('gachaMultiBtn');
+  var singleBtn = document.getElementById('gachaBtn');
+  var countSelect = document.getElementById('gachaMultiCount');
+
+  if (multiBtn) multiBtn.disabled = true;
+  if (singleBtn) singleBtn.disabled = true;
+
+  isDrawing = true;
+
+  var result = document.getElementById('gachaResult');
+  var deck = document.getElementById('gachaDeck');
+
+  // 清空单抽结果区（发起新连抽 → 本链结束）
+  resetReplaceChain();
+  if (result) result.innerHTML = '';
+  // M02-S03-G02-W03：一次新的连抽 → 开启新的行为事件 session。
+  beginUnifiedGachaSession();
+  var actionId = newUnifiedGachaActionId('multi');
+
+  try {
+    // 获取连抽数量
+    var count = parseInt(countSelect ? countSelect.value : '3', 10);
+    count = Math.max(2, Math.min(5, count));
+    var availableMinutes = getGachaAvailableMinutes();
+
+    // 调用多抽API
+    var r = await api('/api/gacha/multi-draw', {
+      method: 'POST',
+      body: JSON.stringify({
+        available_time: availableMinutes,
+        count: count,
+        energy: gachaState.energy,
+        preferred_tag: gachaState.selectedTag || null
+      })
+    });
+
+    if (r.tasks && r.tasks.length > 0) {
+      multiDrawResults = r.tasks;
+      var renderedCount = renderMultiResults(r);
+      // M02-S03-G02-W03：每张 **有效** 卡（真实 task id）各记一次 card_drawn。
+      r.tasks.forEach(function (task) {
+        var tid = unifiedGachaTaskId(task && task.id);
+        if (tid === null) return;  // 没有真实 task id → 不记录
+        sendUnifiedGachaEvent('card_drawn', tid, {
+          source: 'multi_draw',
+          pool: r.pool || gachaState.pool,
+          energy: gachaState.energy,
+          available_time: availableMinutes,
+          preferred_tag: gachaState.selectedTag || null,
+          multi_count: count
+        }, unifiedGachaEventId(actionId, 'card_drawn', tid));
+      });
+      // 结果列表 **确实渲染** 出来 → 这些卡已进入结果区 → card_shown。
+      // 没渲染出来（容器缺失）→ 绝不记 card_shown。
+      if (renderedCount > 0) {
+        r.tasks.forEach(function (task) {
+          var tid = unifiedGachaTaskId(task && task.id);
+          if (tid === null) return;
+          reportUnifiedGachaCardShown(tid, {
+            source: 'multi_draw',
+            surface: 'multi_list',
+            pool: r.pool || gachaState.pool
+          }, actionId);
+        });
+      }
+      toast('抽到 ' + r.tasks.length + ' 张卡牌', 'suc');
+    } else {
+      // 空池或404
+      var multiResultArea = document.getElementById('gachaMultiResult');
+      if (multiResultArea) {
+        multiResultArea.classList.add('hidden');
+      }
+      multiDrawResults = [];
+      toast('没有合适的任务', 'inf');
+    }
+  } catch (e) {
+    toast(e.message || '连抽失败', 'err');
+    // 清空多抽结果
+    var multiResultArea = document.getElementById('gachaMultiResult');
+    if (multiResultArea) {
+      multiResultArea.classList.add('hidden');
+    }
+    multiDrawResults = [];
+  } finally {
+    if (multiBtn) multiBtn.disabled = false;
+    if (singleBtn) singleBtn.disabled = false;
+    isDrawing = false;
+    refreshGachaStats();
+  }
+}
+
+function renderMultiResults(response) {
+  var container = document.getElementById('gachaMultiResult');
+  var summary = document.getElementById('gachaMultiSummary');
+  var list = document.getElementById('gachaMultiList');
+
+  if (!container || !summary || !list) return;
+
+  var tasks = response.tasks || [];
+  var totalMinutes = response.total_minutes || 0;
+  var remainingMinutes = response.remaining_minutes || 0;
+
+  // Helper: build one summary chip.
+  // iconClass is a STATIC trusted class name (no interpolation).
+  function appendSummaryChip(iconClass, valueText, suffixText) {
+    var span = document.createElement('span');
+    var icon = document.createElement('i');
+    icon.className = iconClass;
+    span.appendChild(icon);
+    span.appendChild(document.createTextNode(' ' + suffixText + ' '));
+    var strong = document.createElement('strong');
+    strong.textContent = String(valueText);
+    span.appendChild(strong);
+    // Append the static unit suffix without interpolation (e.g. " 分钟").
+    if (iconClass === 'fa-solid fa-clock' || iconClass === 'fa-solid fa-hourglass-half') {
+      span.appendChild(document.createTextNode(' 分钟'));
+    } else if (iconClass === 'fa-solid fa-layer-group') {
+      span.appendChild(document.createTextNode(' 张'));
+    }
+    summary.appendChild(span);
+  }
+  appendSummaryChip('fa-solid fa-layer-group', tasks.length, '抽到');
+  appendSummaryChip('fa-solid fa-clock', totalMinutes, '共');
+  appendSummaryChip('fa-solid fa-hourglass-half', remainingMinutes, '剩余');
+
+  // 渲染卡牌列表 - 全部使用 createElement + textContent，无 innerHTML 拼接
+  list.textContent = '';
+
+  tasks.forEach(function(task, idx) {
+    // 使用原生 <button type="button">：天然支持键盘 Enter/Space，无需 tabindex/handler hack
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'gacha-multi-item';
+    btn.setAttribute('data-task-id', task.id);
+    btn.setAttribute('data-idx', idx);
+    btn.setAttribute('aria-pressed', 'false');
+    // 可访问名称：任务标题（DOM 文本 → AT 名称）
+    var titleDiv = document.createElement('span');
+    titleDiv.className = 'gacha-multi-item-title';
+    titleDiv.textContent = task.name || '未知任务';
+    btn.appendChild(titleDiv);
+
+    // 安全渲染元信息
+    var metaDiv = document.createElement('span');
+    metaDiv.className = 'gacha-multi-item-meta';
+    var timeSpan = document.createElement('span');
+    timeSpan.textContent = (task.estimated_time != null ? String(task.estimated_time) : '?') + '分';
+    metaDiv.appendChild(timeSpan);
+
+    // 安全渲染标签
+    var tags = Array.isArray(task.tags) ? task.tags : [];
+    if (tags.length > 0) {
+      var tagSpan = document.createElement('span');
+      tagSpan.className = 'gacha-multi-item-tag';
+      tagSpan.textContent = tags[0];
+      metaDiv.appendChild(tagSpan);
+    }
+
+    btn.appendChild(metaDiv);
+
+    // 点击/键盘激活单张卡牌 - 原生 button 自带 Enter/Space
+    btn.addEventListener('click', (function(t, i) {
+      return function() {
+        activateMultiCard(t, i);
+      };
+    })(task, idx));
+
+    list.appendChild(btn);
+  });
+
+  container.classList.remove('hidden');
+  // M02-S03-G02-W03：返回"确实渲染进结果区"的张数，供调用方决定是否记 card_shown。
+  return tasks.length;
+}
+
+function activateMultiCard(task, idx) {
+  // 检查是否有计时器正在运行
+  // AR03-G08：唯一 session 来自 ESM timer owner。
+  var _snap = _timerSnapshot();
+  if (_snap.session && _timerRunning()) {
+    var activeTaskId = _snap.session.task_id;
+    if (activeTaskId && activeTaskId !== task.id) {
+      var activeCard = document.querySelector('.task-card.drawn-card[data-task-id="' + activeTaskId + '"]');
+      if (activeCard) {
+        toast('请先完成当前计时任务', 'inf');
+        return;
+      }
+    }
+  }
+
+  // 更新选中状态UI + aria-pressed 同步
+  var items = document.querySelectorAll('.gacha-multi-item');
+  items.forEach(function(item) {
+    item.classList.remove('activated');
+    if (item.setAttribute) {
+      item.setAttribute('aria-pressed', 'false');
+    }
+  });
+  var selectedItem = document.querySelector('.gacha-multi-item[data-task-id="' + task.id + '"]');
+  if (selectedItem) {
+    selectedItem.classList.add('activated');
+    if (selectedItem.setAttribute) {
+      selectedItem.setAttribute('aria-pressed', 'true');
+    }
+    // M1.2 a11y: keep keyboard focus on the selected button so the
+    // keyboard user does not lose their position after activation.
+    selectedItem.focus({ preventScroll: true });
+  }
+
+  // 清除单抽结果区
+  var result = document.getElementById('gachaResult');
+  if (result) result.innerHTML = '';
+
+  // 激活卡牌 - 使用现有renderDrawnCard
+  gachaState.currentTaskId = task.id;
+  gachaState.canReplace = false; // 多抽激活的卡牌不允许换卡
+
+  // M1.3A: cache the active drawn task so startTask() finds it even
+  // when the loadTasks() /api/tasks request hasn't completed yet.
+  _currentDrawnTask = task;
+
+  var stage = renderDrawnCard(task, 0);
+  if (result && stage) {
+    result.appendChild(stage);
+    // M02-S03-G02-W03：激活的卡真正进入结果区 → card_shown。
+    // 复用当前 session（不新开 session：这是同一轮连抽的延续）。
+    reportUnifiedGachaCardShown(task.id, {
+      source: 'multi_draw',
+      surface: 'multi_activated',
+      pool: gachaState.pool
+    });
+  }
+}
+
 async function playCardFlyAnimation(task) {
   var deck = document.getElementById('gachaDeck');
   var stage = document.querySelector('.drawn-card-stage');
@@ -690,28 +1234,55 @@ function renderDrawnCard(task, idx) {
   var isOneOff = task.repeat_type === 'none';
 
   // 抽卡后的操作按钮（noteBtn 内含文件路径，必须双重转义：单引号 + HTML 实体）
+  // M1.2 hardening: every interpolated field must be escapeHtml'd before
+  // landing in innerHTML. task.id must be coerced to a safe integer
+  // literal so a payload of '1);alert(1)//' cannot break out of the
+  // onclick=... attribute.
+  var safeId = parseInt(task.id, 10);
+  if (!isFinite(safeId)) safeId = 0;
   var safeNotePath = task.linked_note_path
-    ? task.linked_note_path.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;')
+    ? escapeHtml(
+        task.linked_note_path
+          .replace(/\\/g, '\\\\')
+          .replace(/'/g, "\\'")
+          .replace(/"/g, '&quot;')
+      )
     : '';
   var noteBtn = task.linked_note_path
     ? '<button class="btn" onclick="openNoteFromCard(\'' + safeNotePath + '\')" style="margin-bottom:6px;width:100%;background:rgba(88,166,255,0.15);border-color:rgba(88,166,255,0.4);color:#7ab8ff"><i class="fa-brands fa-markdown"></i> 在Obsidian中打开</button>'
     : '';
+  // M02-S02-G01-W08：自由卡的主操作是"接受自由卡"（点击后由 startTask 委派到
+  // 同一张卡片内的接受表单），普通/微型/目标卡的主操作与既有计时器流程保持原样。
+  // 按钮统一走 startTask(<safeId>)：自由卡在 startTask 内部**委派**到
+  // openFreeCardAcceptForm，**绝不** 走行内估时的普通启动路径。
+  var isFreeCard = normalizeCardType(task.task_type) === 'free';
+  var freeMinutes = isFreeCard ? resolveFreeCardMinutes(task) : null;
+  var primaryActionLabel = isFreeCard ? '接受自由卡' : '开始任务';
+  var primaryActionIcon = isFreeCard ? 'fa-solid fa-check' : 'fa-solid fa-play';
   var actions =
-    '<button class="btn pri" onclick="startTask(' + task.id + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-play"></i> 开始任务</button>' +
+    '<button class="btn pri" onclick="startTask(' + safeId + ')" style="margin-bottom:6px;width:100%"><i class="' + primaryActionIcon + '"></i> ' + primaryActionLabel + '</button>' +
     noteBtn +
-    '<button class="btn" onclick="handleSkip(' + task.id + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-forward"></i> 跳过</button>' +
-    '<button class="btn danger" onclick="handleRefuse(' + task.id + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-xmark"></i> 拒绝</button>' +
-    (gachaState.canReplace ? '<button class="btn" onclick="showReplaceReason(' + task.id + ')" style="width:100%"><i class="fa-solid fa-shuffle"></i> 换一张</button>' : '');
+    '<button class="btn" onclick="handleSkip(' + safeId + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-forward"></i> 跳过</button>' +
+    '<button class="btn danger" onclick="handleRefuse(' + safeId + ')" style="margin-bottom:6px;width:100%"><i class="fa-solid fa-xmark"></i> 拒绝</button>' +
+    (gachaState.canReplace ? '<button class="btn" onclick="showReplaceReason(' + safeId + ')" style="width:100%"><i class="fa-solid fa-shuffle"></i> 换一张</button>' : '');
+  // 记住该卡的操作栏 HTML：取消接受时用它 **原样** 恢复卡片操作。
+  _drawnCardActionsCache[safeId] = actions;
 
   var wrap = document.createElement('div');
   wrap.className = 'drawn-card-stage';
   var card = document.createElement('div');
   card.className = 'task-card card drawn-card ' + theme + (urgent ? ' urgent' : '') + (isOneOff ? ' is-oneoff' : '');
   card.setAttribute('data-task-id', task.id);
+  // data-card-type 存的是**归一后**的合法值（standard/free/micro/goal），
+  // 绝不是用户/DB 里的原始字符串，因此不可能夹带 HTML。
+  card.setAttribute('data-card-type', normalizeCardType(task.task_type));
   card.style.animationDelay = (idx * 0.15) + 's';
 
   // 横向布局：左侧任务信息，右侧操作按钮
+  // corner = **内容类别**角标（原语义不变）；cardType = **独立的卡类型**角标
+  // （自由卡／微型卡／目标卡／标准卡），两者同时出现、互不替代。
   var corner = { study: '学习', exercise: '运动', work: '工作', life: '生活', other: '其他' }[task.category] || '任务';
+  var cardType = cardTypeLabel(task.task_type);
   var repeatLbl = { none: '单次', daily: '每日', weekly: '每周' }[task.repeat_type] || '单次';
   var safeName = escapeHtml(task.name);
   var safeDesc = escapeHtml((task.description || '').substring(0, 150));
@@ -719,15 +1290,29 @@ function renderDrawnCard(task, idx) {
 
   var leftHtml =
     '<div class="task-card-header" style="width:100%;border-bottom:1px solid rgba(255,255,255,0.06);padding:8px 10px;background:linear-gradient(180deg,rgba(0,0,0,0.18),transparent)">' +
-    '<div style="display:flex;align-items:center;gap:8px">' +
-    '<span style="font-size:.68rem;padding:2px 8px;border-radius:8px;background:rgba(0,0,0,0.28);border:1px solid var(--card-border);color:var(--card-accent);font-family:var(--font-heading)">' + corner + '</span>' +
-    '<span style="font-size:.68rem;padding:2px 8px;border-radius:8px;background:rgba(0,0,0,0.28);border:1px solid var(--card-border);color:var(--card-accent);font-family:var(--font-heading)">P' + (task.priority || '?') + '</span>' +
+    '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+    '<span style="font-size:.68rem;padding:2px 8px;border-radius:8px;background:rgba(0,0,0,0.28);border:1px solid var(--card-border);color:var(--card-accent);font-family:var(--font-heading)" title="活动类别">' + corner + '</span>' +
+    '<span style="font-size:.68rem;padding:2px 8px;border-radius:8px;background:rgba(0,0,0,0.28);border:1px solid var(--card-border);color:var(--gold);font-family:var(--font-heading)" title="卡类型">' + escapeHtml(cardType) + '</span>' +
+    '<span style="font-size:.68rem;padding:2px 8px;border-radius:8px;background:rgba(0,0,0,0.28);border:1px solid var(--card-border);color:var(--card-accent);font-family:var(--font-heading)">P' + escapeHtml(String(task.priority == null ? '?' : task.priority)) + '</span>' +
     '</div></div>' +
     '<div style="flex:1;padding:8px 10px;display:flex;flex-direction:column;justify-content:center;min-height:0">' +
     '<div style="font-family:var(--font-heading);font-size:1.05rem;margin-bottom:6px;font-weight:600">' + safeName + '</div>' +
     '<div style="font-size:.82rem;color:var(--text-secondary);margin-bottom:6px;line-height:1.4">' + safeDesc + '</div>' +
+    // 自由卡提示：本次发行的合法时长（25/55）来自 effective_minutes；
+    // 没有可派发时长时 **绝不** 显示误导性的行内估时。
+    // （25/55 自动时长与"接受"流程已上线；"帮我选"与结束时的顺利/中断
+    //   反馈仍属后续工单，因此这里仍如实标注其尚未上线。）
+    (isFreeCard
+      ? (freeMinutes === null
+        ? '<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:6px;line-height:1.4">自由卡：本次没有可用的已批准时长（25/55 分钟），暂不能开始。</div>'
+        : '<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:6px;line-height:1.4">自由卡：本次时长 ' + freeMinutes + ' 分钟（来自策略本次发行）；结束时的顺利/中断反馈即将上线。</div>')
+      : '') +
     '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
-    '<span style="font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:3px"><i class="fa-solid fa-clock" style="color:var(--gold);font-size:.7rem"></i>' + (task.estimated_time || '?') + '分</span>' +
+    '<span style="font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:3px"><i class="fa-solid fa-clock" style="color:var(--gold);font-size:.7rem"></i>' +
+      (isFreeCard
+        ? (freeMinutes === null ? '时长待定' : freeMinutes + '分')
+        : escapeHtml(String(task.estimated_time == null ? '?' : task.estimated_time)) + '分') +
+    '</span>' +
     '<span style="font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:3px"><i class="fa-solid fa-repeat" style="color:var(--gold);font-size:.7rem"></i>' + repeatLbl + '</span>' +
     '</div>' +
     (safeTagsHtml ? '<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">' + safeTagsHtml + '</div>' : '') +
@@ -755,17 +1340,902 @@ function renderDrawnCard(task, idx) {
   return wrap;
 }
 
+// ============ 自由卡接受（M02-S02-G01-W08）============
+// 合同要点：
+// - 自由卡时长 **只** 来自当前卡对象的 ``effective_minutes``；且要求
+//   ``free_card_dispatchable === true`` 且时长是严格整数 25 / 55。
+//   缺字段 / false / 非法值 → **fail closed**（绝不回落 ``estimated_time``，
+//   也绝不硬编码 25 / 55）。
+// - 活动内容必填（最多 200 字）；理由默认值精确为
+//   "没有什么理由，我就是想。"，空白理由按同一默认值规范化。
+// - 活动 / 理由一律通过 DOM ``value`` 读取，用户输入 **绝不** 拼进
+//   inline JavaScript 或未转义 HTML。
+// - 开始后复用 **现有** 计时启动接口（planned_minutes 严格等于
+//   effective_minutes）与现有唯一计时 session / 内嵌计时 / 暂停 / 结束流程；
+//   **绝不** 建立第二套计时器。
+var FREE_CARD_MINUTES_OPTIONS = [25, 55];
+var FREE_CARD_DEFAULT_REASON = '没有什么理由，我就是想。';
+var FREE_CARD_MAX_ACTIVITY_LENGTH = 200;
+// 自由卡接受表单的 DOM id 前缀（同一张卡片内展开，不新建页面）。
+var FREE_CARD_FORM_ID_PREFIX = 'freeCardAcceptForm_';
+// 正在提交的自由卡接受（幂等保护，避免重复启动计时）。
+var _pendingFreeCardAcceptId = null;
+// 每张已渲染卡片的操作栏 HTML（取消接受时原样恢复）。
+var _drawnCardActionsCache = {};
+
+// 从卡对象解析本次发行的合法自由卡时长；非法 / 缺失 → null（fail closed）。
+function resolveFreeCardMinutes(task) {
+  if (!task || typeof task !== 'object') return null;
+  if (task.free_card_dispatchable !== true) return null;
+  var raw = task.effective_minutes;
+  if (typeof raw !== 'number' || !isFinite(raw)) return null;
+  if (Math.floor(raw) !== raw) return null;
+  if (FREE_CARD_MINUTES_OPTIONS.indexOf(raw) < 0) return null;
+  return raw;
+}
+
+// 找出当前卡对象（与 startTask 使用同一套安全缓存）。
+function findDrawnTask(taskId) {
+  var numericId = (typeof taskId === 'number') ? taskId : parseInt(taskId, 10);
+  if (!isFinite(numericId) || numericId <= 0) return null;
+  var task = null;
+  if (_currentDrawnTask && Number(_currentDrawnTask.id) === numericId) {
+    task = _currentDrawnTask;
+  } else if (Array.isArray(multiDrawResults) && multiDrawResults.length) {
+    for (var i = 0; i < multiDrawResults.length; i += 1) {
+      var m = multiDrawResults[i];
+      if (m && Number(m.id) === numericId) { task = m; break; }
+    }
+  }
+  if (!task && Array.isArray(allTasks)) {
+    task = allTasks.find(function (x) { return x.id === numericId; }) || null;
+  }
+  return task;
+}
+
+// 校验 / 规范化用户输入的活动与理由（与后端规则一致的前端预检）。
+function normalizeFreeCardInputs(activity, reason) {
+  var cleanActivity = (typeof activity === 'string') ? activity.trim() : '';
+  if (!cleanActivity) {
+    return { ok: false, error: '请先填写接下来要做什么', activity: '', reason: '' };
+  }
+  if (cleanActivity.length > FREE_CARD_MAX_ACTIVITY_LENGTH) {
+    return { ok: false, error: '活动内容最多 200 字', activity: cleanActivity, reason: '' };
+  }
+  if (/[\x00-\x1f\x7f]/.test(cleanActivity)) {
+    return { ok: false, error: '活动内容包含非法字符', activity: cleanActivity, reason: '' };
+  }
+  var cleanReason = (typeof reason === 'string') ? reason.trim() : '';
+  if (!cleanReason) cleanReason = FREE_CARD_DEFAULT_REASON;
+  if (cleanReason.length > FREE_CARD_MAX_ACTIVITY_LENGTH) {
+    return { ok: false, error: '理由最多 200 字', activity: cleanActivity, reason: '' };
+  }
+  if (/[\x00-\x1f\x7f]/.test(cleanReason)) {
+    return { ok: false, error: '理由包含非法字符', activity: cleanActivity, reason: '' };
+  }
+  return { ok: true, error: null, activity: cleanActivity, reason: cleanReason };
+}
+
+// "帮我选"（M02-S02-G02）：调用现有只读接口
+// ``GET /api/gacha/free-card/suggestion``，把返回的 **一条** 建议填进活动
+// 输入框。
+//
+// 硬约束（与产品意图一致）：
+// - 只读、**无模型 API**：后端只从同一份已批准策略的候选池里取一条，
+//   **绝不** 在前端编造候选；
+// - 成功时 **只** 填活动输入框：**不** 自动提交表单、**不** 启动计时、
+//   **不** 改理由输入框（用户可继续编辑，然后自行点"开始"）；
+// - 失败（422 / 缺少合法 activity / 网络失败）→ **保留** 用户当前输入与
+//   理由，给出简短提示，让用户手动填写继续；**绝不** 追加问卷。
+async function suggestFreeCardActivity(taskId) {
+  var numericId = (typeof taskId === 'number') ? taskId : parseInt(taskId, 10);
+  if (!isFinite(numericId) || numericId <= 0) return;
+
+  var formId = FREE_CARD_FORM_ID_PREFIX + numericId;
+  var activityEl = document.getElementById(formId + '_activity');
+
+  var data = null;
+  try {
+    data = await api('/api/gacha/free-card/suggestion', { method: 'GET' });
+  } catch (e) {
+    // 422 / 网络失败 / 其它错误：保留用户当前输入与理由。
+    toast('暂时拿不到建议，可以自己写一个再开始', 'err');
+    return;
+  }
+
+  var suggestion = data && data.suggestion ? data.suggestion : null;
+  var activity = suggestion && typeof suggestion.activity === 'string'
+    ? suggestion.activity.trim()
+    : '';
+  if (!activity) {
+    // 响应里没有合法活动 → 绝不编造，保留用户当前输入与理由。
+    toast('暂时没有可用的活动建议，可以自己写一个再开始', 'err');
+    return;
+  }
+  if (activity.length > FREE_CARD_MAX_ACTIVITY_LENGTH) {
+    toast('建议内容过长，请自己写一个再开始', 'err');
+    return;
+  }
+  if (/[\x00-\x1f\x7f]/.test(activity)) {
+    toast('建议内容包含非法字符，请自己写一个再开始', 'err');
+    return;
+  }
+
+  // 只写活动输入框：理由与计时流程完全不受影响。
+  if (activityEl) activityEl.value = activity;
+  toast('已填入一条建议，可以直接改成你自己的做法', 'inf');
+}
+
+// 在 **同一张卡片** 内渲染自由卡接受表单。
+// 活动 / 理由输入框用 **DOM API** 创建（value 通过属性赋值，绝不拼进
+// inline JS 或未转义 HTML）；提交时再通过 ``element.value`` 读回。
+// ``values`` 可用于失败后 **原样保留** 用户已填内容以便重试。
+function openFreeCardAcceptForm(taskId, values) {
+  var numericId = (typeof taskId === 'number') ? taskId : parseInt(taskId, 10);
+  if (!isFinite(numericId) || numericId <= 0) {
+    toast('任务不存在', 'err');
+    return;
+  }
+  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + numericId + '"]');
+  if (!card) { toast('请先抽一张卡牌', 'err'); return; }
+  var rightPanel = card.querySelector('.drawn-card-right-panel');
+  if (!rightPanel) return;
+
+  var task = findDrawnTask(numericId);
+  var minutes = task ? resolveFreeCardMinutes(task) : null;
+  if (minutes === null) {
+    // Fail closed：没有已批准的可派发时长 → 不显示可执行的开始路径。
+    rightPanel.innerHTML =
+      '<div style="font-size:.78rem;color:var(--text-secondary);margin-bottom:8px">自由卡本次没有可用的已批准时长（25/55 分钟），因此不能开始计时。</div>' +
+      '<button class="btn" onclick="cancelFreeCardAcceptForm(' + numericId + ')" style="width:100%"><i class="fa-solid fa-arrow-left"></i> 返回</button>';
+    toast('这张自由卡本次没有已批准的可执行时长，无法开始', 'err');
+    return;
+  }
+
+  var prior = values || null;
+  var formId = FREE_CARD_FORM_ID_PREFIX + numericId;
+  rightPanel.innerHTML = '';
+  var box = document.createElement('div');
+  box.className = 'free-card-accept-form';
+
+  var intro = document.createElement('div');
+  intro.style.cssText = 'font-size:.76rem;color:var(--text-secondary);margin-bottom:6px';
+  intro.textContent = '接受这张自由卡，本次时长 ' + minutes + ' 分钟。';
+  box.appendChild(intro);
+
+  var activityLabel = document.createElement('label');
+  activityLabel.setAttribute('for', formId + '_activity');
+  activityLabel.style.cssText = 'font-size:.72rem;color:var(--text-muted);display:block;margin-bottom:3px';
+  activityLabel.textContent = '接下来做什么（必填，最多 200 字）';
+  box.appendChild(activityLabel);
+
+  var activityInput = document.createElement('input');
+  activityInput.setAttribute('type', 'text');
+  activityInput.setAttribute('id', formId + '_activity');
+  activityInput.setAttribute('maxlength', String(FREE_CARD_MAX_ACTIVITY_LENGTH));
+  activityInput.setAttribute('placeholder', '例如：看 20 分钟纪录片');
+  activityInput.style.cssText = 'flex:1;min-width:0;padding:6px;border-radius:8px;border:1px solid var(--card-border);background:rgba(0,0,0,0.25);color:var(--text-primary)';
+  if (prior && typeof prior.activity === 'string') activityInput.value = prior.activity;
+
+  // "帮我选"（M02-S02-G02）：一次点击即得 **一个** 具体活动建议。
+  // - 只调用现有只读接口 GET /api/gacha/free-card/suggestion（它只从同一份
+  //   已批准策略的候选池里取一条）；**无模型 API**、不发行卡、不写库；
+  // - 成功时 **只** 填活动输入框；**绝不** 自动提交、**绝不** 启动计时、
+  //   **绝不** 改理由输入框（用户可继续编辑后自行点"开始"）。
+  var activityRow = document.createElement('div');
+  activityRow.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px';
+  activityRow.appendChild(activityInput);
+
+  var suggestBtn = document.createElement('button');
+  suggestBtn.className = 'btn';
+  suggestBtn.setAttribute('id', formId + '_suggest');
+  suggestBtn.setAttribute('type', 'button');
+  suggestBtn.style.cssText = 'flex:0 0 auto;white-space:nowrap;padding:6px 10px';
+  suggestBtn.textContent = '帮我选';
+  suggestBtn.addEventListener('click', function () {
+    suggestFreeCardActivity(numericId);
+  });
+  activityRow.appendChild(suggestBtn);
+  box.appendChild(activityRow);
+
+  var reasonLabel = document.createElement('label');
+  reasonLabel.setAttribute('for', formId + '_reason');
+  reasonLabel.style.cssText = 'font-size:.72rem;color:var(--text-muted);display:block;margin-bottom:3px';
+  reasonLabel.textContent = '理由（可编辑）';
+  box.appendChild(reasonLabel);
+
+  var reasonInput = document.createElement('input');
+  reasonInput.setAttribute('type', 'text');
+  reasonInput.setAttribute('id', formId + '_reason');
+  reasonInput.setAttribute('maxlength', String(FREE_CARD_MAX_ACTIVITY_LENGTH));
+  reasonInput.style.cssText = 'width:100%;margin-bottom:6px;padding:6px;border-radius:8px;border:1px solid var(--card-border);background:rgba(0,0,0,0.25);color:var(--text-primary)';
+  // 默认值精确为产品约定的缺省理由（通过 DOM 属性赋值，不是 HTML 拼接）。
+  reasonInput.value = (prior && typeof prior.reason === 'string' && prior.reason)
+    ? prior.reason
+    : FREE_CARD_DEFAULT_REASON;
+  box.appendChild(reasonInput);
+
+  var reminder = document.createElement('div');
+  reminder.style.cssText = 'font-size:.7rem;color:var(--text-muted);line-height:1.4;margin-bottom:8px';
+  reminder.textContent = '开始后请同时为手机手动设置计时器；网页计时不应替代手机提醒。';
+  box.appendChild(reminder);
+
+  var startBtn = document.createElement('button');
+  startBtn.className = 'btn pri';
+  startBtn.style.cssText = 'width:100%;margin-bottom:6px';
+  startBtn.textContent = '开始';
+  startBtn.addEventListener('click', function () { submitFreeCardAccept(numericId); });
+  box.appendChild(startBtn);
+
+  var cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn';
+  cancelBtn.style.cssText = 'width:100%';
+  cancelBtn.textContent = '取消';
+  cancelBtn.addEventListener('click', function () { cancelFreeCardAcceptForm(numericId); });
+  box.appendChild(cancelBtn);
+
+  rightPanel.appendChild(box);
+
+  if (typeof activityInput.focus === 'function') {
+    try { activityInput.focus(); } catch (e) { /* ignore */ }
+  }
+}
+
+// 取消接受 → 恢复卡片操作。
+function cancelFreeCardAcceptForm(taskId) {
+  var numericId = (typeof taskId === 'number') ? taskId : parseInt(taskId, 10);
+  if (!isFinite(numericId) || numericId <= 0) return;
+  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + numericId + '"]');
+  if (!card) return;
+  var rightPanel = card.querySelector('.drawn-card-right-panel');
+  if (!rightPanel) return;
+  // 原样恢复该卡渲染时的操作栏（保持既有按钮与行为逐字不变）。
+  var cached = _drawnCardActionsCache[numericId];
+  if (typeof cached === 'string') {
+    rightPanel.innerHTML = cached;
+  }
+}
+
+// 严格规范 timer/start 返回的 session_id。
+// 接受：正整数 number，或仅由数字组成且代表正整数的字符串。
+// 拒绝：missing / null / 空串 / boolean / 非数字 / 0 / 负数 / 小数 / 不安全整数。
+// **绝不** 伪造 session_id；非法一律返回 null（fail closed）。
+function normalizeTimerSessionId(raw) {
+  if (typeof raw === 'boolean') return null;
+  if (typeof raw === 'number') {
+    if (!isFinite(raw)) return null;
+    if (Math.floor(raw) !== raw) return null;      // 小数
+    if (raw <= 0) return null;                     // 0 / 负数
+    if (typeof Number.isSafeInteger === 'function' && !Number.isSafeInteger(raw)) return null;
+    return raw;
+  }
+  if (typeof raw === 'string') {
+    if (!/^[0-9]+$/.test(raw)) return null;        // 空串 / 非数字字符 / 小数 / 负号
+    var parsed = Number(raw);
+    if (!isFinite(parsed)) return null;
+    if (Math.floor(parsed) !== parsed) return null;
+    if (parsed <= 0) return null;
+    if (typeof Number.isSafeInteger === 'function' && !Number.isSafeInteger(parsed)) return null;
+    return parsed;
+  }
+  return null;                                     // missing / null / 对象 / 数组
+}
+
+// 提交自由卡接受：启动既有计时器 + 写 accept_task 事件。
+async function submitFreeCardAccept(taskId) {
+  var numericId = (typeof taskId === 'number') ? taskId : parseInt(taskId, 10);
+  if (!isFinite(numericId) || numericId <= 0) {
+    toast('任务不存在', 'err');
+    return;
+  }
+  if (_pendingFreeCardAcceptId === numericId) return;
+  _pendingFreeCardAcceptId = numericId;
+
+  var task = findDrawnTask(numericId);
+  if (!task) {
+    _pendingFreeCardAcceptId = null;
+    toast('任务不存在', 'err');
+    return;
+  }
+  var minutes = resolveFreeCardMinutes(task);
+  if (minutes === null) {
+    _pendingFreeCardAcceptId = null;
+    toast('这张自由卡本次没有已批准的可执行时长，无法开始', 'err');
+    return;
+  }
+
+  var formId = FREE_CARD_FORM_ID_PREFIX + numericId;
+  var activityEl = document.getElementById(formId + '_activity');
+  var reasonEl = document.getElementById(formId + '_reason');
+  var activityRaw = activityEl ? activityEl.value : '';
+  var reasonRaw = reasonEl ? reasonEl.value : '';
+
+  var normalized = normalizeFreeCardInputs(activityRaw, reasonRaw);
+  if (!normalized.ok) {
+    _pendingFreeCardAcceptId = null;
+    toast(normalized.error, 'err');
+    return;
+  }
+
+  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + numericId + '"]');
+  var rightPanel = card ? card.querySelector('.drawn-card-right-panel') : null;
+
+  // AR03-G08：计时启动统一经 ESM timer owner（唯一计时生命周期所有者）。
+  // 自由卡接受路径启用 **严格 session_id 校验**。
+  var owner = null;
+  try {
+    owner = await _getTimerOwner();
+  } catch (e) {
+    _pendingFreeCardAcceptId = null;
+    toast('计时模块加载失败，启动计时失败', 'err');
+    return;
+  }
+  var started = null;
+  try {
+    started = await owner.startSession({
+      taskId: numericId,
+      plannedMinutes: minutes,
+      taskName: normalized.activity,
+      requireValidSessionId: true
+    });
+  } catch (e) {
+    _pendingFreeCardAcceptId = null;
+    toast(e.message || '启动计时失败', 'err');
+    return;
+  }
+
+  // === 严格规范 session_id（M02-S02-G01-W11）=========================
+  // timer/start 已经成功返回，但 session_id 缺失 / 非法时：
+  //   - 绝不向计时完成接口发送无效 ID；
+  //   - 绝不设置活动 session（owner 也绝不设置）；
+  //   - 绝不启动内嵌计时器、绝不显示"执行中"状态；
+  //   - 绝不声称"已停止"（我们无从确认计时是否真的停了）；
+  //   - 显示明确警告，并保留活动 / 理由供用户恢复。
+  if (!started || !started.ok) {
+    _pendingFreeCardAcceptId = null;
+    openFreeCardAcceptForm(numericId, { activity: normalized.activity, reason: normalized.reason });
+    toast('无法确认计时已停止，请检查计时状态/必要时手动处理。你的活动与理由已保留。', 'err');
+    return;
+  }
+  var sessionId = started.session ? started.session.id : null;
+
+  // 计时已启动 → 复用既有内嵌计时流程（owner 持有唯一 session）。
+  _refreshTimerViews();
+  startInlineTimer(numericId);
+
+  // 记住本次接受时填写的活动 → 结束反馈的 **可编辑预填**。
+  _freeCardAcceptedActivities[numericId] = normalized.activity;
+
+  // 右侧执行状态显示用户填写的活动。
+  if (rightPanel) {
+    // M02-S02-G03：自由卡的结束按钮走"结束并记录反馈"（先问清楚，
+    // 再停止计时、再写事件）；普通/微型/目标卡保持"确认完成任务"不变。
+    var endButton = isFreeCardTask(task)
+      ? '<button class="btn pri" onclick="openFreeCardEndForm(' + numericId + ')" style="width:100%"><i class="fa-solid fa-check"></i> 结束并记录反馈</button>'
+      : '<button class="btn pri" onclick="confirmComplete(' + numericId + ')" style="width:100%"><i class="fa-solid fa-check"></i> 确认完成任务</button>';
+    rightPanel.innerHTML =
+      '<div style="text-align:center;margin-bottom:8px">' +
+      '<div style="font-size:.78rem;color:var(--text-secondary);margin-bottom:4px">执行中...</div>' +
+      '<div class="card-timer-display" style="font-family:var(--font-heading);font-size:1.3rem;color:var(--gold);margin-bottom:6px">00:00</div>' +
+      '<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:6px;word-break:break-all">' + escapeHtml(normalized.activity) + '</div>' +
+      '<div style="font-size:.68rem;color:var(--text-muted);margin-bottom:6px">计划 ' + minutes + ' 分</div>' +
+      '<div style="font-size:.66rem;color:var(--text-muted);line-height:1.4;margin-bottom:6px">请同时为手机手动设置计时器；网页计时不应替代手机提醒。</div>' +
+      '</div>' +
+      '<button class="btn" onclick="pauseInlineTimer(' + numericId + ')" style="width:100%;margin-bottom:6px"><i class="fa-solid fa-pause"></i> 暂停</button>' +
+      endButton;
+  }
+
+  // 写 accept_task 事件（绑定返回的 session_id 与活动文本）。
+  try {
+    await api('/api/task-feedback', {
+      method: 'POST',
+      body: JSON.stringify({
+        task_id: numericId,
+        event_type: 'accept_task',
+        planned_minutes: minutes,
+        completion_status: 'accepted',
+        reason_category: 'other',
+        reason_detail: normalized.reason,
+        note: JSON.stringify({
+          schema_version: 1,
+          session_id: sessionId,
+          activity: normalized.activity
+        })
+      })
+    });
+  } catch (e) {
+    await compensateFreeCardAcceptFailure(numericId, sessionId);
+    // 保留活动 / 理由输入，便于用户重试。
+    openFreeCardAcceptForm(numericId, { activity: normalized.activity, reason: normalized.reason });
+    toast((e.message || '接受记录保存失败') + '；已尽力结束刚创建的计时，请重试', 'err');
+    _pendingFreeCardAcceptId = null;
+    return;
+  }
+  _pendingFreeCardAcceptId = null;
+  toast('计时已开始，请同时为手机设置计时器！', 'suc');
+}
+
+// 补偿：接受事件写入失败 → 尽力结束刚创建的计时 session，绝不留下
+// "静默运行且没有活动记录"的计时器。
+async function compensateFreeCardAcceptFailure(taskId, sessionId) {
+  var sid = sessionId;
+  if (sid === null || sid === undefined) {
+    var snap = _timerSnapshot();
+    sid = snap.session ? snap.session.id : null;
+  }
+  if (sid === null || sid === undefined) return;
+  try {
+    var owner = await _getTimerOwner();
+    await owner.completeSession({
+      sessionId: sid,
+      actualMinutes: 1,
+      result: 'abandoned',
+      reason: 'free_card_acceptance_event_failed'
+    });
+    owner.stopInlineTimer();
+    _refreshTimerViews();
+  } catch (e) {
+    toast('计时状态可能仍需你手动处理（自动结束失败）', 'err');
+  }
+}
+
+// ============ 自由卡结束反馈（M02-S02-G03）============
+// 合同要点：
+// - 只作用于 **正式自由卡**（沿用源码里已有的卡型判定
+//   ``normalizeCardType(task.task_type) === 'free'``）；普通 / 微型 /
+//   目标卡的完成、关怀与计时行为 **逐字不变**。
+// - 用户 **主动结束** 自由卡时，先问清楚（是否顺利 / 是否被中断 /
+//   实际活动 / 可选原因），用户确认后才停止计时并写事件：
+//   **绝不** 自动替用户选择"顺利"，**绝不** 把"打开了表单"或
+//   "计时已停止"当作反馈已保存。
+// - 反馈只复用既有 ``POST /api/task-feedback`` 与既有合法 event_type /
+//   reason_category；实际活动与本次结论放进既有 note 字段（JSON，
+//   与 accept_task 的 schema_version 约定兼容）。
+// - 中断绝不记为已完成：timer/complete 的 result 与事件的
+//   completion_status 都跟随用户的选择；计时停止失败 → 保留现状，
+//   绝不写反馈。
+// - 保存失败 → 保留表单内容、允许重试；取消 → 绝不谎报保存成功。
+// - 成功保存 → 回到统一抽卡。
+var FREE_CARD_END_FORM_ID_PREFIX = 'freeCardEndForm_';
+// 接受自由卡时填写的活动（结束反馈的 **可编辑预填**；没有就留空）。
+var _freeCardAcceptedActivities = {};
+// 结束反馈的表单状态（面板快照 / 计时是否已停 / 时长），按 taskId 存。
+var _freeCardEndState = {};
+// 正在提交的自由卡结束反馈（避免重复提交）。
+var _pendingFreeCardEndId = null;
+
+// 是否是正式自由卡（沿用既有卡型判定，不发明新的卡型识别规则）。
+function isFreeCardTask(task) {
+  return !!task && normalizeCardType(task.task_type) === 'free';
+}
+
+// 在 **同一张卡片** 内展开"结束反馈"表单（不新建页面）。
+// 是否顺利 / 是否被中断 **默认都不选中**：绝不替用户选择"顺利"。
+function openFreeCardEndForm(taskId) {
+  var numericId = (typeof taskId === 'number') ? taskId : parseInt(taskId, 10);
+  if (!isFinite(numericId) || numericId <= 0) {
+    toast('任务不存在', 'err');
+    return;
+  }
+  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + numericId + '"]');
+  if (!card) { toast('请先抽一张卡牌', 'err'); return; }
+  var rightPanel = card.querySelector('.drawn-card-right-panel');
+  if (!rightPanel) return;
+
+  var formId = FREE_CARD_END_FORM_ID_PREFIX + numericId;
+  // 记住当前面板（取消时原样恢复"执行中"面板，计时继续走）。
+  // 只记第一次：再次打开（保存失败后重试）时 **不** 覆盖成表单本身。
+  var state = _freeCardEndState[numericId] || {};
+  if (typeof state.panelHtml !== 'string') {
+    state.panelHtml = rightPanel.innerHTML;
+  }
+  _freeCardEndState[numericId] = state;
+
+  rightPanel.innerHTML = '';
+
+  // 运行状态（保留计时显示：打开表单 **不代表** 计时已停止）。
+  var running = document.createElement('div');
+  running.style.cssText = 'text-align:center;margin-bottom:8px';
+  var runningText = document.createElement('div');
+  runningText.style.cssText = 'font-size:.78rem;color:var(--text-secondary);margin-bottom:4px';
+  runningText.textContent = '执行中...';
+  running.appendChild(runningText);
+  var timerDisplay = document.createElement('div');
+  timerDisplay.className = 'card-timer-display';
+  timerDisplay.style.cssText = 'font-family:var(--font-heading);font-size:1.3rem;color:var(--gold);margin-bottom:6px';
+  timerDisplay.textContent = '00:00';
+  running.appendChild(timerDisplay);
+  rightPanel.appendChild(running);
+
+  var box = document.createElement('div');
+  box.className = 'free-card-end-form';
+
+  var intro = document.createElement('div');
+  intro.style.cssText = 'font-size:.76rem;color:var(--text-secondary);margin-bottom:6px';
+  intro.textContent = '结束这张自由卡了？如实记一下，保存成功后才算数。';
+  box.appendChild(intro);
+
+  var outcomeLabel = document.createElement('div');
+  outcomeLabel.style.cssText = 'font-size:.72rem;color:var(--text-muted);margin-bottom:3px';
+  outcomeLabel.textContent = '这次是否顺利（必选，二选一）';
+  box.appendChild(outcomeLabel);
+
+  var smoothInput = document.createElement('input');
+  smoothInput.setAttribute('type', 'radio');
+  smoothInput.setAttribute('name', 'freeCardEndOutcome_' + numericId);
+  smoothInput.setAttribute('id', formId + '_smooth');
+  smoothInput.setAttribute('value', 'smooth');
+  var smoothLabel = document.createElement('label');
+  smoothLabel.setAttribute('for', formId + '_smooth');
+  smoothLabel.style.cssText = 'font-size:.78rem;display:flex;gap:6px;align-items:center;margin-bottom:4px';
+  var smoothText = document.createElement('span');
+  smoothText.textContent = '顺利完成了';
+  smoothLabel.appendChild(smoothInput);
+  smoothLabel.appendChild(smoothText);
+  box.appendChild(smoothLabel);
+
+  var interruptedInput = document.createElement('input');
+  interruptedInput.setAttribute('type', 'radio');
+  interruptedInput.setAttribute('name', 'freeCardEndOutcome_' + numericId);
+  interruptedInput.setAttribute('id', formId + '_interrupted');
+  interruptedInput.setAttribute('value', 'interrupted');
+  var interruptedLabel = document.createElement('label');
+  interruptedLabel.setAttribute('for', formId + '_interrupted');
+  interruptedLabel.style.cssText = 'font-size:.78rem;display:flex;gap:6px;align-items:center;margin-bottom:6px';
+  var interruptedText = document.createElement('span');
+  interruptedText.textContent = '中途被打断了';
+  interruptedLabel.appendChild(interruptedInput);
+  interruptedLabel.appendChild(interruptedText);
+  box.appendChild(interruptedLabel);
+
+  // 两个单选互斥（并 **不** 预选任何一项）。
+  smoothInput.addEventListener('click', function () {
+    smoothInput.checked = true;
+    interruptedInput.checked = false;
+  });
+  interruptedInput.addEventListener('click', function () {
+    interruptedInput.checked = true;
+    smoothInput.checked = false;
+  });
+
+  var activityLabel = document.createElement('label');
+  activityLabel.setAttribute('for', formId + '_activity');
+  activityLabel.style.cssText = 'font-size:.72rem;color:var(--text-muted);display:block;margin-bottom:3px';
+  activityLabel.textContent = '实际做了什么（必填，可修改）';
+  box.appendChild(activityLabel);
+
+  var activityInput = document.createElement('input');
+  activityInput.setAttribute('type', 'text');
+  activityInput.setAttribute('id', formId + '_activity');
+  activityInput.setAttribute('maxlength', String(FREE_CARD_MAX_ACTIVITY_LENGTH));
+  activityInput.setAttribute('placeholder', '例如：看了一集纪录片');
+  activityInput.style.cssText = 'width:100%;margin-bottom:6px;padding:6px;border-radius:8px;border:1px solid var(--card-border);background:rgba(0,0,0,0.25);color:var(--text-primary)';
+  // 可编辑预填：接受时填写的活动（没有就留空，**绝不** 编造事实）。
+  var priorActivity = _freeCardAcceptedActivities[numericId];
+  if (typeof priorActivity === 'string' && priorActivity) activityInput.value = priorActivity;
+  box.appendChild(activityInput);
+
+  var reasonLabel = document.createElement('label');
+  reasonLabel.setAttribute('for', formId + '_reason');
+  reasonLabel.style.cssText = 'font-size:.72rem;color:var(--text-muted);display:block;margin-bottom:3px';
+  reasonLabel.textContent = '原因（可选）';
+  box.appendChild(reasonLabel);
+
+  var reasonInput = document.createElement('input');
+  reasonInput.setAttribute('type', 'text');
+  reasonInput.setAttribute('id', formId + '_reason');
+  reasonInput.setAttribute('maxlength', String(FREE_CARD_MAX_ACTIVITY_LENGTH));
+  reasonInput.setAttribute('placeholder', '例如：手机响了');
+  reasonInput.style.cssText = 'width:100%;margin-bottom:6px;padding:6px;border-radius:8px;border:1px solid var(--card-border);background:rgba(0,0,0,0.25);color:var(--text-primary)';
+  box.appendChild(reasonInput);
+
+  var saveBtn = document.createElement('button');
+  saveBtn.className = 'btn pri';
+  saveBtn.setAttribute('id', formId + '_save');
+  saveBtn.style.cssText = 'width:100%;margin-bottom:6px';
+  saveBtn.textContent = '保存反馈';
+  saveBtn.addEventListener('click', function () { submitFreeCardEnd(numericId); });
+  box.appendChild(saveBtn);
+
+  var cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn';
+  cancelBtn.setAttribute('id', formId + '_cancel');
+  cancelBtn.style.cssText = 'width:100%';
+  cancelBtn.textContent = '取消';
+  cancelBtn.addEventListener('click', function () { cancelFreeCardEndForm(numericId); });
+  box.appendChild(cancelBtn);
+
+  rightPanel.appendChild(box);
+}
+
+// 取消结束反馈：取消 = 没有保存任何反馈，绝不谎报保存成功。
+function cancelFreeCardEndForm(taskId) {
+  var numericId = (typeof taskId === 'number') ? taskId : parseInt(taskId, 10);
+  if (!isFinite(numericId) || numericId <= 0) return;
+  var state = _freeCardEndState[numericId] || {};
+  if (state.timerStopped) {
+    // 计时已经停了 → 表单保留，用户可以再试一次保存。
+    toast('已取消保存，本次反馈还没有记录（可以再试一次）', 'inf');
+    return;
+  }
+  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + numericId + '"]');
+  if (card) {
+    var rightPanel = card.querySelector('.drawn-card-right-panel');
+    if (rightPanel && typeof state.panelHtml === 'string') {
+      // 原样恢复"执行中"面板（计时没有被停止，任务仍在进行）。
+      rightPanel.innerHTML = state.panelHtml;
+    }
+  }
+  delete _freeCardEndState[numericId];
+  toast('已取消，本次反馈没有保存', 'inf');
+}
+
+// 提交自由卡结束反馈：先按用户的选择停止计时，再写既有反馈事件。
+async function submitFreeCardEnd(taskId) {
+  var numericId = (typeof taskId === 'number') ? taskId : parseInt(taskId, 10);
+  if (!isFinite(numericId) || numericId <= 0) {
+    toast('任务不存在', 'err');
+    return;
+  }
+  // 避免重复提交（同一张卡在保存途中不再发起第二次提交）。
+  if (_pendingFreeCardEndId === numericId) return;
+
+  var formId = FREE_CARD_END_FORM_ID_PREFIX + numericId;
+  var smoothEl = document.getElementById(formId + '_smooth');
+  var interruptedEl = document.getElementById(formId + '_interrupted');
+  var activityEl = document.getElementById(formId + '_activity');
+  var reasonEl = document.getElementById(formId + '_reason');
+
+  // 是否顺利 / 是否被中断：必须由用户 **明确选择**（默认两者都不选中）。
+  var outcome = '';
+  if (smoothEl && smoothEl.checked) outcome = 'smooth';
+  else if (interruptedEl && interruptedEl.checked) outcome = 'interrupted';
+  if (!outcome) {
+    toast('请先选择：顺利完成了，还是中途被打断了', 'err');
+    return;
+  }
+
+  // 实际活动：必填（没填就 **绝不** 把它伪装成事实）。
+  var activityRaw = activityEl && typeof activityEl.value === 'string' ? activityEl.value : '';
+  var activity = activityRaw.trim();
+  if (!activity) {
+    toast('请填写这次实际做了什么', 'err');
+    return;
+  }
+  if (activity.length > FREE_CARD_MAX_ACTIVITY_LENGTH) {
+    toast('实际活动最多 200 字', 'err');
+    return;
+  }
+  if (/[\x00-\x1f\x7f]/.test(activity)) {
+    toast('实际活动包含非法字符', 'err');
+    return;
+  }
+  var reason = reasonEl && typeof reasonEl.value === 'string' ? reasonEl.value.trim() : '';
+  if (reason.length > FREE_CARD_MAX_ACTIVITY_LENGTH) {
+    toast('原因最多 200 字', 'err');
+    return;
+  }
+
+  var state = _freeCardEndState[numericId] || {};
+  var planned = state.planned != null ? state.planned : null;
+  var actual = state.actual != null ? state.actual : null;
+
+  _pendingFreeCardEndId = numericId;
+  try {
+    // AR03-G08：停止计时统一经 ESM timer owner（唯一生命周期所有者）。
+    var owner = await _getTimerOwner();
+    // === 停止计时（结果跟随用户的选择）===============================
+    if (!state.timerStopped) {
+      var _snap = _timerSnapshot();
+      var session = _snap.session;
+      if (session && session.id) {
+        // 计时属于别的任务 → 绝不动它，也绝不声称"结束成功"。
+        if (Number(session.task_id) !== numericId) {
+          toast('当前计时属于另一张卡，反馈没有保存，请重试', 'err');
+          return;
+        }
+        // AR03-G08：实际分钟数由 owner 统一计算（暂停时用 pausedElapsedMs，
+        // 运行时用 now-started + paused_seconds*1000，下限 1）。
+        actual = owner.getActualMinutes();
+        planned = session.planned_minutes != null ? session.planned_minutes : null;
+        var stopResult = (outcome === 'smooth') ? 'completed' : 'abandoned';
+        // 中断：绝不记为已完成（沿用既有"提前结束"的 abandoned 语义）。
+        var stopReason = (outcome === 'smooth') ? null : 'early_finish';
+        try {
+          await owner.completeSession({
+            sessionId: session.id,
+            actualMinutes: actual,
+            result: stopResult,
+            reason: stopReason
+          });
+        } catch (e) {
+          // 计时停止失败 → 保留现状：不写反馈、不清 dock、表单内容保留。
+          toast((e.message || '停止计时失败') + '；反馈没有保存，请重试', 'err');
+          return;
+        }
+        state.timerStopped = true;
+        state.outcome = outcome;
+        state.planned = planned;
+        state.actual = actual;
+        _freeCardEndState[numericId] = state;
+        // 计时已停 → 锁定结论（重试时结论不会与计时状态相矛盾）。
+        if (smoothEl) smoothEl.disabled = true;
+        if (interruptedEl) interruptedEl.disabled = true;
+        owner.stopInlineTimer();
+        _refreshTimerViews();
+      } else {
+        // 没有进行中的计时（例如计时早已被停掉）：不重复停止，
+        // 直接进入"写反馈"阶段。
+        state.timerStopped = true;
+        state.outcome = outcome;
+        _freeCardEndState[numericId] = state;
+      }
+    }
+
+    // === 写既有反馈事件（复用既有 /api/task-feedback 与合法字段）======
+    var eventType;
+    var completionStatus;
+    var reasonCategory;
+    var reasonDetail;
+    var outcomeLabel = outcome === 'smooth' ? '顺利完成' : '中途被打断';
+    if (outcome === 'smooth') {
+      eventType = (planned != null && actual != null && actual >= planned)
+        ? 'finish_on_time'
+        : 'finish_early';
+      completionStatus = 'completed';
+      reasonCategory = 'other';
+      reasonDetail = reason || '顺利完成';
+    } else {
+      eventType = 'abandon_task';
+      completionStatus = 'abandoned';
+      reasonCategory = 'external_interrupt';
+      reasonDetail = reason || '被中断';
+    }
+    // note：既有允许的 note 字段（自由事件的 note 语义保持自由），
+    // 用与 accept_task 一致的 schema_version 约定 + 一句可读摘要。
+    var note = JSON.stringify({
+      schema_version: 1,
+      outcome: outcome === 'smooth' ? 'smooth' : 'interrupted',
+      interrupted: outcome !== 'smooth',
+      activity: activity,
+      summary: outcomeLabel + '｜实际活动：' + activity
+    });
+
+    if (!state.feedbackSaved) {
+      try {
+        await api('/api/task-feedback', {
+          method: 'POST',
+          body: JSON.stringify({
+            task_id: numericId,
+            event_type: eventType,
+            planned_minutes: planned,
+            actual_minutes: actual,
+            completion_status: completionStatus,
+            reason_category: reasonCategory,
+            reason_detail: reasonDetail,
+            note: note
+          })
+        });
+      } catch (e) {
+        // 保存失败 → 保留表单内容、允许重试（绝不谎报保存成功）。
+        state.feedbackSaved = false;
+        _freeCardEndState[numericId] = state;
+        toast((e.message || '反馈保存失败') + '；已保留你填写的内容，请重试', 'err');
+        return;
+      }
+      state.feedbackSaved = true;
+      _freeCardEndState[numericId] = state;
+    }
+
+    // === 顺利结束 → 复用既有"任务完成"端点（中断绝不记为已完成）======
+    if (outcome === 'smooth' && !state.taskCompleted) {
+      try {
+        await api('/api/tasks/' + numericId + '/complete', { method: 'POST' });
+        await api('/api/tasks/' + numericId + '/move-to-discard', { method: 'POST' });
+      } catch (e) {
+        // 反馈已经保存；任务完成失败 → 如实告知，绝不谎报"全部完成"。
+        toast((e.message || '任务完成记录失败') + '；本次反馈已保存', 'err');
+        return;
+      }
+      state.taskCompleted = true;
+      _freeCardEndState[numericId] = state;
+    }
+
+    delete _freeCardEndState[numericId];
+    delete _freeCardAcceptedActivities[numericId];
+    toast('已记录这次自由卡的反馈', 'suc');
+    returnToUnifiedGachaAfterFreeCard();
+  } finally {
+    _pendingFreeCardEndId = null;
+  }
+}
+
+// 保存成功 → 回到统一抽卡（清理本次卡片，清空抽卡状态）。
+function returnToUnifiedGachaAfterFreeCard() {
+  var result = document.getElementById('gachaResult');
+  if (result) {
+    result.innerHTML =
+      '<div class="empty-state"><i class="fa-solid fa-circle-check" style="color:var(--green)"></i>' +
+      '<p>已记录这次自由卡的反馈，可以继续抽卡了。</p></div>';
+  }
+  if (typeof gachaState === 'object' && gachaState) {
+    gachaState.currentTaskId = null;
+    gachaState.canReplace = false;
+  }
+  _currentDrawnTask = null;
+  loadTasks();
+  refreshGachaStats();
+  updateDiscardPileVisual();
+}
+
 // ============ 开始任务（计时器）============
+// Module-level caches used by startTask() so a card rendered via the
+// multi/single/care/replace paths is startable even before /api/tasks
+// populates allTasks (M1.3A). Safe to write from any draw path.
+var _currentDrawnTask = null;
+// Idempotency guard for the timer-start POST reentrancy (M1.3A).
+var _pendingStartTaskId = null;
+
 async function startTask(taskId) {
-  var task = allTasks.find(function (x) { return x.id === taskId; });
-  if (!task) { toast('任务不存在', 'err'); return; }
+  // Coerce taskId to a positive integer literal. The onclick= handler
+  // already emits startTask(parseInt(task.id,10)), but hostile payloads
+  // or programmatic callers could pass a non-numeric; we must NOT
+  // let such a value reach the allTasks.find callback. (M1.3A)
+  var numericId = (typeof taskId === 'number') ? taskId : parseInt(taskId, 10);
+  if (!isFinite(numericId) || numericId <= 0) {
+    toast('任务不存在', 'err');
+    return;
+  }
+  // Drop a second immediate activation while the POST is pending.
+  if (_pendingStartTaskId === numericId) return;
+  _pendingStartTaskId = numericId;
+  try {
+  // 1) Prefer the active drawn card we just rendered (handles the
+  //    race where allTasks hasn't loaded yet but the card is on
+  //    screen via renderMultiResults → activateMultiCard → renderDrawnCard).
+  var task = null;
+  if (_currentDrawnTask && Number(_currentDrawnTask.id) === numericId) {
+    task = _currentDrawnTask;
+  } else if (Array.isArray(multiDrawResults) && multiDrawResults.length) {
+    for (var i = 0; i < multiDrawResults.length; i += 1) {
+      var m = multiDrawResults[i];
+      if (m && Number(m.id) === numericId) { task = m; break; }
+    }
+  }
+  // 2) Fall back to the loaded catalog (legacy / single-draw / care-draw
+  //    after /api/tasks has loaded).
+  if (!task && Array.isArray(allTasks)) {
+    task = allTasks.find(function (x) { return x.id === numericId; }) || null;
+  }
+  if (!task) {
+    toast('任务不存在', 'err');
+    return;
+  }
   if (!task.is_unlocked && task.is_unlocked !== undefined) {
     toast(prereqHint(task) || '任务被前置依赖阻塞', 'err');
     return;
   }
+  // 开始/接受当前卡 → 本链结束。
+  resetReplaceChain();
 
-  var planned = task.estimated_time || 30;
-  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + taskId + '"]');
+  // M02-S02-G01-W08：自由卡的"开始"必须先走 **接受流程**（填写活动 + 理由），
+  // 绝不允许用行内 estimated_time 直接启动计时。普通/微型/目标卡保持原样。
+  if (normalizeCardType(task.task_type) === 'free') {
+    _pendingStartTaskId = null;
+    openFreeCardAcceptForm(numericId);
+    return;
+  }
+
+  // M1.3B: coerce task.estimated_time to a finite positive integer
+  // before it is concatenated into the rightPanel innerHTML string
+  // AND before it is sent to the timer-start request. A hostile or stale
+  // value (string, NaN, <1, >480) must NOT reach the DOM, the URL,
+  // or the API. This is the only XSS path in startTask.
+  var rawEstimated = Number(task.estimated_time);
+  var planned = (isFinite(rawEstimated) && Math.floor(rawEstimated) === rawEstimated
+                 && rawEstimated >= 1 && rawEstimated <= 480)
+                ? Math.floor(rawEstimated) : 30;
+  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + numericId + '"]');
   if (!card) { toast('请先抽一张卡牌', 'err'); return; }
 
   var rightPanel = card.querySelector('.drawn-card-right-panel');
@@ -777,101 +2247,110 @@ async function startTask(taskId) {
     '<div class="card-timer-display" style="font-family:var(--font-heading);font-size:1.3rem;color:var(--gold);margin-bottom:6px">00:00</div>' +
     '<div style="font-size:.68rem;color:var(--text-muted)">计划 ' + planned + ' 分</div>' +
     '</div>' +
-    '<button class="btn" onclick="pauseInlineTimer(' + taskId + ')" style="width:100%;margin-bottom:6px"><i class="fa-solid fa-pause"></i> 暂停</button>' +
-    '<button class="btn pri" onclick="confirmComplete(' + taskId + ')" style="width:100%"><i class="fa-solid fa-check"></i> 确认完成任务</button>';
+    '<button class="btn" onclick="pauseInlineTimer(' + numericId + ')" style="width:100%;margin-bottom:6px"><i class="fa-solid fa-pause"></i> 暂停</button>' +
+    '<button class="btn pri" onclick="confirmComplete(' + numericId + ')" style="width:100%"><i class="fa-solid fa-check"></i> 确认完成任务</button>';
 
   try {
-    var r = await api('/api/timer/start', {
-      method: 'POST',
-      body: JSON.stringify({ task_id: taskId, planned_minutes: planned })
+    // AR03-G08：计时启动统一经 ESM timer owner（唯一生命周期所有者）。
+    // 普通任务路径 **不** 启用严格 session_id 校验（沿用既有语义）。
+    var owner = await _getTimerOwner();
+    await owner.startSession({
+      taskId: numericId,
+      plannedMinutes: planned,
+      taskName: task.name
     });
-    timerDockSession = {
-      id: r.session_id,
-      task_id: r.task_id,
-      started_at: r.started_at,
-      planned_minutes: r.planned_minutes,
-      task_name: task.name
-    };
-    timerDockPaused = false;
-    timerDockPausedElapsed = 0;
-    updateTimerDockDisplay();
-    startInlineTimer(taskId, r.started_at, planned);
+    _refreshTimerViews();
+    startInlineTimer(numericId);
     toast('计时已开始，加油！', 'suc');
   } catch (e) {
     toast(e.message || '启动计时失败', 'err');
     if (rightPanel) {
-      rightPanel.innerHTML = '<button class="btn pri" onclick="startTask(' + taskId + ')" style="width:100%"><i class="fa-solid fa-play"></i> 开始任务</button>';
+      rightPanel.innerHTML = '<button class="btn pri" onclick="startTask(' + numericId + ')" style="width:100%"><i class="fa-solid fa-play"></i> 开始任务</button>';
     }
+  }
+  } finally {
+    _pendingStartTaskId = null;
   }
 }
 
 // 内嵌计时器更新
+// AR03-G08：内嵌计时的句柄与唯一 session 归 ESM timer owner 所有；
+// 这里只是 classic facade（卡内 DOM 的既有位置与文案保持不变）。
 function startInlineTimer(taskId, startedAt, planned) {
-  if (window._inlineTimerHandle) clearInterval(window._inlineTimerHandle);
-  var card = document.querySelector('.task-card.drawn-card[data-task-id="' + taskId + '"]');
-  if (!card) return;
-  window._inlineTimerHandle = setInterval(function () {
-    if (!timerDockSession || timerDockSession.task_id !== taskId) {
-      clearInterval(window._inlineTimerHandle);
-      return;
-    }
-    var display = card.querySelector('.card-timer-display');
-    if (!display) { clearInterval(window._inlineTimerHandle); return; }
-    var started = new Date(timerDockSession.started_at).getTime();
-    var elapsed = Date.now() - started;
-    if (timerDockPaused) elapsed = timerDockPausedElapsed;
-    var sec = Math.floor(Math.max(0, elapsed) / 1000);
-    var m = Math.floor(sec / 60);
-    var s = sec % 60;
-    display.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-  }, 1000);
+  var owner = _timerOwner;
+  if (!owner) {
+    // owner 尚未就绪 → 异步取到后再启动（句柄始终在 owner 手里）。
+    _getTimerOwner().then(function (o) {
+      o.startInlineTimer(taskId);
+    }).catch(function (e) {
+      console.error('[timer] startInlineTimer', e);
+    });
+    return;
+  }
+  owner.startInlineTimer(taskId);
 }
 
 // 内嵌暂停
 async function pauseInlineTimer(taskId) {
-  if (!timerDockSession || timerDockSession.task_id !== taskId) return;
-  toggleTimerDockPause();
+  var snap = _timerSnapshot();
+  if (!snap.session || snap.session.task_id !== taskId) return;
+  await toggleTimerDockPause();
   var card = document.querySelector('.task-card.drawn-card[data-task-id="' + taskId + '"]');
   if (!card) return;
   var rightPanel = card.querySelector('.drawn-card-right-panel');
   if (!rightPanel) return;
   var pauseBtn = rightPanel.querySelector('button[onclick*="pauseInlineTimer"]');
   if (pauseBtn) {
-    pauseBtn.innerHTML = timerDockPaused
+    pauseBtn.innerHTML = _timerSnapshot().paused
       ? '<i class="fa-solid fa-play"></i> 继续'
       : '<i class="fa-solid fa-pause"></i> 暂停';
   }
 }
 
 // 确认完成任务（需要先停止计时器）
+// 合约（M1.3C）：
+//   - 计时器停API失败时：保留现有timer-active状态，不完成、不弃牌、不重置；显示错误。
+//   - API成功时：才清空dock，再走原有completeWithFeedback流程。
+//   - 实际时长需考虑历史paused_seconds累积（暂停段已被服务端扣除并累加）。
 async function confirmComplete(taskId) {
   // 先停止计时器
-  if (timerDockSession && timerDockSession.id) {
-    try {
-      var started = new Date(timerDockSession.started_at).getTime();
-      var actualMin = Math.max(1, Math.round((Date.now() - started) / 60000));
-      await api('/api/timer/complete', {
-        method: 'POST',
-        body: JSON.stringify({ session_id: timerDockSession.id, actual_minutes: actualMin, result: 'completed' })
-      });
-    } catch (e) { /* ignore timer stop error */ }
+  var owner = null;
+  try {
+    owner = await _getTimerOwner();
+  } catch (e) {
+    toast('计时模块加载失败，任务未完成', 'err');
+    return;
   }
-  timerDockSession = null;
-  updateTimerDockDisplay();
+  var snap = owner.getSnapshot();
+  if (snap.session && snap.session.id) {
+    // AR03-G08：实际分钟数由 owner 统一计算（暂停时用 pausedElapsedMs，
+    // 运行时用 now-started + paused_seconds*1000，下限 1）。
+    var actualMin = owner.getActualMinutes();
+    try {
+      await owner.completeSession({
+        sessionId: snap.session.id,
+        actualMinutes: actualMin,
+        result: 'completed'
+      });
+    } catch (e) {
+      // M1.3C：API失败 → 不重置dock、不调用completeWithFeedback、不标记任务完成；
+      // 保留现有timer-active状态让用户能重试。
+      toast(e.message || '停止计时失败，任务未完成', 'err');
+      return;
+    }
+  }
+  // API成功（或无计时器）→ 清理dock状态，走原有任务完成/弃牌流程
+  owner.stopInlineTimer();
+  _refreshTimerViews();
   await completeWithFeedback(taskId);
 }
 
 async function checkTaskTimerStatus(taskId) {
   try {
-    var r = await api('/api/timer/active');
-    if (r && r.task_id === taskId) {
-      // 仍在计时，超时提醒
-      var started = new Date(r.started_at).getTime();
-      var planned = r.planned_minutes || 30;
-      var elapsed = (Date.now() - started) / 60000;
-      if (elapsed > planned * 0.8) {
-        toast(WARM_MESSAGES.timeout, 'inf');
-      }
+    var owner = await _getTimerOwner();
+    var r = await owner.checkTaskTimerStatus(taskId);
+    if (r && r.overdue) {
+      toast(WARM_MESSAGES.timeout, 'inf');
     }
   } catch (e) { /* ignore */ }
 }
@@ -883,24 +2362,55 @@ function showReplaceReason(taskId) {
     bar = document.createElement('div');
     bar.id = 'replaceReasonBar';
     bar.className = 'replace-reason';
+    // 理由 **没有** 默认选中项：用户必须自己明确选一个。
+    // 开关 A 复用本链状态；开关 B 每次新表单默认不勾选（不写入 gachaState）。
     bar.innerHTML =
       '<input type="radio" name="reason" value="low_energy" id="rr_low"><label for="rr_low">精力不足</label>' +
       '<input type="radio" name="reason" value="no_time" id="rr_no"><label for="rr_no">时间不够</label>' +
       '<input type="radio" name="reason" value="similar_done" id="rr_sim"><label for="rr_sim">刚做过类似</label>' +
       '<input type="radio" name="reason" value="other" id="rr_ot"><label for="rr_ot">其他</label>' +
+      '<label class="replace-opt" for="rr_allow_repeat"><input type="checkbox" id="rr_allow_repeat"> 允许曾被更换的卡牌再次抽出</label>' +
+      '<label class="replace-opt" for="rr_hide_today"><input type="checkbox" id="rr_hide_today"> 我今天内不想再看到这张卡</label>' +
       '<button class="btn pri sm" onclick="doReplace()">确认换牌</button>';
     var card = document.getElementById('gachaResult').querySelector('.task-card.drawn-card');
     if (card) card.appendChild(bar);
   } else {
     bar.style.display = 'flex';
   }
+  // 每次打开表单都按链状态同步开关 A，并确保开关 B 未被勾选。
+  var allowEl = document.getElementById('rr_allow_repeat');
+  if (allowEl) allowEl.checked = !!gachaState.allowRepeatReplaced;
+  var hideEl = document.getElementById('rr_hide_today');
+  if (hideEl) hideEl.checked = false;
+}
+
+// 读取表单里的开关 A，并同步成本链状态（用户选择在链内保持）。
+function readAllowRepeatReplaced() {
+  var el = document.getElementById('rr_allow_repeat');
+  var value = !!(el && el.checked);
+  gachaState.allowRepeatReplaced = value;
+  return value;
 }
 
 async function doReplace() {
   var rid = gachaState.replacedTaskId;
-  var reasonEl = document.querySelector('input[name="reason"]:checked');
-  var reason = reasonEl ? reasonEl.value : 'other';
+  // M02-S03-G01-W04：理由 **必须显式选择**，绝不静默回落成 other。
+  var reasonEl = document.querySelector('#replaceReasonBar input[name="reason"]:checked');
+  if (!reasonEl) {
+    toast('请先选择换牌理由', 'err');
+    return;
+  }
+  var reason = reasonEl.value;
+  var allowRepeat = readAllowRepeatReplaced();
+  var hideEl = document.getElementById('rr_hide_today');
+  var hideToday = !!(hideEl && hideEl.checked);
+  var chainIds = Array.isArray(gachaState.replacedTaskIds) ? gachaState.replacedTaskIds.slice() : [];
+  // M02-S03-G02-W03：同一条连续换卡链沿用同一个 session；
+  // 本次换牌是一个新的真实动作 → 新的 action id。
+  var actionId = newUnifiedGachaActionId('replace');
+  var replacedTaskId = unifiedGachaTaskId(rid);
   try {
+    var availableMinutes = getGachaAvailableMinutes();
     var r = await api('/api/gacha/replace', {
       method: 'POST',
       body: JSON.stringify({
@@ -908,16 +2418,57 @@ async function doReplace() {
         reason: reason,
         pool: gachaState.pool,
         energy: gachaState.energy,
-        preferred_tag: gachaState.selectedTag || null
+        available_time: availableMinutes,
+        preferred_tag: gachaState.selectedTag || null,
+        replaced_task_ids: chainIds,
+        allow_repeat_replaced: allowRepeat,
+        hide_today: hideToday
       })
     });
     if (r.task) {
-      gachaState.canReplace = false;
+      if (r.pool) gachaState.pool = r.pool;
+      // 只有 **成功** 才把旧卡并入本链；失败时链与当前卡都保持不变。
+      if (chainIds.indexOf(rid) === -1) chainIds.push(rid);
+      gachaState.replacedTaskIds = chainIds;
+      gachaState.currentTaskId = r.task.id;
+      // 单抽路径换卡成功后 **仍可** 继续换卡（不永久关闭 canReplace）。
+      gachaState.canReplace = true;
+      // M1.3A: cache the active drawn task after a replace.
+      _currentDrawnTask = r.task;
       document.getElementById('gachaResult').innerHTML = '';
       document.getElementById('gachaResult').appendChild(renderDrawnCard(r.task, 0));
+      // M02-S03-G02-W03：只有成功才记录 card_replaced。
+      // task_id 指 **真实被换出的那张牌**；context 记录新牌 id、明确选择的
+      // 换牌理由、开关 A/B 与真实 pool。
+      var newTaskId = unifiedGachaTaskId(r.task.id);
+      if (replacedTaskId !== null) {
+        sendUnifiedGachaEvent('card_replaced', replacedTaskId, {
+          new_task_id: newTaskId,
+          reason: reason,
+          allow_repeat_replaced: allowRepeat,
+          hide_today: hideToday,
+          pool: r.pool || gachaState.pool,
+          replaced_task_ids: chainIds.slice()
+        }, unifiedGachaEventId(actionId, 'card_replaced', replacedTaskId));
+      }
+      // 换卡得到的 **新牌** 也是一次真实发牌 → card_drawn（新牌的真实 id）。
+      sendUnifiedGachaEvent('card_drawn', newTaskId, {
+        source: 'replace',
+        pool: r.pool || gachaState.pool,
+        energy: gachaState.energy,
+        available_time: availableMinutes,
+        preferred_tag: gachaState.selectedTag || null
+      }, unifiedGachaEventId(actionId, 'card_drawn', newTaskId));
+      // 新牌真正渲染进结果区 → 记录新牌的 card_shown。
+      reportUnifiedGachaCardShown(r.task.id, {
+        source: 'replace',
+        surface: 'result',
+        pool: r.pool || gachaState.pool
+      }, actionId);
       toast('已换牌', 'inf');
     }
   } catch (e) {
+    // 失败：保留当前卡、保留表单与开关状态，显示错误并允许重试。
     toast(e.message || '换牌失败', 'err');
   }
 }
@@ -948,24 +2499,106 @@ async function completeWithFeedback(id, opts) {
     // 先将任务放入弃牌堆，再标记完成
     await api('/api/tasks/' + id + '/move-to-discard', { method: 'POST' });
 
-    var feedbackBody = { energy_after: 5, mood_after: 3 };
-    if (finishEarly) feedbackBody.event_type = 'finish_early';
-    api('/api/tasks/' + id + '/feedback', {
-      method: 'POST',
-      body: JSON.stringify(feedbackBody)
-    }).catch(function () { });
-
+    // M1.3D: 任务完成链路的最终环节改为询问用户真实感受。
+    // 不再隐式 POST 硬编码的 energy/mood 值；改由 submitFeedback/cancelFeedback
+    // 在用户明确操作后再调用 /api/tasks/<id>/feedback。完成清理
+    // （loadTasks/refreshGachaStats/updateDiscardPileVisual/dock 重置）
+    // 在 feedback 关闭后再做，保证与原有"任务已完成+弃牌"语义一致。
     loadTasks();
     refreshGachaStats();
     updateDiscardPileVisual();
-    timerDockSession = null;
-    updateTimerDockDisplay();
+    // AR03-G08：清空唯一计时状态（owner 持有），并同步两处计时 UI。
+    if (_timerOwner) {
+      _timerOwner.clear();
+      _timerOwner.stopInlineTimer();
+    }
+    _refreshTimerViews();
 
-    // 弹出关怀问询框
-    showCareModal(id, task ? task.category : null);
+    // 把后续切换交给 focus 关怀；用户取消/提交后再走 care modal。
+    openFeedbackModalForTask(id, task ? task.category : null, finishEarly);
   } catch (e) {
     toast(e.message || '完成失败', 'err');
   }
+}
+
+// ============ 反馈表单（modal）============
+// 仅当用户主动 确认 才会 POST /api/tasks/<id>/feedback；取消则零网络。
+// 提交失败时停留在 modal 上、允许重试；不静默关闭。
+var _pendingFeedbackSubmit = null;  // reentrancy guard: 当前正在 POST 的 taskId
+function openFeedbackModalForTask(taskId, category, finishEarly) {
+  // 把上下文记下，供 submitFeedback / cancelFeedback 后续恢复 care modal
+  _feedbackContext = {
+    taskId: taskId,
+    category: category || null,
+    finishEarly: !!finishEarly
+  };
+  // 预填表字段
+  var idEl = document.getElementById('fbTaskId');
+  if (idEl) idEl.value = String(taskId);
+  var energyEl = document.getElementById('fbEnergy');
+  if (energyEl) energyEl.value = '5';
+  var energyVal = document.getElementById('fbEnergyVal');
+  if (energyVal) energyVal.textContent = '5';
+  // 默认心情复位为 3（"满意"），并清除旧 .sel 标记
+  gachaState.feedbackMood = 3;
+  document.querySelectorAll('.feedback-emoji button').forEach(function (b) {
+    b.classList.remove('sel');
+    if (b.getAttribute('data-mood') === '3') b.classList.add('sel');
+  });
+  // 完成早退时不强制改值；保留用户原输入。无需清理额外字段。
+  _pendingFeedbackSubmit = null;  // 进入模态时清掉旧锁
+  showModal('feedbackModal');
+}
+
+var _feedbackContext = null;
+
+function transitionToCareModal() {
+  var ctx = _feedbackContext;
+  _feedbackContext = null;
+  _pendingFeedbackSubmit = null;
+  if (!ctx) return;
+  showCareModal(ctx.taskId, ctx.category);
+}
+
+function submitFeedback() {
+  var ctx = _feedbackContext;
+  if (!ctx) {
+    closeModal('feedbackModal');
+    return;
+  }
+  var taskId = ctx.taskId;
+  // reentrancy: 阻止快速重复点击造成并发 POST
+  if (_pendingFeedbackSubmit === taskId) return;
+  var energyEl = document.getElementById('fbEnergy');
+  var energy = parseInt(energyEl ? energyEl.value : '5', 10);
+  if (!isFinite(energy) || energy < 1 || energy > 10) energy = 5;
+  var mood = gachaState.feedbackMood;
+  if (!isFinite(mood) || mood < 1 || mood > 5) mood = 3;
+  var body = { energy_after: energy, mood_after: mood };
+  if (ctx.finishEarly) body.event_type = 'finish_early';
+
+  _pendingFeedbackSubmit = taskId;
+  // 不先关闭 modal —— 失败时要停留以供重试
+  api('/api/tasks/' + taskId + '/feedback', {
+    method: 'POST',
+    body: JSON.stringify(body)
+  }).then(function () {
+    closeModal('feedbackModal');
+    document.getElementById('gachaResult').innerHTML =
+      '<div class="empty-state"><i class="fa-solid fa-circle-check" style="color:var(--green)"></i><p>太棒了，继续加油！</p></div>';
+    refreshGachaStats();
+    transitionToCareModal();
+  }).catch(function (e) {
+    _pendingFeedbackSubmit = null;  // 解锁，允许用户重新点确认
+    toast((e && e.message) || '反馈提交失败，请重试', 'err');
+    // 模态保持打开，不清空用户输入
+  });
+}
+
+function cancelFeedback() {
+  closeModal('feedbackModal');
+  // 取消 = 不上报；直接走 care modal 以保持原"任务完成关怀"语义
+  transitionToCareModal();
 }
 
 // ============ 任务完成关怀问询 ============
@@ -1018,29 +2651,62 @@ function careRest() {
 async function drawGachaWithCategory(includeCategory, excludeCategory) {
   if (isDrawing) return;
   isDrawing = true;
+  // 发起新抽卡 → 本链结束。
+  resetReplaceChain();
+  // M02-S03-G02-W03：一次新的抽卡 → 开启新的行为事件 session。
+  beginUnifiedGachaSession();
+  var actionId = newUnifiedGachaActionId('care');
   var btn = document.getElementById('gachaBtn');
   if (btn) btn.disabled = true;
   var result = document.getElementById('gachaResult');
   result.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>正在抽卡...</p></div>';
 
   try {
+    var availableMinutes = getGachaAvailableMinutes();
     var r = await api('/api/gacha/care-draw', {
       method: 'POST',
       body: JSON.stringify({
         pool: gachaState.pool,
         energy: gachaState.energy,
-        available_time: parseInt(document.getElementById('gachaTimeInput').value, 10) || 25,
+        available_time: availableMinutes,
         preferred_tag: gachaState.selectedTag || null,
         include_category: includeCategory || null,
         exclude_category: excludeCategory || null
       })
     });
     if (r.task) {
+      if (r.pool) gachaState.pool = r.pool;
       gachaState.canReplace = r.can_replace !== false;
       gachaState.currentTaskId = r.task.id;
+      // M1.3A: cache the active drawn task for the care-draw path.
+      _currentDrawnTask = r.task;
+      // M02-S03-G02-W03：服务端返回真实 task 后才记录 card_drawn。
+      var careTaskId = unifiedGachaTaskId(r.task.id);
+      var careContext = {
+        source: 'care_draw',
+        pool: r.pool || gachaState.pool,
+        energy: gachaState.energy,
+        available_time: availableMinutes,
+        preferred_tag: gachaState.selectedTag || null,
+        include_category: includeCategory || null,
+        exclude_category: excludeCategory || null
+      };
+      sendUnifiedGachaEvent('card_drawn', careTaskId, careContext,
+        unifiedGachaEventId(actionId, 'card_drawn', careTaskId));
+      // M02-S03-G02-W03："帮我选"（关怀模态的同科/换口味两条路径走
+      // /api/gacha/care-draw）成功返回新牌 → 记录 help_me_choose。
+      // context 只放 **实际** 的 include/exclude category 与 pool。
+      sendUnifiedGachaEvent('help_me_choose', careTaskId, {
+        include_category: includeCategory || null,
+        exclude_category: excludeCategory || null,
+        pool: careContext.pool
+      }, unifiedGachaEventId(actionId, 'help_me_choose', careTaskId));
       result.innerHTML = '';
       var stage = renderDrawnCard(r.task, 0);
       result.appendChild(stage);
+      // 卡片真正进入结果区后才记录 card_shown。
+      reportUnifiedGachaCardShown(careTaskId,
+        { source: 'care_draw', surface: 'result', pool: careContext.pool }, actionId);
       await playCardFlyAnimation(r.task);
       updateDiscardPileVisual();
     } else {
@@ -1102,25 +2768,11 @@ function setMood(v, el) {
   el.classList.add('sel');
 }
 
-function submitFeedback() {
-  var tid = document.getElementById('fbTaskId').value;
-  var energy = parseInt(document.getElementById('fbEnergy').value, 10);
-  var mood = gachaState.feedbackMood;
-  api('/api/tasks/' + tid + '/feedback', {
-    method: 'POST',
-    body: JSON.stringify({ energy_after: energy, mood_after: mood })
-  }).catch(function () { });
-  closeModal('feedbackModal');
-  document.getElementById('gachaResult').innerHTML =
-    '<div class="empty-state"><i class="fa-solid fa-circle-check" style="color:var(--green)"></i><p>太棒了，继续加油！</p></div>';
-  refreshGachaStats();
-}
-
-function cancelFeedback() {
-  closeModal('feedbackModal');
-}
+// submitFeedback / cancelFeedback 由 openFeedbackModalForTask 上方
+// （M1.3D 区域）的版本提供；这里不再重复定义以免覆盖重入守卫。
 
 async function handleSkip(id) {
+  resetReplaceChain();
   var ctx = getTaskFeedbackContext(id);
   ctx.completionStatus = 'skipped';
   await promptTaskFeedback('skip', ctx);
@@ -1138,6 +2790,7 @@ async function handleSkip(id) {
 }
 
 async function handleRefuse(id) {
+  resetReplaceChain();
   var ctx = getTaskFeedbackContext(id);
   ctx.completionStatus = 'refused';
   await promptTaskFeedback('skip', ctx);
@@ -1154,37 +2807,16 @@ async function handleRefuse(id) {
 
 async function refreshGachaStats() {
   try {
-    var r = await api('/api/gacha/statistics');
-    var se = document.getElementById('statDraws');
-    var sr = document.getElementById('statRate');
-    var srej = document.getElementById('statRejects');
-    if (se) se.textContent = r.total_draws || 0;
-    if (sr) sr.textContent = r.acceptance_rate != null ? (Math.round(r.acceptance_rate) + '%') : '--';
-    if (srej) srej.textContent = r.rejections || 0;
+    var m = await import('/static/modules/gacha/presentation.js');
+    await m.refreshGachaStats(api);
   } catch (e) { /* 统计失败不阻塞 */ }
 }
 
 // ============ 弃牌堆视觉 ============
 async function updateDiscardPileVisual() {
   try {
-    var items = await api('/api/discard-pile');
-    var stack = document.getElementById('discardPileStack');
-    var empty = document.getElementById('discardPileEmpty');
-    if (!stack) return;
-    // 移除所有视觉卡
-    stack.querySelectorAll('.discard-pile-visual-card').forEach(function (el) { el.remove(); });
-    // 显示空状态或堆叠卡
-    if (empty) empty.style.display = items && items.length > 0 ? 'none' : 'flex';
-    if (items && items.length > 0) {
-      var show = Math.min(items.length, 5);
-      for (var i = 0; i < show; i++) {
-        var card = document.createElement('div');
-        card.className = 'discard-pile-visual-card discard-pile-card';
-        card.style.setProperty('--di', i);
-        card.style.zIndex = i;
-        stack.appendChild(card);
-      }
-    }
+    var m = await import('/static/modules/gacha/presentation.js');
+    await m.updateDiscardPileVisual(api);
   } catch (e) { /* ignore */ }
 }
 
@@ -1416,139 +3048,20 @@ function closeDiscardPileModal() {
   closeModal('discardPileModal');
 }
 
-function openTaskEdit(id) {
-  showModal('taskModal');
-  document.getElementById('tfId').value = '';
-  document.getElementById('taskModalTitle').textContent = '新建任务';
-  document.getElementById('taskDelBtn').style.display = 'none';
-  loadNoteOptionsForTaskModal();
-  document.getElementById('tfExistingTags').innerHTML = allTags.map(function (t) {
-    return '<span class="badge bg-blue tag-pick" data-tag="' + escapeHtml(t.name) + '">' + escapeHtml(t.name) + '</span>';
-  }).join('');
-  document.querySelectorAll('#tfExistingTags .tag-pick').forEach(function (el) {
-    el.addEventListener('click', function () { toggleExistingTag(el.getAttribute('data-tag')); });
-  });
-  buildDepList([]);
-  if (id) {
-    var t = allTasks.find(function (x) { return x.id === id; });
-    if (t) {
-      document.getElementById('tfId').value = t.id;
-      document.getElementById('taskModalTitle').textContent = '编辑: ' + t.name;
-      document.getElementById('taskDelBtn').style.display = 'inline-flex';
-      document.getElementById('tfName').value = t.name || '';
-      document.getElementById('tfCat').value = t.category || 'study';
-      document.getElementById('tfPri').value = t.priority || 5;
-      document.getElementById('tfTime').value = t.estimated_time || 30;
-      document.getElementById('tfDdl').value = t.deadline || '';
-      document.getElementById('tfRes').value = t.resistance || 'medium';
-      document.getElementById('tfEnergy').value = t.energy_required || 'medium';
-      document.getElementById('tfRepeat').value = t.repeat_type || 'none';
-      document.getElementById('tfProfile').value = t.task_profile || 'deadline_flexible';
-      document.getElementById('tfDesc').value = t.description || '';
-      buildDepList(t.prerequisite_ids || []);
-      document.getElementById('tfTagChips').innerHTML = '';
-      window._tfTags = (t.tags || []).slice();
-      window._tfTags.forEach(function (x) { addTagChipEl('tf', x); });
-      return;
-    }
-  }
-  ['tfName', 'tfDesc', 'tfDdl'].forEach(function (x) { document.getElementById(x).value = ''; });
-  document.getElementById('tfCat').value = 'study';
-  document.getElementById('tfPri').value = '5';
-  document.getElementById('tfTime').value = '30';
-  document.getElementById('tfRes').value = 'medium';
-  document.getElementById('tfEnergy').value = 'medium';
-  document.getElementById('tfRepeat').value = 'none';
-  document.getElementById('tfProfile').value = 'deadline_flexible';
-  document.getElementById('tfLinkedNote').value = '';
-  document.getElementById('tfTagChips').innerHTML = '';
-  window._tfTags = [];
-  buildDepList([]);
-}
-
-async function loadNoteOptionsForTaskModal() {
-  var sel = document.getElementById('tfLinkedNote');
-  if (!sel || sel.options.length > 1) return;
-  try {
-    var notes = await api('/api/knowledge/notes');
-    notes.slice(0, 200).forEach(function (n) {
-      var opt = document.createElement('option');
-      opt.value = n.path || '';
-      opt.textContent = (n.category || '') + ' / ' + (n.name || n.path || '');
-      sel.appendChild(opt);
-    });
-  } catch (e) { /* ignore */ }
-}
-
-function buildDepList(selectedIds) {
-  selectedIds = selectedIds || [];
-  var searchEl = document.getElementById('tfDepSearch');
-  var search = (searchEl ? searchEl.value : '').toLowerCase();
-  var currentId = parseInt(document.getElementById('tfId').value, 10) || 0;
-  var tasks = allTasks.filter(function (t) {
-    if (!t.id || t.id === currentId) return false;
-    if (search && t.name.toLowerCase().indexOf(search) < 0) return false;
-    return true;
-  }).slice(0, 50);
-  var listEl = document.getElementById('tfDepList');
-  listEl.innerHTML = tasks.map(function (t) {
-    var checked = selectedIds.indexOf(t.id) >= 0 ? ' checked' : '';
-    var done = t.completed ? ' (已完成)' : '';
-    return '<label class="note-item" style="display:flex;align-items:center;gap:8px;cursor:pointer">' +
-      '<input type="checkbox" class="dep-cb" value="' + t.id + '"' + checked + ' style="width:auto"> ' +
-      escapeHtml(t.name) + done + ' <span class="note-meta">ID:' + t.id + '</span></label>';
-  }).join('');
-  listEl.querySelectorAll('.dep-cb').forEach(function (cb) {
-    cb.addEventListener('change', function () { window._depSelected = readSelectedPrereqs(); });
-  });
-  window._depSelected = selectedIds.slice();
-}
-
-function toggleExistingTag(name) {
-  if (!window._tfTags) window._tfTags = [];
-  var idx = window._tfTags.indexOf(name);
-  if (idx >= 0) window._tfTags.splice(idx, 1);
-  else window._tfTags.push(name);
-  document.getElementById('tfTagChips').innerHTML = '';
-  window._tfTags.forEach(function (x) { addTagChipEl('tf', x); });
-}
-
-async function saveTask() {
-  var id = document.getElementById('tfId').value;
-  var name = document.getElementById('tfName').value.trim();
-  if (!name) { toast('请填写任务名称', 'err'); return; }
-  var prereqIds = readSelectedPrereqs();
-  var localErr = validatePrereqsLocal(id, prereqIds);
-  if (localErr) { toast(localErr, 'err'); return; }
-  var data = {
-    name: name,
-    category: document.getElementById('tfCat').value,
-    priority: parseInt(document.getElementById('tfPri').value, 10),
-    estimated_time: parseInt(document.getElementById('tfTime').value, 10),
-    deadline: document.getElementById('tfDdl').value || null,
-    resistance: document.getElementById('tfRes').value,
-    energy_required: document.getElementById('tfEnergy').value,
-    repeat_type: document.getElementById('tfRepeat').value,
-    task_profile: document.getElementById('tfProfile').value,
-    description: document.getElementById('tfDesc').value,
-    tags: window._tfTags || [],
-    prerequisite_ids: prereqIds
-  };
-  var linkedNote = document.getElementById('tfLinkedNote').value;
-  if (linkedNote) data.linked_note_path = linkedNote;
-  try {
-    await api(id ? '/api/tasks/' + id : '/api/tasks', {
-      method: id ? 'PUT' : 'POST',
-      body: JSON.stringify(data)
-    });
-    closeModal('taskModal');
-    toast(id ? '已更新' : '已创建', 'suc');
-    loadTasks();
-    loadTags();
-  } catch (e) {
-    toast(e.message || '保存失败', 'err');
-  }
-}
+// ============ TASK EDITOR (AR03-G13) ============
+// 任务编辑器模态框（#taskModal）的**全部业务实现**与**唯一状态**
+// （原始卡类型 / 当前标签数组 / 当前依赖选择数组）已迁至
+// static/modules/tasks/editor.js（真实生产 ESM owner）。
+// 此处**不再**保留任何影子实现；既有同步入口名
+// （openTaskEdit / buildDepList / addTagChip / saveTask /
+//   deleteCurrentTask）由 static/app.entry.js 在模块入口阶段**同步**
+// 绑定到 window，src/index.html 的 inline handler 无需改动。
+//
+// 仍由 classic 层持有（owner **注入调用**，不复制）：
+//   normalizeCardType —— 唯一实现（展示侧归一）；
+//   allTasks / allTags —— 唯一任务 / 标签数据来源；
+//   loadTasks / loadTags —— 唯一任务数据加载；
+//   deleteTask —— 唯一任务删除（含 dependents 确认）。
 
 async function deleteTask(id) {
   var msg = '确认删除该任务？';
@@ -1572,40 +3085,7 @@ async function deleteTask(id) {
   }
 }
 
-function deleteCurrentTask() {
-  var id = document.getElementById('tfId').value;
-  if (id) { deleteTask(id); closeModal('taskModal'); }
-}
-
-function addTagChip(prefix) {
-  var inp = document.getElementById(prefix + 'TagInput');
-  var tagName = inp.value.trim();
-  if (!tagName) return;
-  inp.value = '';
-  if (!window['_' + prefix + 'Tags']) window['_' + prefix + 'Tags'] = [];
-  if (window['_' + prefix + 'Tags'].indexOf(tagName) < 0) {
-    window['_' + prefix + 'Tags'].push(tagName);
-    addTagChipEl(prefix, tagName);
-  }
-}
-
-function addTagChipEl(prefix, tagName) {
-  var chips = document.getElementById(prefix + 'TagChips');
-  var chip = document.createElement('span');
-  chip.className = 'tag-chip';
-  chip.innerHTML = tagName + '<span class="remove" data-prefix="' + prefix + '" data-name="' +
-    tagName.replace(/"/g, '&quot;') + '">&times;</span>';
-  chip.querySelector('.remove').addEventListener('click', function () {
-    removeTagChip(this.getAttribute('data-prefix'), this.getAttribute('data-name'));
-  });
-  chips.appendChild(chip);
-}
-
-function removeTagChip(prefix, tagName) {
-  window['_' + prefix + 'Tags'] = window['_' + prefix + 'Tags'].filter(function (x) { return x !== tagName; });
-  document.getElementById(prefix + 'TagChips').innerHTML = '';
-  window['_' + prefix + 'Tags'].forEach(function (x) { addTagChipEl(prefix, x); });
-}
+// deleteCurrentTask 已迁至 static/modules/tasks/editor.js（ESM owner）。
 
 async function openBatchTags() {
   toast('选择任务后点击编辑，在标签栏中添加标签即可', 'inf');
@@ -1644,195 +3124,123 @@ async function openDepGraph() {
 }
 
 // ============ SCHEDULE ============
-var schedDate = new Date(), slots = [], weeklyData = {}, dailyData = [];
+// AR03-G12:「日程」页的**全部日程业务实现与唯一业务状态**
+// （schedDate / slots / weeklyData / dailyData）已迁至
+// static/modules/schedule/index.js（真实生产 ESM owner）。
+// 此处**只**保留最薄 classic facade：
+//   - 唯一共享的 ESM import promise（并发调用不会重复加载；加载失败清缓存重试）；
+//   - 依赖注入 api / toast / showModal / closeModal：ESM 侧不新建独立
+//     client、不引入全局 Store 或事件总线、不新建缓存 / 重试层；
+//   - 旧函数名全部保留（renderSchedule / shiftDate / openActivityMgr /
+//     closeActivityMgr / addActivity），src/index.html 的 inline onclick
+//     （shiftDate / openActivityMgr）、app.js 内的 addEventListener 调用点
+//     与导航 / INIT 调用点无需改动；
+//   - classic 层**不再**持有第二份日程业务实现，也不直连 /api/schedule/*。
+var _scheduleOwnerPromise = null;
+var _scheduleOwner = null;
+
+function _loadScheduleOwner() {
+  if (!_scheduleOwnerPromise) {
+    _scheduleOwnerPromise = import('/static/modules/schedule/index.js')
+      .then(function (m) {
+        _scheduleOwner = m.createScheduleOwner({
+          api: api,
+          toast: toast,
+          showModal: showModal,
+          closeModal: closeModal
+        });
+        return _scheduleOwner;
+      })
+      .catch(function (err) {
+        _scheduleOwnerPromise = null;
+        throw err;
+      });
+  }
+  return _scheduleOwnerPromise;
+}
+
+function _scheduleCall(method, args) {
+  return _loadScheduleOwner().then(function (owner) {
+    return owner[method].apply(owner, args || []);
+  }).catch(function (err) {
+    console.error('[schedule] ' + method, err);
+  });
+}
+
+function renderSchedule() {
+  return _scheduleCall('renderSchedule');
+}
 
 function shiftDate(d) {
-  schedDate.setDate(schedDate.getDate() + d);
-  renderSchedule();
+  return _scheduleCall('shiftDate', [d]);
 }
 
-async function renderSchedule() {
-  var ds = schedDate.toISOString().slice(0, 10);
-  document.getElementById('schedDate').textContent = ds;
-  try {
-    slots = await api('/api/schedule/slots');
-    weeklyData = await api('/api/schedule/weekly');
-    dailyData = await api('/api/schedule/daily?date=' + ds);
-  } catch (e) {
-    toast('日程加载失败（可能数据库表未就绪）', 'err');
-    slots = slots || [];
-  }
-  var dow = schedDate.getDay();
-  var wd = weeklyData[(dow === 0 ? 6 : dow - 1).toString()] || {};
-  var html = '';
-  slots.forEach(function (s) {
-    var daily = dailyData.find(function (d) { return d.slot_id === s.slot_id; });
-    var activity = daily ? daily.activity : (wd[s.slot_id] ? wd[s.slot_id].activity : '');
-    html += '<div class="sched-time"><div>' + s.start_time + '</div><div style="font-size:.65rem">' + s.end_time + '</div></div>';
-    html += '<div class="sched-slot" data-slot="' + s.slot_id + '">' +
-      '<input class="slot-act full-width" value="' + (activity || '').replace(/"/g, '&quot;') + '" placeholder="点击编辑..." readonly></div>';
-  });
-  var grid = document.getElementById('schedGrid');
-  grid.innerHTML = html || '<div class="empty-state"><p>暂无日程时段</p></div>';
-  grid.querySelectorAll('.sched-slot').forEach(function (el) {
-    el.addEventListener('click', function () { editSlot(el.getAttribute('data-slot'), el); });
-  });
-}
-
-async function editSlot(slotId, el) {
-  var act = prompt('活动名称:', el.querySelector('.slot-act').value || '');
-  if (act === null) return;
-  try {
-    await api('/api/schedule/daily', {
-      method: 'POST',
-      body: JSON.stringify({ date: schedDate.toISOString().slice(0, 10), slot_id: slotId, activity: act })
-    });
-    renderSchedule();
-    toast('已保存', 'suc');
-  } catch (e) {
-    toast(e.message || '保存失败', 'err');
-  }
-}
-
-async function openActivityMgr() {
-  showModal('activityMgrModal');
-  loadActivityList();
-}
-
-async function loadActivityList() {
-  var wrap = document.getElementById('activityList');
-  if (!wrap) return;
-  wrap.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">加载中...</p>';
-  try {
-    var items = await api('/api/schedule/activities');
-    if (!items || !items.length) {
-      wrap.innerHTML = '<div class="empty-state" style="padding:16px"><p>暂无活动</p></div>';
-      return;
-    }
-    wrap.innerHTML = items.map(function (a) {
-      var type = a.type || 'custom';
-      var dur = a.duration_minutes != null ? a.duration_minutes : 30;
-      return '<div class="activity-row" data-id="' + a.id + '">' +
-        '<div><strong>' + String(a.name).replace(/</g, '&lt;') + '</strong>' +
-        '<span style="color:var(--text-muted);font-size:.8rem;margin-left:8px">' + type + ' · ' + dur + '分</span></div>' +
-        '<button type="button" class="btn danger sm activity-del-btn" data-id="' + a.id + '" data-name="' +
-        String(a.name).replace(/"/g, '&quot;') + '"><i class="fa-solid fa-trash"></i></button></div>';
-    }).join('');
-    wrap.querySelectorAll('.activity-del-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        deleteActivity(parseInt(btn.getAttribute('data-id'), 10), btn.getAttribute('data-name'));
-      });
-    });
-  } catch (e) {
-    wrap.innerHTML = '<p style="color:var(--text-muted)">活动列表加载失败</p>';
-    toast(e.message || '活动列表加载失败', 'err');
-  }
-}
-
-async function addActivity() {
-  var nameEl = document.getElementById('activityNewName');
-  var name = nameEl.value.trim();
-  if (!name) {
-    toast('请输入活动名称', 'err');
-    return;
-  }
-  var body = {
-    name: name,
-    type: (document.getElementById('activityNewType').value || 'custom').trim() || 'custom',
-    duration_minutes: parseInt(document.getElementById('activityNewDuration').value, 10) || 30
-  };
-  try {
-    await api('/api/schedule/activities', { method: 'POST', body: JSON.stringify(body) });
-    toast('活动已添加', 'suc');
-    nameEl.value = '';
-    loadActivityList();
-  } catch (e) {
-    toast(e.message || '添加失败', 'err');
-  }
-}
-
-function deleteActivity(id, name) {
-  if (!confirm('确定删除活动「' + name + '」？')) return;
-  api('/api/schedule/activities/' + id, { method: 'DELETE' }).then(function () {
-    toast('已删除', 'suc');
-    loadActivityList();
-  }).catch(function (e) {
-    toast(e.message || '删除失败', 'err');
-  });
+function openActivityMgr() {
+  return _scheduleCall('openActivityMgr');
 }
 
 function closeActivityMgr() {
-  closeModal('activityMgrModal');
+  return _scheduleCall('closeActivityMgr');
+}
+
+function addActivity() {
+  return _scheduleCall('addActivity');
 }
 
 // ============ KNOWLEDGE ============
-var currentNotePath = '';
+// AR03-G06:「知识库」页的真实知识浏览业务实现与**唯一会话状态**
+// （currentNotePath / 分类笔记缓存 / 当前分类）已迁至
+// static/modules/knowledge/index.js（真实生产 ESM owner）。
+// 此处**只**保留最薄 classic facade：
+//   - 唯一共享的 ESM import promise（并发调用不会重复加载；加载失败清缓存重试）；
+//   - 依赖注入 api / toast / mdToHtml / escapeHtml：ESM 侧不新建独立
+//     client、不读真实 filesystem、不引入全局 Store 或事件总线；
+//   - 旧函数名全部保留，src/index.html 的 inline onclick
+//     （openCurrentInObsidian）与 app.js 内的调用点无需改动。
+// mdToHtml 仍是 classic 层唯一的**同步** Markdown 呈现 helper（依赖页面既有
+// marked 全局与其正则 fallback），仅作为依赖注入交给 ESM owner 使用，
+// 本模块不复制实现、也不改成 async facade。
+var _knowledgeOwnerPromise = null;
+var _knowledgeOwner = null;
 
-// P3-Bug-D: 前端缓存已加载的笔记数据（按分类）
-var _noteCache = {};
-var _noteCacheCat = null;
+function _loadKnowledgeOwner() {
+  if (!_knowledgeOwnerPromise) {
+    _knowledgeOwnerPromise = import('/static/modules/knowledge/index.js')
+      .then(function (m) {
+        _knowledgeOwner = m.createKnowledgeOwner({
+          api: api,
+          toast: toast,
+          mdToHtml: mdToHtml,
+          escapeHtml: escapeHtml
+        });
+        return _knowledgeOwner;
+      })
+      .catch(function (err) {
+        _knowledgeOwnerPromise = null;
+        throw err;
+      });
+  }
+  return _knowledgeOwnerPromise;
+}
+
+function _knowledgeCall(method, args) {
+  return _loadKnowledgeOwner().then(function (owner) {
+    return owner[method].apply(owner, args || []);
+  }).catch(function (err) {
+    console.error('[knowledge] ' + method, err);
+  });
+}
 
 async function loadCategories() {
-  try {
-    var cats = await api('/api/knowledge/categories');
-    var list = document.getElementById('catList');
-    list.innerHTML = cats.map(function (c) {
-      return '<div class="cat-item" data-id="' + c.id + '" data-name="' + c.name + '">' + c.name +
-        '<span class="cat-count">' + c.count + '</span></div>';
-    }).join('');
-    list.querySelectorAll('.cat-item').forEach(function (el) {
-      el.addEventListener('click', function () {
-        loadCategoryNotes(el.getAttribute('data-id'), el.getAttribute('data-name'));
-      });
-    });
-    if (cats.length > 0) loadCategoryNotes(cats[0].id, cats[0].name);
-  } catch (e) {
-    toast('加载分类失败', 'err');
-  }
+  await _knowledgeCall('loadCategories');
 }
 
 async function loadCategoryNotes(catId, catName) {
-  document.querySelectorAll('.cat-item').forEach(function (x) {
-    x.classList.toggle('active', x.getAttribute('data-name') === catName);
-  });
-  try {
-    var notes;
-    // P3-Bug-D: 缓存逻辑——同分类复用已加载数据
-    if (_noteCacheCat === catName && _noteCache[catName]) {
-      notes = _noteCache[catName];
-    } else {
-      notes = await api('/api/knowledge/notes');
-      _noteCache[catName] = notes;
-      _noteCacheCat = catName;
-    }
-    var filtered = notes.filter(function (n) { return n.category === catName; });
-    var list = document.getElementById('noteList');
-    list.innerHTML = '<div class="cat-item" style="font-size:.8rem;color:var(--text-muted)">' +
-      catName + ' (' + filtered.length + '篇)</div>';
-    filtered.forEach(function (n) {
-      var item = document.createElement('div');
-      item.className = 'note-item';
-      item.textContent = n.name;
-      item.addEventListener('click', function () { loadNote(n.path); });
-      list.appendChild(item);
-    });
-    if (filtered.length > 0) loadNote(filtered[0].path);
-  } catch (e) {
-    toast('加载笔记列表失败', 'err');
-  }
+  await _knowledgeCall('loadCategoryNotes', [catId, catName]);
 }
 
 async function loadNote(path) {
-  currentNotePath = path;
-  try {
-    var r = await api('/api/knowledge/note-content/' + encodeURIComponent(path));
-    document.getElementById('knowTitle').innerHTML = '<i class="fa-solid fa-file-lines"></i> ' + path;
-    document.getElementById('knowContent').innerHTML = mdToHtml(r.content || '');
-    document.getElementById('knowActions').style.display = 'flex';
-  } catch (e) {
-    document.getElementById('knowContent').innerHTML = '<div class="empty-state"><p>无法加载笔记</p></div>';
-    toast(e.message || '加载失败', 'err');
-  }
+  await _knowledgeCall('loadNote', [path]);
 }
 
 // P3-Bug-C: 使用 marked.js 解析 Markdown（支持代码块、表格、删除线等）
@@ -1867,448 +3275,237 @@ function mdToHtml(md) {
   return '<p>' + h + '</p>';
 }
 
-async function openNoteFromCard(filePath) {
-  try {
-    await api('/api/knowledge/open-in-obsidian', {
-      method: 'POST',
-      body: JSON.stringify({ file_path: filePath })
-    });
-    toast('已在Obsidian中打开', 'suc');
-  } catch (e) {
-    toast('打开失败: ' + (e.message || e), 'err');
-  }
+function openNoteFromCard(filePath) {
+  return _knowledgeCall('openNoteFromCard', [filePath]);
 }
 
-async function openCurrentInObsidian() {
-  if (!currentNotePath) { toast('请先选择笔记', 'err'); return; }
-  try {
-    await api('/api/knowledge/open-in-obsidian', {
-      method: 'POST',
-      body: JSON.stringify({ file_path: currentNotePath })
-    });
-    toast('已在Obsidian中打开', 'suc');
-  } catch (e) {
-    toast(e.message || '打开失败', 'err');
-  }
+function openCurrentInObsidian() {
+  return _knowledgeCall('openCurrentInObsidian');
 }
 
 // ============ CONFIG ============
-async function loadConfigForm() {
-  try {
-    var r = await api('/api/config');
-    document.getElementById('cfgPort').value = r.port || 5000;
-    document.getElementById('cfgNotesDir').value = r.notes_directory || '';
-    document.getElementById('cfgVaultPath').value = r.vault_path || '';
-    document.getElementById('cfgApiBase').value = r.api_base || 'https://api.openai.com/v1';
-    document.getElementById('cfgModel').value = r.model || 'gpt-4o-mini';
-    refreshAgentReadonlyHint(r);
-  } catch (e) {
-    toast('加载配置失败', 'err');
+// AR03-G11：「设置」页「系统配置」表单的**全部业务实现**已迁至
+// static/modules/config/index.js（真实生产 ESM owner）。
+// 此处**只**保留最薄 classic facade：
+//   - 唯一共享的 ESM import promise（并发调用不会重复加载；加载失败清缓存重试）；
+//   - 依赖注入 api / toast / refreshAgentReadonlyHint：ESM 侧不新建独立
+//     client、不引入全局 Store 或事件总线、不新建缓存 / 重试层；
+//   - refreshAgentReadonlyHint 仍是 Agent 只读 owner 的既有 facade（唯一实现
+//     在 static/modules/agent-readonly/index.js），config owner **只调用**它，
+//     不复制第二份提示逻辑；
+//   - 旧函数名 loadConfigForm / saveConfigForm 全部保留，src/index.html 的经典
+//     inline onclick 与 app.js 内的导航调用点无需改动。
+var _configOwnerPromise = null;
+var _configOwner = null;
+
+function _loadConfigOwner() {
+  if (!_configOwnerPromise) {
+    _configOwnerPromise = import('/static/modules/config/index.js')
+      .then(function (m) {
+        _configOwner = m.createConfigOwner({
+          api: api,
+          toast: toast,
+          refreshAgentReadonlyHint: refreshAgentReadonlyHint
+        });
+        return _configOwner;
+      })
+      .catch(function (err) {
+        _configOwnerPromise = null;
+        throw err;
+      });
   }
+  return _configOwnerPromise;
+}
+
+function _configCall(method, args) {
+  return _loadConfigOwner().then(function (owner) {
+    return owner[method].apply(owner, args || []);
+  }).catch(function (err) {
+    console.error('[config] ' + method, err);
+  });
+}
+
+function loadConfigForm() {
+  return _configCall('loadConfigForm');
+}
+
+function saveConfigForm() {
+  return _configCall('saveConfigForm');
 }
 
 // ============ AGENT READONLY (P1-6) ============
-var agentRoList = [];
-var agentRawSubdir = '';
-var agentVaultSubject = '';
+// AR03-G07：「设置」页 Agent 只读浏览面板的**全部业务实现与唯一会话状态**
+// （agentRoList / agentRawSubdir / agentVaultSubject）已迁至
+// static/modules/agent-readonly/index.js（真实生产 ESM owner）。
+// 此处**只**保留最薄 classic facade：
+//   - 唯一共享的 ESM import promise（并发调用不会重复加载；加载失败清缓存重试）；
+//   - 依赖注入 api / toast / showModal / closeModal / escapeHtml：ESM 侧不新建
+//     独立 client、不读真实 filesystem、不引入全局 Store 或事件总线；
+//   - refreshAgentReadonlyHint 是**唯一实现**（CONFIG 表单提示与面板横幅共用
+//     同一份 ESM 实现），classic 层不复制第二份文案逻辑；
+//   - 旧函数名全部保留，app.js 内的 addEventListener 调用点无需改动。
+var _agentRoOwnerPromise = null;
+var _agentRoOwner = null;
 
+function _loadAgentRoOwner() {
+  if (!_agentRoOwnerPromise) {
+    _agentRoOwnerPromise = import('/static/modules/agent-readonly/index.js')
+      .then(function (m) {
+        _agentRoOwner = m.createAgentReadonlyOwner({
+          api: api,
+          toast: toast,
+          showModal: showModal,
+          closeModal: closeModal,
+          escapeHtml: escapeHtml
+        });
+        return _agentRoOwner;
+      })
+      .catch(function (err) {
+        _agentRoOwnerPromise = null;
+        throw err;
+      });
+  }
+  return _agentRoOwnerPromise;
+}
+
+function _agentRoCall(method, args) {
+  return _loadAgentRoOwner().then(function (owner) {
+    return owner[method].apply(owner, args || []);
+  }).catch(function (err) {
+    console.error('[agent-readonly] ' + method, err);
+  });
+}
+
+// CONFIG 表单提示与 Agent 面板横幅共用 ESM owner 的**唯一**实现。
 function refreshAgentReadonlyHint(cfg) {
-  var hint = document.getElementById('agentReadonlyHint');
-  var banner = document.getElementById('agentReadonlyBanner');
-  var hasKey = cfg && (cfg.has_openai_key || cfg.has_claude_key);
-  var msg = hasKey
-    ? '只读浏览模式：可查看 Agent 与文件，本页不执行 Agent、不写入 Vault。'
-    : '未配置 API Key：只读浏览仍可用；运行 Agent 需在上方填入密钥（本模式不执行）。';
-  if (hint) hint.textContent = msg;
-  if (banner) banner.textContent = msg;
+  return _agentRoCall('refreshHint', [cfg]);
 }
 
 async function openAgentReadonlyModal() {
-  showModal('agentReadonlyModal');
-  try {
-    var cfg = await api('/api/config');
-    refreshAgentReadonlyHint(cfg);
-  } catch (e) { /* ignore */ }
-  switchAgentTab('agents');
-  loadAgentRoList();
+  return _agentRoCall('openModal');
 }
 
 function closeAgentReadonlyModal() {
-  closeModal('agentReadonlyModal');
+  return _agentRoCall('closeModal');
 }
 
 function switchAgentTab(tab) {
-  document.querySelectorAll('.agent-ro-tab').forEach(function (b) {
-    b.classList.toggle('active', b.getAttribute('data-agent-tab') === tab);
-  });
-  document.getElementById('agentTabAgents').classList.toggle('hidden', tab !== 'agents');
-  document.getElementById('agentTabRaw').classList.toggle('hidden', tab !== 'raw');
-  document.getElementById('agentTabVault').classList.toggle('hidden', tab !== 'vault');
-  if (tab === 'raw') loadAgentRawList(agentRawSubdir);
-  if (tab === 'vault') loadAgentVaultList(agentVaultSubject);
+  return _agentRoCall('switchTab', [tab]);
 }
 
 async function loadAgentRoList() {
-  var wrap = document.getElementById('agentRoList');
-  if (!wrap) return;
-  wrap.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">加载中...</p>';
-  try {
-    agentRoList = await api('/api/agent/agents');
-    if (!agentRoList.length) {
-      wrap.innerHTML = '<p style="color:var(--text-muted)">暂无 Agent</p>';
-      return;
-    }
-    wrap.innerHTML = agentRoList.map(function (a) {
-      return '<div class="agent-ro-item" data-id="' + a.id + '"><i class="fa-solid ' + (a.icon || 'fa-robot') +
-        '"></i> ' + String(a.name).replace(/</g, '&lt;') + '</div>';
-    }).join('');
-    wrap.querySelectorAll('.agent-ro-item').forEach(function (el) {
-      el.addEventListener('click', function () {
-        selectAgentReadonly(el.getAttribute('data-id'), el);
-      });
-    });
-    selectAgentReadonly(agentRoList[0].id, wrap.querySelector('.agent-ro-item'));
-  } catch (e) {
-    wrap.innerHTML = '<p style="color:var(--text-muted)">Agent 列表加载失败</p>';
-    toast(e.message || 'Agent 列表加载失败', 'err');
-  }
+  return _agentRoCall('loadAgentList');
 }
 
 async function selectAgentReadonly(id, el) {
-  document.querySelectorAll('#agentRoList .agent-ro-item').forEach(function (x) { x.classList.remove('active'); });
-  if (el) el.classList.add('active');
-  var agent = agentRoList.find(function (a) { return a.id === id; });
-  var detail = document.getElementById('agentRoDetail');
-  var ta = document.getElementById('agentRoPromptView');
-  if (!agent || !detail) return;
-  var actions = (agent.action_labels || agent.actions || []).join('；') || '无';
-  detail.innerHTML =
-    '<p><strong>' + String(agent.name).replace(/</g, '&lt;') + '</strong>（' + id + '）</p>' +
-    '<p>' + String(agent.desc || '').replace(/</g, '&lt;') + '</p>' +
-    '<p>输入：' + (agent.input_type_label || agent.input_type) + '</p>' +
-    '<p>写操作（本模式禁用）：' + actions + '</p>' +
-    '<p>提示词文件：' + (agent.prompt_file || '-') + '</p>';
-  if (ta) ta.value = '加载中...';
-  try {
-    var pr = await api('/api/agent/agents/' + encodeURIComponent(id) + '/prompt');
-    document.getElementById('agentRoPromptLabel').textContent =
-      '提示词内容（只读）' + (pr.exists ? ' · ' + pr.size + ' 字符' : ' · 文件缺失');
-    ta.value = pr.exists ? (pr.content || '') : '（提示词文件不存在）';
-  } catch (e) {
-    ta.value = '';
-    toast(e.message || '提示词加载失败', 'err');
-  }
+  return _agentRoCall('selectAgent', [id, el]);
 }
 
 async function loadAgentRawList(subdir) {
-  agentRawSubdir = subdir || '';
-  var wrap = document.getElementById('agentRawList');
-  var pathEl = document.getElementById('agentRawPath');
-  if (!wrap) return;
-  wrap.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">加载中...</p>';
-  if (pathEl) pathEl.textContent = '当前目录：' + (agentRawSubdir || '未分类/');
-  try {
-    var q = agentRawSubdir ? '?subdir=' + encodeURIComponent(agentRawSubdir) : '';
-    var r = await api('/api/agent/files/raw' + q);
-    var html = '';
-    if (agentRawSubdir) {
-      var parent = agentRawSubdir.indexOf('/') >= 0
-        ? agentRawSubdir.slice(0, agentRawSubdir.lastIndexOf('/'))
-        : '';
-      html += '<div class="agent-ro-item" data-raw-nav=".."><i class="fa-solid fa-arrow-up"></i> 上级</div>';
-    }
-    (r.subdirs || []).forEach(function (d) {
-      html += '<div class="agent-ro-item" data-raw-dir="' + String(d.name).replace(/"/g, '&quot;') +
-        '"><i class="fa-solid fa-folder"></i> ' + d.name + ' (' + d.file_count + ')</div>';
-    });
-    (r.files || []).forEach(function (f) {
-      html += '<div class="agent-ro-item" data-raw-file="' + String(f.path).replace(/"/g, '&quot;') +
-        '"><i class="fa-solid fa-file-lines"></i> ' + f.name + '</div>';
-    });
-    if (!html) html = '<p style="color:var(--text-muted);padding:8px">暂无 txt 文件</p>';
-    wrap.innerHTML = html;
-    wrap.querySelectorAll('[data-raw-nav]').forEach(function (el) {
-      el.addEventListener('click', function () {
-        var parent = agentRawSubdir.indexOf('/') >= 0
-          ? agentRawSubdir.slice(0, agentRawSubdir.lastIndexOf('/'))
-          : '';
-        loadAgentRawList(parent);
-      });
-    });
-    wrap.querySelectorAll('[data-raw-dir]').forEach(function (el) {
-      el.addEventListener('click', function () {
-        var name = el.getAttribute('data-raw-dir');
-        var next = agentRawSubdir ? agentRawSubdir + '/' + name : name;
-        loadAgentRawList(next);
-      });
-    });
-    wrap.querySelectorAll('[data-raw-file]').forEach(function (el) {
-      el.addEventListener('click', function () {
-        loadAgentRawContent(el.getAttribute('data-raw-file'));
-      });
-    });
-  } catch (e) {
-    wrap.innerHTML = '<p style="color:var(--text-muted)">Raw 列表加载失败</p>';
-    toast(e.message || 'Raw 列表加载失败', 'err');
-  }
+  return _agentRoCall('loadRawList', [subdir]);
 }
 
 async function loadAgentRawContent(path) {
-  var box = document.getElementById('agentRawContent');
-  if (!box) return;
-  box.textContent = '加载中...';
-  try {
-    var r = await api('/api/agent/files/raw/content?path=' + encodeURIComponent(path));
-    box.textContent = r.content || '';
-    document.getElementById('agentRawPath').textContent = '文件：' + path + '（' + (r.size || 0) + ' 字节）';
-  } catch (e) {
-    box.textContent = '加载失败';
-    toast(e.message || 'Raw 文件读取失败', 'err');
-  }
+  return _agentRoCall('loadRawContent', [path]);
 }
 
 async function loadAgentVaultList(subject) {
-  agentVaultSubject = subject || '';
-  var wrap = document.getElementById('agentVaultList');
-  var pathEl = document.getElementById('agentVaultPath');
-  if (!wrap) return;
-  wrap.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">加载中...</p>';
-  if (pathEl) pathEl.textContent = '当前目录：' + (agentVaultSubject || 'Vault 根目录');
-  try {
-    var q = agentVaultSubject ? '?subject=' + encodeURIComponent(agentVaultSubject) : '';
-    var r = await api('/api/agent/files/vault' + q);
-    var html = '';
-    if (agentVaultSubject) {
-      html += '<div class="agent-ro-item" data-vault-nav=".."><i class="fa-solid fa-arrow-up"></i> 上级</div>';
-    }
-    (r.dirs || []).forEach(function (d) {
-      html += '<div class="agent-ro-item" data-vault-dir="' + String(d.name).replace(/"/g, '&quot;') +
-        '"><i class="fa-solid fa-folder"></i> ' + d.name + ' (' + d.file_count + ')</div>';
-    });
-    (r.files || []).forEach(function (f) {
-      html += '<div class="agent-ro-item" data-vault-file="' + String(f.path).replace(/"/g, '&quot;') +
-        '"><i class="fa-solid fa-file-lines"></i> ' + f.name + '</div>';
-    });
-    if (!html) html = '<p style="color:var(--text-muted);padding:8px">暂无 Markdown 文件</p>';
-    wrap.innerHTML = html;
-    wrap.querySelectorAll('[data-vault-nav]').forEach(function (el) {
-      el.addEventListener('click', function () {
-        var parent = agentVaultSubject.indexOf('/') >= 0
-          ? agentVaultSubject.slice(0, agentVaultSubject.lastIndexOf('/'))
-          : '';
-        loadAgentVaultList(parent);
-      });
-    });
-    wrap.querySelectorAll('[data-vault-dir]').forEach(function (el) {
-      el.addEventListener('click', function () {
-        var name = el.getAttribute('data-vault-dir');
-        var next = agentVaultSubject ? agentVaultSubject + '/' + name : name;
-        loadAgentVaultList(next);
-      });
-    });
-    wrap.querySelectorAll('[data-vault-file]').forEach(function (el) {
-      el.addEventListener('click', function () {
-        loadAgentVaultContent(el.getAttribute('data-vault-file'));
-      });
-    });
-  } catch (e) {
-    wrap.innerHTML = '<p style="color:var(--text-muted)">Vault 列表加载失败</p>';
-    toast(e.message || 'Vault 列表加载失败', 'err');
-  }
+  return _agentRoCall('loadVaultList', [subject]);
 }
 
 async function loadAgentVaultContent(path) {
-  var box = document.getElementById('agentVaultContent');
-  if (!box) return;
-  box.textContent = '加载中...';
-  try {
-    var r = await api('/api/agent/files/vault/content?path=' + encodeURIComponent(path));
-    box.textContent = r.content || '';
-    document.getElementById('agentVaultPath').textContent = '文件：' + path + '（' + (r.size || 0) + ' 字节）';
-  } catch (e) {
-    box.textContent = '加载失败';
-    toast(e.message || 'Vault 文件读取失败', 'err');
-  }
-}
-
-async function saveConfigForm() {
-  var data = {
-    port: parseInt(document.getElementById('cfgPort').value, 10) || 5000,
-    notes_directory: document.getElementById('cfgNotesDir').value,
-    vault_path: document.getElementById('cfgVaultPath').value,
-    openai_api_key: document.getElementById('cfgApiKey').value,
-    api_base: document.getElementById('cfgApiBase').value,
-    model: document.getElementById('cfgModel').value
-  };
-  try {
-    var r = await api('/api/config/save', { method: 'POST', body: JSON.stringify(data) });
-    if (r.success) toast('已保存，重启服务器后生效', 'suc');
-    else toast('保存失败: ' + (r.error || ''), 'err');
-  } catch (e) {
-    toast(e.message || '保存失败', 'err');
-  }
+  return _agentRoCall('loadVaultContent', [path]);
 }
 
 // ============ PROMPTS ============
-var promptFiles = [];
-var promptCurrentContent = '';
-var promptOriginalContent = '';
-var promptSelectedName = '';
-var promptEditMode = false;
+// AR03-G05:「设置」页提示词文件浏览器（#promptPanel）的**全部业务实现与唯一
+// 会话状态**已迁至 static/modules/prompts/index.js（真实生产 ESM owner）。
+// 此处**只**保留最薄 classic facade：
+//   - 唯一共享的 ESM import promise（并发调用不会重复加载；加载失败清缓存重试）；
+//   - 依赖注入 api / toast / showModal / closeModal / escapeHtml：ESM 侧不新建
+//     独立 client、不读真实 filesystem、不引入全局事件总线；
+//   - 最小代际（generation）防过期：列表与正文请求各领一个号，旧一代响应到达后
+//     不再写 DOM（较新的用户选择获胜）；
+//   - 旧函数名全部保留，src/index.html 的经典 onclick 与 app.js 内的
+//     addEventListener 调用点无需改动。
+// promptFiles / promptCurrentContent / promptOriginalContent / promptSelectedName /
+// promptEditMode / 待保存内容由 ESM owner 持有**唯一一份**，classic 层不镜像。
+var _promptsOwnerPromise = null;
+var _promptsOwner = null;
+var _promptsListGeneration = 0;
+var _promptsContentGeneration = 0;
 
-function setPromptEditMode(on) {
-  promptEditMode = !!on;
-  var ta = document.getElementById('promptContentView');
-  var readBtns = document.getElementById('promptReadBtns');
-  var editBtns = document.getElementById('promptEditBtns');
-  var hint = document.getElementById('promptModeHint');
-  if (ta) ta.readOnly = !promptEditMode;
-  if (readBtns) readBtns.classList.toggle('hidden', promptEditMode);
-  if (editBtns) editBtns.classList.toggle('hidden', !promptEditMode);
-  if (hint) {
-    hint.textContent = promptEditMode
-      ? '编辑模式：修改后请预览差异并确认保存（保存前自动备份）'
-      : '默认只读；进入编辑模式后可预览差异并保存（保存前自动备份）';
+function _loadPromptsOwner() {
+  if (!_promptsOwnerPromise) {
+    _promptsOwnerPromise = import('/static/modules/prompts/index.js')
+      .then(function (m) {
+        _promptsOwner = m.createPromptsOwner({
+          api: api,
+          toast: toast,
+          showModal: showModal,
+          closeModal: closeModal,
+          escapeHtml: escapeHtml
+        });
+        return _promptsOwner;
+      })
+      .catch(function (err) {
+        _promptsOwnerPromise = null;
+        throw err;
+      });
   }
-  document.getElementById('promptCopyBtn').style.display = promptEditMode ? 'none' : '';
-  document.getElementById('promptEditBtn').style.display = promptEditMode ? 'none' : '';
+  return _promptsOwnerPromise;
 }
 
-function computePromptDiff(oldText, newText) {
-  var oldL = (oldText || '').split('\n');
-  var newL = (newText || '').split('\n');
-  var max = Math.max(oldL.length, newL.length);
-  var added = 0, removed = 0, changed = 0;
-  var lines = [];
-  for (var i = 0; i < max; i++) {
-    var o = oldL[i], n = newL[i];
-    if (o === undefined) {
-      added++;
-      lines.push({ type: 'add', text: n });
-    } else if (n === undefined) {
-      removed++;
-      lines.push({ type: 'rem', text: o });
-    } else if (o !== n) {
-      changed++;
-      lines.push({ type: 'chg', old: o, new: n });
-    }
-  }
-  return { added: added, removed: removed, changed: changed, lines: lines.slice(0, 80) };
-}
-
-async function refreshPromptBackupStatus() {
-  var btn = document.getElementById('promptRestoreBtn');
-  if (!btn || !promptSelectedName || promptEditMode) {
-    if (btn) btn.style.display = 'none';
-    return;
-  }
-  try {
-    var r = await api('/api/prompts/' + encodeURIComponent(promptSelectedName) + '/backup/latest');
-    btn.style.display = r.exists ? '' : 'none';
-  } catch (e) {
-    btn.style.display = 'none';
-  }
+function _promptsCall(method, args) {
+  return _loadPromptsOwner().then(function (owner) {
+    return owner[method].apply(owner, args || []);
+  }).catch(function (err) {
+    console.error('[prompts] ' + method, err);
+  });
 }
 
 async function loadPromptList() {
-  var list = document.getElementById('promptFileList');
-  if (!list) return;
-  if (promptEditMode) {
-    toast('请先退出编辑模式', 'err');
-    return;
-  }
-  list.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">加载中...</p>';
+  var generation = ++_promptsListGeneration;
   try {
-    promptFiles = await api('/api/prompts');
-    if (!promptFiles || !promptFiles.length) {
-      list.innerHTML = '<div class="empty-state" style="padding:12px"><p>暂无提示词文件</p></div>';
-      document.getElementById('promptContentView').value = '';
-      document.getElementById('promptCurrentLabel').textContent = '选择文件查看内容';
-      promptCurrentContent = '';
-      promptOriginalContent = '';
-      promptSelectedName = '';
-      return;
-    }
-    list.innerHTML = promptFiles.map(function (f, idx) {
-      var safe = String(f.name).replace(/&/g, '&amp;').replace(/</g, '&lt;');
-      return '<div class="prompt-file-item" data-idx="' + idx + '">' + safe + '</div>';
-    }).join('');
-    list.querySelectorAll('.prompt-file-item').forEach(function (el) {
-      el.addEventListener('click', function () {
-        if (promptEditMode) {
-          toast('请先保存或取消编辑', 'err');
-          return;
-        }
-        var i = parseInt(el.getAttribute('data-idx'), 10);
-        if (promptFiles[i]) loadPromptContent(promptFiles[i].name, el);
-      });
-    });
+    var owner = await _loadPromptsOwner();
+    if (generation !== _promptsListGeneration) return;
+    await owner.loadPromptList();
   } catch (e) {
-    list.innerHTML = '<div class="empty-state" style="padding:12px"><p>提示词列表加载失败</p></div>';
-    toast('提示词列表加载失败', 'err');
+    console.error('[prompts] loadPromptList', e);
   }
 }
 
 async function loadPromptContent(name, el) {
-  if (!name || promptEditMode) return;
-  document.querySelectorAll('.prompt-file-item').forEach(function (x) { x.classList.remove('active'); });
-  if (el) el.classList.add('active');
+  var generation = ++_promptsContentGeneration;
   try {
-    var r = await api('/api/prompts/' + encodeURIComponent(name));
-    promptSelectedName = name;
-    promptCurrentContent = r.content || '';
-    promptOriginalContent = promptCurrentContent;
-    document.getElementById('promptContentView').value = promptCurrentContent;
-    document.getElementById('promptCurrentLabel').textContent = name;
-    refreshPromptBackupStatus();
+    var owner = await _loadPromptsOwner();
+    if (generation !== _promptsContentGeneration) return;
+    await owner.loadPromptContent(name, el);
   } catch (e) {
-    toast(e.message || '加载提示词失败', 'err');
+    console.error('[prompts] loadPromptContent', e);
   }
 }
 
-function enterPromptEdit() {
-  if (!promptSelectedName) {
-    toast('请先选择提示词文件', 'err');
-    return;
+function setPromptEditMode(on) { _promptsCall('setPromptEditMode', [on]); }
+async function computePromptDiff(oldText, newText) {
+  try {
+    var owner = await _loadPromptsOwner();
+    return owner.computePromptDiff(oldText, newText);
+  } catch (e) {
+    console.error('[prompts] computePromptDiff', e);
+    return { added: 0, removed: 0, changed: 0, lines: [] };
   }
-  promptOriginalContent = promptCurrentContent;
-  setPromptEditMode(true);
-  document.getElementById('promptRestoreBtn').style.display = 'none';
 }
+function enterPromptEdit() { _promptsCall('enterPromptEdit'); }
+function cancelPromptEdit() { _promptsCall('cancelPromptEdit'); }
+function previewPromptDiff() { _promptsCall('previewPromptDiff'); }
+function cancelPromptDiffModal() { _promptsCall('cancelPromptDiffModal'); }
+async function confirmPromptSave() { await _promptsCall('confirmPromptSave'); }
+async function restorePromptLatest() { await _promptsCall('restorePromptLatest'); }
+async function refreshPromptBackupStatus() { await _promptsCall('refreshPromptBackupStatus'); }
+function copyPromptContent() { _promptsCall('copyPromptContent'); }
 
-function cancelPromptEdit() {
-  var ta = document.getElementById('promptContentView');
-  var dirty = ta && ta.value !== promptOriginalContent;
-  if (dirty && !confirm('内容已修改，确定放弃编辑？')) return;
-  if (ta) ta.value = promptOriginalContent;
-  promptCurrentContent = promptOriginalContent;
-  setPromptEditMode(false);
-  refreshPromptBackupStatus();
-}
-
-function previewPromptDiff() {
-  if (!promptSelectedName) return;
-  var newContent = document.getElementById('promptContentView').value;
-  if (newContent === promptOriginalContent) {
-    toast('内容未变化', 'inf');
-    return;
-  }
-  var diff = computePromptDiff(promptOriginalContent, newContent);
-  document.getElementById('promptDiffSummary').innerHTML =
-    '原内容 ' + promptOriginalContent.length + ' 字符 → 新内容 ' + newContent.length + ' 字符<br>' +
-    '新增行 ' + diff.added + ' · 删除行 ' + diff.removed + ' · 修改行 ' + diff.changed;
-  var html = '';
-  diff.lines.forEach(function (ln) {
-    if (ln.type === 'add') html += '<div class="diff-line-add">+ ' + escapeHtml(ln.text) + '</div>';
-    else if (ln.type === 'rem') html += '<div class="diff-line-rem">- ' + escapeHtml(ln.text) + '</div>';
-    else html += '<div class="diff-line-chg">~ ' + escapeHtml(ln.old) + ' → ' + escapeHtml(ln.new) + '</div>';
-  });
-  if (!diff.lines.length) html = '<div style="color:var(--text-muted)">（无逐行差异，可能仅末尾换行不同）</div>';
-  document.getElementById('promptDiffLines').innerHTML = html;
-  window._promptPendingSave = newContent;
-  showModal('promptDiffModal');
-}
-
+// 共享的严格 HTML 转义（app.js 其它模块与 ESM owner 共用同一实现）。
 function escapeHtml(s) {
   return String(s == null ? '' : s)
     .replace(/&/g, '&amp;')
@@ -2317,77 +3514,6 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
-
-async function confirmPromptSave() {
-  if (!promptSelectedName || window._promptPendingSave === undefined) return;
-  var content = window._promptPendingSave;
-  try {
-    await api('/api/prompts/' + encodeURIComponent(promptSelectedName), {
-      method: 'PUT',
-      body: JSON.stringify({ content: content })
-    });
-    closeModal('promptDiffModal');
-    promptCurrentContent = content;
-    promptOriginalContent = content;
-    document.getElementById('promptContentView').value = content;
-    setPromptEditMode(false);
-    toast('保存成功', 'suc');
-    refreshPromptBackupStatus();
-    window._promptPendingSave = undefined;
-  } catch (e) {
-    toast(e.message || '保存失败，原文件未破坏（已先备份）', 'err');
-  }
-}
-
-function cancelPromptDiffModal() {
-  closeModal('promptDiffModal');
-  window._promptPendingSave = undefined;
-}
-
-async function restorePromptLatest() {
-  if (!promptSelectedName || promptEditMode) return;
-  if (!confirm('确定恢复最近一次备份？当前文件会先自动备份。')) return;
-  try {
-    await api('/api/prompts/' + encodeURIComponent(promptSelectedName) + '/restore-latest', {
-      method: 'POST',
-      body: JSON.stringify({})
-    });
-    var r = await api('/api/prompts/' + encodeURIComponent(promptSelectedName));
-    promptCurrentContent = r.content || '';
-    promptOriginalContent = promptCurrentContent;
-    document.getElementById('promptContentView').value = promptCurrentContent;
-    toast('已恢复最近备份', 'suc');
-    refreshPromptBackupStatus();
-  } catch (e) {
-    toast(e.message || '恢复失败', 'err');
-  }
-}
-
-function copyPromptContent() {
-  if (promptEditMode) return;
-  if (!promptCurrentContent) {
-    toast('请先选择提示词文件', 'err');
-    return;
-  }
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(promptCurrentContent).then(function () {
-      toast('已复制到剪贴板', 'suc');
-    }).catch(function () {
-      toast('复制失败', 'err');
-    });
-  } else {
-    var ta = document.getElementById('promptContentView');
-    ta.focus();
-    ta.select();
-    try {
-      if (document.execCommand('copy')) toast('已复制到剪贴板', 'suc');
-      else toast('复制失败', 'err');
-    } catch (err) {
-      toast('复制失败', 'err');
-    }
-  }
-}
-
 // ============ SLEEP TRACKING ============
 function todayDateStr() {
   return new Date().toISOString().slice(0, 10);
@@ -2409,148 +3535,69 @@ async function loadSleepPanel() {
 }
 
 // ============ STATE ASSESSMENT ============
-var assessmentQuestions = [];
-var assessmentAnswers = {};
+// AR03-G09：「日程」页「今日状态评估」面板与模态的**全部业务实现与唯一
+// 业务状态**（assessmentQuestions / assessmentAnswers / TONE_LABELS /
+// formatAssessmentScore）已迁至 static/modules/state-assessment/index.js
+// （真实生产 ESM owner）。
+// 此处**只**保留最薄 classic facade：
+//   - 唯一共享的 ESM import promise（并发调用不会重复加载；加载失败清缓存重试）；
+//   - 依赖注入 api / toast / showModal / closeModal：ESM 侧不新建独立
+//     client、不创建全局 Store 或事件总线；
+//   - 旧函数名全部保留（loadStateAssessmentPanel / openStateAssessmentModal /
+//     saveStateAssessment / closeStateAssessmentModal），app.js 内的
+//     addEventListener 调用点与启动调用无需改动；
+//   - classic 层**不再**持有第二份题目 / 答案状态，也不直连 /api/state/*。
+var _stateAssessmentOwnerPromise = null;
+var _stateAssessmentOwner = null;
 
-var TONE_LABELS = { high: '高能量', normal: '正常', low: '低能量', rest: '休息' };
-
-function formatAssessmentScore(v) {
-  if (v == null || v === '') return '-';
-  return String(v);
-}
-
-async function loadStateAssessmentPanel() {
-  await loadStateAssessmentSummary();
-  await loadStateAssessmentHistory();
-}
-
-async function loadStateAssessmentSummary() {
-  var wrap = document.getElementById('stateAssessmentSummary');
-  var btn = document.getElementById('stateAssessmentOpenBtn');
-  if (!wrap) return;
-  wrap.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">加载中...</p>';
-  try {
-    var r = await api('/api/state/assessment');
-    if (r.completed) {
-      var tone = TONE_LABELS[r.daily_tone] || r.daily_tone || '-';
-      wrap.innerHTML =
-        '<div class="state-scores">' +
-        '<div class="state-score"><div class="num">' + formatAssessmentScore(r.energy_score) + '</div><div class="lbl">精力</div></div>' +
-        '<div class="state-score"><div class="num">' + formatAssessmentScore(r.focus_score) + '</div><div class="lbl">专注</div></div>' +
-        '<div class="state-score"><div class="num">' + formatAssessmentScore(r.mood_score) + '</div><div class="lbl">情绪</div></div>' +
-        '<div class="state-score"><div class="num" style="font-size:1rem">' + tone + '</div><div class="lbl">基调</div></div>' +
-        '</div>';
-      if (btn) btn.innerHTML = '<i class="fa-solid fa-pen"></i> 修改评估';
-    } else {
-      wrap.innerHTML = '<div class="empty-state" style="padding:12px"><p>今日还没有评估</p></div>';
-      if (btn) btn.innerHTML = '<i class="fa-solid fa-pen"></i> 填写评估';
-    }
-  } catch (e) {
-    wrap.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">状态评估加载失败</p>';
-    toast(e.message || '状态评估加载失败', 'err');
+function _loadStateAssessmentOwner() {
+  if (!_stateAssessmentOwnerPromise) {
+    _stateAssessmentOwnerPromise = import('/static/modules/state-assessment/index.js')
+      .then(function (m) {
+        _stateAssessmentOwner = m.createStateAssessmentOwner({
+          api: api,
+          toast: toast,
+          showModal: showModal,
+          closeModal: closeModal
+        });
+        return _stateAssessmentOwner;
+      })
+      .catch(function (err) {
+        _stateAssessmentOwnerPromise = null;
+        throw err;
+      });
   }
+  return _stateAssessmentOwnerPromise;
 }
 
-async function loadStateAssessmentHistory() {
-  var wrap = document.getElementById('stateAssessmentHistory');
-  if (!wrap) return;
-  try {
-    var rows = await api('/api/state/assessment/history?days=7');
-    if (!rows || !rows.length) {
-      wrap.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">暂无历史记录</p>';
-      return;
-    }
-    var html = '<table class="energy-table"><thead><tr><th>日期</th><th>精力</th><th>专注</th><th>情绪</th><th>基调</th></tr></thead><tbody>';
-    rows.slice(0, 7).forEach(function (r) {
-      html += '<tr><td>' + r.date + '</td><td>' + formatAssessmentScore(r.energy_score) +
-        '</td><td>' + formatAssessmentScore(r.focus_score) +
-        '</td><td>' + formatAssessmentScore(r.mood_score) +
-        '</td><td>' + (TONE_LABELS[r.daily_tone] || r.daily_tone || '-') + '</td></tr>';
-    });
-    html += '</tbody></table>';
-    wrap.innerHTML = html;
-  } catch (e) {
-    wrap.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">历史记录加载失败</p>';
-  }
-}
-
-async function openStateAssessmentModal() {
-  var form = document.getElementById('stateAssessmentForm');
-  if (!form) return;
-  form.innerHTML = '<p style="color:var(--text-muted)">加载中...</p>';
-  showModal('stateAssessmentModal');
-  try {
-    var r = await api('/api/state/assessment');
-    var qResp = await api('/api/state/questions');
-    assessmentQuestions = r.questions || qResp.questions || [];
-    assessmentAnswers = {};
-    if (r.completed && r.answers) {
-      assessmentAnswers = Object.assign({}, r.answers);
-    }
-    renderAssessmentForm();
-  } catch (e) {
-    form.innerHTML = '<p style="color:var(--text-muted)">加载失败</p>';
-    toast(e.message || '评估表单加载失败', 'err');
-  }
-}
-
-function renderAssessmentForm() {
-  var form = document.getElementById('stateAssessmentForm');
-  if (!form || !assessmentQuestions.length) {
-    if (form) form.innerHTML = '<p style="color:var(--text-muted)">暂无评估问题</p>';
-    return;
-  }
-  form.innerHTML = assessmentQuestions.map(function (q) {
-    var val = assessmentAnswers[q.id] != null ? assessmentAnswers[q.id] : 3;
-    assessmentAnswers[q.id] = val;
-    return '<div class="assess-q" data-qid="' + q.id + '">' +
-      '<label>' + String(q.q).replace(/</g, '&lt;') + '</label>' +
-      '<input type="range" min="1" max="5" step="1" value="' + val + '" class="assess-range" data-qid="' + q.id + '">' +
-      '<div class="assess-q-val">当前: <span class="assess-val-num">' + val + '</span></div></div>';
-  }).join('');
-  form.querySelectorAll('.assess-range').forEach(function (inp) {
-    inp.addEventListener('input', function () {
-      var qid = inp.getAttribute('data-qid');
-      var v = parseInt(inp.value, 10);
-      assessmentAnswers[qid] = v;
-      var row = inp.closest('.assess-q');
-      if (row) {
-        var span = row.querySelector('.assess-val-num');
-        if (span) span.textContent = String(v);
-      }
-    });
+function _stateAssessmentCall(method, args) {
+  return _loadStateAssessmentOwner().then(function (owner) {
+    return owner[method].apply(owner, args || []);
+  }).catch(function (err) {
+    console.error('[state-assessment] ' + method, err);
   });
 }
 
-async function saveStateAssessment() {
-  if (!assessmentQuestions.length) {
-    toast('暂无评估问题', 'err');
-    return;
-  }
-  var answers = {};
-  assessmentQuestions.forEach(function (q) {
-    answers[q.id] = assessmentAnswers[q.id] != null ? assessmentAnswers[q.id] : 3;
-  });
-  try {
-    await api('/api/state/assessment', {
-      method: 'POST',
-      body: JSON.stringify({ answers: answers })
-    });
-    closeModal('stateAssessmentModal');
-    toast('评估已保存', 'suc');
-    loadStateAssessmentPanel();
-  } catch (e) {
-    toast(e.message || '保存失败', 'err');
-  }
+function loadStateAssessmentPanel() {
+  return _stateAssessmentCall('loadPanel');
+}
+
+function openStateAssessmentModal() {
+  return _stateAssessmentCall('openModal');
+}
+
+function saveStateAssessment() {
+  return _stateAssessmentCall('save');
 }
 
 function closeStateAssessmentModal() {
-  closeModal('stateAssessmentModal');
+  return _stateAssessmentCall('closeModal');
 }
 
 // ============ TIMER ============
-var timerActiveSession = null;
-var timerTickHandle = null;
+// AR03-G08：计时状态与计时生命周期的唯一所有者是 ESM timer owner
+// （static/modules/timer/index.js）。这里 **不再** 声明任何会话 / 暂停 /
+// interval 副本，也不直连计时接口。
 
 function formatElapsed(ms) {
   var sec = Math.max(0, Math.floor(ms / 1000));
@@ -2572,61 +3619,16 @@ function populateTimerTaskSelect() {
   if (current) sel.value = current;
 }
 
-function updateTimerDisplay() {
-  var statusEl = document.getElementById('timerStatusText');
-  var elapsedEl = document.getElementById('timerElapsedDisplay');
-  var startBtn = document.getElementById('timerStartBtn');
-  var pauseBtn = document.getElementById('timerPauseBtn');
-  var stopBtn = document.getElementById('timerStopBtn');
-  var sel = document.getElementById('timerTaskSelect');
-  var planned = document.getElementById('timerPlannedMin');
-  if (!statusEl || !elapsedEl) return;
-
-  if (timerActiveSession && timerActiveSession.started_at) {
-    var started = new Date(timerActiveSession.started_at).getTime();
-    var elapsed = Date.now() - started;
-    // P3-Bug-A: 从全局读取暂停状态（两处 UI 同步）
-    if (timerDockPaused) {
-      elapsed = timerDockPausedElapsed;
-    } else {
-      // 运行时：加入历史暂停时间（resume 后 paused_seconds 仍保留）
-      var sessionPausedMs = (timerActiveSession.paused_seconds || 0) * 1000;
-      elapsed += sessionPausedMs;
-    }
-    elapsedEl.textContent = formatElapsed(elapsed);
-    var name = timerActiveSession.task_name || taskNameById(timerActiveSession.task_id);
-    var pauseIndicator = timerDockPaused ? ' (已暂停)' : '';
-    statusEl.textContent = '计时中 · ' + name + '（计划 ' + (timerActiveSession.planned_minutes || '?') + ' 分）' + pauseIndicator;
-    statusEl.className = timerDockPaused ? 'timer-paused' : '';
-    if (startBtn) startBtn.classList.add('hidden');
-    if (stopBtn) stopBtn.classList.remove('hidden');
-    if (pauseBtn) {
-      pauseBtn.classList.remove('hidden');
-      if (timerDockPaused) {
-        pauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-        pauseBtn.title = '继续计时器';
-      } else {
-        pauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-        pauseBtn.title = '暂停计时器';
-      }
-    }
-    if (sel) sel.disabled = true;
-    if (planned) planned.disabled = true;
-  } else {
-    elapsedEl.textContent = '00:00';
-    statusEl.textContent = '未在计时';
-    statusEl.className = 'timer-idle';
-    if (startBtn) startBtn.classList.remove('hidden');
-    if (stopBtn) stopBtn.classList.add('hidden');
-    if (pauseBtn) pauseBtn.classList.add('hidden');
-    if (sel) sel.disabled = false;
-    if (planned) planned.disabled = false;
+// AR03-G04 / AR03-G08：任务页计时 DOM 呈现委托 ESM timer owner
+// （owner 内部再调用 static/modules/timer/presentation.js）。
+// app.js 只保留最薄 classic facade：状态一律来自 owner 快照。
+async function updateTimerDisplay() {
+  try {
+    var owner = await _getTimerOwner();
+    owner.updatePanel();
+  } catch (e) {
+    console.error('[timer] updateTimerDisplay', e);
   }
-}
-
-function startTimerTick() {
-  if (timerTickHandle) clearInterval(timerTickHandle);
-  timerTickHandle = setInterval(updateTimerDisplay, 1000);
 }
 
 async function loadTimerPanel() {
@@ -2634,25 +3636,21 @@ async function loadTimerPanel() {
   var statusEl = document.getElementById('timerStatusText');
   if (statusEl) statusEl.textContent = '加载中...';
   try {
-    var r = await api('/api/timer/active');
-    // P3-Bug-A: 统一状态源——任务页也使用同一个 timerDockSession
-    timerActiveSession = r && r.id ? r : null;
-    // 同步 paused 状态到全局
-    if (timerDockSession && timerDockSession.id === timerActiveSession?.id) {
-      timerDockPaused = !!(r && r.is_paused);
-      timerDockPausedElapsed = (r && r.paused_seconds) ? r.paused_seconds * 1000 : 0;
-    }
-    updateTimerDisplay();
-    startTimerTick();
+    var owner = await _getTimerOwner();
+    // AR03-G08：任务页与 Dock 共享 **同一** 活动 session（唯一状态源）。
+    await owner.loadActive();
+    owner.updatePanel();
+    owner.startPanelTick();
   } catch (e) {
-    timerActiveSession = null;
-    updateTimerDisplay();
+    if (_timerOwner) _timerOwner.clear();
+    _refreshTimerViews();
     toast(e.message || '计时器状态加载失败', 'err');
   }
 }
 
 async function startTimer() {
-  if (timerActiveSession) {
+  var snap = _timerSnapshot();
+  if (snap.session) {
     toast('已有进行中的计时', 'err');
     return;
   }
@@ -2666,31 +3664,23 @@ async function startTimer() {
   var minutes = planned ? parseInt(planned.value, 10) : 30;
   if (!minutes || minutes < 1) minutes = 30;
   try {
-    var r = await api('/api/timer/start', {
-      method: 'POST',
-      body: JSON.stringify({ task_id: taskId, planned_minutes: minutes })
+    // AR03-G08：启动计时统一经 ESM timer owner（唯一生命周期所有者）。
+    var owner = await _getTimerOwner();
+    await owner.startSession({
+      taskId: taskId,
+      plannedMinutes: minutes,
+      taskName: function (id) { return taskNameById(id); }
     });
-    timerActiveSession = {
-      id: r.session_id,
-      task_id: r.task_id,
-      started_at: r.started_at,
-      planned_minutes: r.planned_minutes,
-      task_name: taskNameById(r.task_id)
-    };
-    // P3-Bug-A: 同步到抽卡页 Dock（统一状态源）
-    timerDockSession = timerActiveSession;
-    timerDockPaused = false;
-    timerDockPausedElapsed = 0;
-    updateTimerDockDisplay();
+    _refreshTimerViews();
     toast('计时已开始', 'suc');
-    updateTimerDisplay();
   } catch (e) {
     toast(e.message || '开始计时失败', 'err');
   }
 }
 
 async function stopTimer() {
-  if (!timerActiveSession || !timerActiveSession.id) {
+  var snap = _timerSnapshot();
+  if (!snap.session || !snap.session.id) {
     toast('当前无进行中的计时', 'err');
     return;
   }
@@ -2699,34 +3689,31 @@ async function stopTimer() {
 
 async function handleTimerOutcome(outcome) {
   closeModal('timerOutcomeModal');
-  if (!timerActiveSession || !timerActiveSession.id) return;
+  var owner = null;
+  try {
+    owner = await _getTimerOwner();
+  } catch (e) {
+    toast('计时模块加载失败，停止计时失败', 'err');
+    return;
+  }
+  var snap = owner.getSnapshot();
+  if (!snap.session || !snap.session.id) return;
 
-  var session = timerActiveSession;
-  // P3-Bug-A: 计算实际时间（考虑暂停时间）
-  var started = new Date(session.started_at).getTime();
-  var elapsedMs = Date.now() - started;
-  if (timerDockPaused) elapsedMs = timerDockPausedElapsed;
-  var actualMinutes = Math.max(1, Math.round(elapsedMs / 60000));
+  var session = snap.session;
+  // P3-Bug-A：实际分钟数由 owner 统一计算（考虑暂停时间，下限 1）。
+  var actualMinutes = owner.getActualMinutes();
   var planned = session.planned_minutes || 30;
   var timerResult = outcome === 'completed' ? 'completed' : 'abandoned';
 
   try {
-    await api('/api/timer/complete', {
-      method: 'POST',
-      body: JSON.stringify({
-        session_id: session.id,
-        actual_minutes: actualMinutes,
-        result: timerResult,
-        reason: outcome
-      })
+    await owner.completeSession({
+      sessionId: session.id,
+      actualMinutes: actualMinutes,
+      result: timerResult,
+      reason: outcome
     });
-    timerActiveSession = null;
-    // P3-Bug-A: 同步清空 dock 状态
-    timerDockSession = null;
-    timerDockPaused = false;
-    timerDockPausedElapsed = 0;
-    updateTimerDisplay();
-    updateTimerDockDisplay();
+    owner.stopInlineTimer();
+    _refreshTimerViews();
     toast('计时已结束（' + actualMinutes + ' 分钟）', 'suc');
 
     var fbCtx = {
@@ -2762,83 +3749,7 @@ async function handleTimerOutcome(outcome) {
   }
 }
 
-async function loadSleepInfo() {
-  var disp = document.getElementById('sleepBedTimeDisplay');
-  if (!disp) return;
-  try {
-    var rows = await api('/api/state/sleep');
-    var today = todayDateStr();
-    var row = null;
-    if (Array.isArray(rows)) {
-      row = rows.find(function (r) { return r.date === today; });
-    }
-    var bed = row && row.bed_time ? row.bed_time : '';
-    var streak = row && row.sleep_early_streak != null ? row.sleep_early_streak : 0;
-    disp.textContent = bed || '--';
-    document.getElementById('sleepStreakDisplay').textContent = String(streak);
-    var inp = document.getElementById('sleepBedTimeInput');
-    if (inp) inp.value = bed ? bed.slice(0, 5) : '';
-  } catch (e) {
-    toast('睡眠信息加载失败', 'err');
-  }
-}
-
-async function saveSleep() {
-  var inp = document.getElementById('sleepBedTimeInput');
-  if (!inp) return;
-  var val = inp.value;
-  var errMsg = validateBedTime(val);
-  if (errMsg) {
-    toast(errMsg, 'err');
-    return;
-  }
-  try {
-    var r = await api('/api/state/sleep', {
-      method: 'POST',
-      body: JSON.stringify({ bed_time: val, status: 'on_time' })
-    });
-    toast('睡眠记录已保存', 'suc');
-    document.getElementById('sleepBedTimeDisplay').textContent = r.bed_time || val;
-    document.getElementById('sleepStreakDisplay').textContent = String(
-      r.sleep_early_streak != null ? r.sleep_early_streak : 0
-    );
-    loadWeeklyEnergyTable();
-  } catch (e) {
-    toast(e.message || '保存失败', 'err');
-  }
-}
-
-async function loadWeeklyEnergyTable() {
-  var wrap = document.getElementById('weeklyEnergyTable');
-  if (!wrap) return;
-  try {
-    var rows = await api('/api/state/weekly-energy');
-    if (!Array.isArray(rows) || !rows.length) {
-      wrap.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">暂无能量记录</p>';
-      return;
-    }
-    var cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 6);
-    var cutoffStr = cutoff.toISOString().slice(0, 10);
-    var filtered = rows.filter(function (r) { return r.date >= cutoffStr; });
-    if (!filtered.length) {
-      wrap.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">暂无能量记录</p>';
-      return;
-    }
-    var html = '<table class="energy-table"><thead><tr><th>日期</th><th>早</th><th>午</th><th>晚</th><th>基调</th></tr></thead><tbody>';
-    filtered.forEach(function (r) {
-      html += '<tr><td>' + r.date + '</td><td>' + (r.energy_morning != null ? r.energy_morning : '-') +
-        '</td><td>' + (r.energy_afternoon != null ? r.energy_afternoon : '-') +
-        '</td><td>' + (r.energy_evening != null ? r.energy_evening : '-') +
-        '</td><td>' + (r.daily_tone || '-') + '</td></tr>';
-    });
-    html += '</tbody></table>';
-    wrap.innerHTML = html;
-  } catch (e) {
-    wrap.innerHTML = '<p style="color:var(--text-muted);font-size:.85rem">能量数据加载失败</p>';
-    toast('能量数据加载失败', 'err');
-  }
-}
+// classic 层不再保留第二份实现，也不再直连睡眠状态类接口。
 
 // ============ INIT ============
 document.getElementById('promptRefreshBtn').addEventListener('click', loadPromptList);
