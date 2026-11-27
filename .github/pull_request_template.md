@@ -26,11 +26,17 @@ Closes #
 ## 门禁结果（必填，粘贴实际输出）
 
 <!--
-逐条粘贴第 5 节门禁的实际结果摘要。
-失败的门禁必须写明失败签名，不要省略。
+CI 的 `mechanical gates` 执行的是棘轮（scripts/ci/gate_ratchet.js --check）：
+出现基线之外的新失败即红；失败集合变小则绿并提示可收紧基线。
+基线是「已知欠债清单」，不是豁免。
+详见 ci/README.md 与 docs/CURRENT_PROJECT_STATE.md。
 -->
 
 ```
+node scripts/ci/gate_ratchet.js --check         => PASS / FAIL: <签名>
+
+（逐个门禁的实际结果摘要；失败的门禁必须写明失败签名，不要省略。）
+
 node scripts/check_module_imports.js          => PASS / FAIL: <签名>
 node scripts/check_css_architecture.js         => PASS / FAIL: <签名>
 node scripts/check_layout_utility_conflicts.js => PASS / FAIL: <签名>
@@ -40,6 +46,14 @@ python scripts/phase2_gacha_golden.py          => PASS / FAIL: <签名>
 python -m pytest tests/characterize -q         => PASS / FAIL: <签名>
 node .cursor/infra-tests/redline-guard/harness.js => PASS / FAIL: <签名>
 ```
+
+## 棘轮基线（当且仅当失败变少时）
+
+- [ ] 本 PR **未**改变任何门禁的失败集合 —— 无需动 `ci/gate-baseline.json`
+- [ ] 本 PR 让失败**变少** —— 已更新 `ci/gate-baseline.json`，并在变更说明中写明少了哪些
+
+> 若新增了基线之外的失败，CI 会变红。这是设计意图：基线记录的是欠债，
+> 不是可以新增的豁免项。
 
 ## 红线自检（必填）
 
