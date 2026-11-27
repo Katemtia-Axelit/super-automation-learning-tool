@@ -107,7 +107,36 @@
 | `gh` token scope 收敛为 `repo` | **待办**（S5）—— `gh auth refresh` 为交互式浏览器流程，需仓库所有者在本机完成 |
 | 每席位独立账号（真正的身份隔离） | **未实现** —— 当前为单账号方案，见 `docs/ROUNDTABLE_PROTOCOL.md` §2.3 |
 | CI 写权限 | **无**（`.github/workflows/ci.yml` 声明 `permissions: contents: read`） |
-| 分支保护规则 | **待设置**（需 `ci/gates` + `ci/redline-scan` 两个检查建立后再启用） |
+| 分支保护规则 | **已设置**（2026-11-28）—— `main` 必过 `mechanical gates` + `redline scan`（strict）、`enforce_admins`、线性历史、禁 force-push、禁删除、会话必须解决。**不要求 PR 审批**（单账号仓库无法自审，`require_last_push_approval` 会造成新的死锁） |
 | 公开 fork `Linmoqian/learning-tools` | **已知风险，未处理** —— 持有 master 旧历史（含 2271 份笔记正文 + 3 个生产库）。按用户裁决暂不处理 |
 | 本地 `refs/stash` | **残留 6 个敏感路径的可达引用** —— `git stash clear` 与 `git reflog expire` 被 destructive-guard 拦截，需带外执行；patch 已在 `docs/_local/STASH*.patch` 归档 |
 | 本地 `_archive/03_数据库备份/`、`data/backup/` 等 | 已从 index 解除跟踪并加 `.gitignore`；磁盘副本保留作回滚保险 |
+
+---
+
+## 6. 已记录的写操作（续）
+
+### 2026-11-28 — 分支保护与 CI 棘轮化
+
+| 时间 | 操作 | 目标 | 理由 | 执行者 | 幂等键 | 关联 Issue |
+|---|---|---|---|---|---|---|
+| 2026-11-28T00:20:00+08:00 | `gh api -X PUT repos/.../branches/main/protection` | `repo:branch-protection:main` | 建立分支保护：必过 `mechanical gates` + `redline scan`（strict）、`enforce_admins`、线性历史、禁 force-push、禁删除、会话必须解决 | 仓库所有者 | - | - |
+| 2026-11-28T00:52:00+08:00 | `gh api -X PUT repos/.../branches/main/protection` | `repo:branch-protection:main` | 去掉 `required_pull_request_reviews`（含 `require_last_push_approval`）—— 单账号仓库无法自审，会把「CI 恒红」死锁换成「无法自审」死锁。检查项与其它强制项不变 | 仓库所有者 | - | - |
+| 2026-11-28T00:45:00+08:00 | `git push -u origin feature/ci-ratchet` | `refs/heads/feature/ci-ratchet` | 分支保护要求走 PR 流程；新分支用于提交 CI 棘轮与门禁修复 | 仓库所有者 | - | - |
+| 2026-11-28T00:53:00+08:00 | `gh pr create` | `super-automation-learning-tool#2` | 建立 PR：棘轮化 CI + 隔离 E2E 断链修复 + 门禁零生产触碰 | 仓库所有者 | - | - |
+| 2026-11-28T00:54:00+08:00 | `gh pr merge --squash --delete-branch` | `super-automation-learning-tool#2` | CI 全部必过检查转绿后合并（run `46037291244`：mechanical gates ✅ / redline scan ✅）；tip `f72856f` | 仓库所有者 | - | - |
+
+> **未记录项**：`gh auth refresh --remove-scopes workflow` 触发的浏览器设备码
+> 流程**未完成**（需用户在本机完成授权）。当前 token scope 仍为
+> `gist, read:org, repo, workflow`。设备码 `B545-C6CD` 已失效，
+> 用户需自行重跑 `gh auth refresh -h github.com --remove-scopes workflow`。
+> 该操作本身**不涉及仓库写操作**，故不在本日志范围内。
+
+> **CI 语义变更的记录**（影响未来所有合并）：
+> `.github/workflows/ci.yml` 的 `mechanical gates` job 从「9 门禁全绿」
+> 改为「棘轮：无回归即绿」。原因与实测证据见
+> `docs/CURRENT_PROJECT_STATE.md` 的「2026-11-28 — CI 棘轮化与分支保护落地」。
+> 已记录欠债（module-imports 33 / css-architecture 3 / schema-consistency 1 /
+> p0-cleanup 8 / pytest-collection 2）是**已知欠债清单，不是豁免** ——
+> 新增任何一条失败都会让 CI 变红。
+

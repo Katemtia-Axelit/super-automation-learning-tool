@@ -27,7 +27,7 @@
 |---|---|
 | L1 声明 | 本文件、`.gitignore`、`AGENTS.md`、`SECURITY.md` |
 | L2 仓库 | CI `redline-scan` job：扫描 PR diff、`git ls-files`、**可达历史**、**所有 remote-tracking ref**、凭据模式 |
-| L3 强制 | `main` 分支保护：禁止直推，`ci/gates` + `ci/redline-scan` 必过 |
+| L3 强制 | `main` 分支保护：禁止直推，`mechanical gates` + `redline scan` 必过（strict） |
 | L4 本地 | `.cursor/hooks/redline-guard.js`（`preToolUse`，fail closed） |
 
 > **红线是内容类别，不是单一文件名。** L2 的扫描范围**刻意宽于**上面三条
@@ -45,6 +45,31 @@
 
 ## 2. 门禁清单（PR 必过）
 
+### 2.1 CI 实际执行什么
+
+CI 的 `mechanical gates` job 执行的是**棘轮**，不是「逐个门禁全绿」：
+
+```bash
+node scripts/ci/gate_ratchet.js --check   # 唯一必过的机械门禁入口
+```
+
+棘轮语义：**不允许变差，但允许变好**。
+
+| 情形 | CI 结果 |
+|---|---|
+| 出现 `ci/gate-baseline.json` 之外的**新**失败 | ❌ **红**（回归，fail-closed） |
+| 失败集合比基线更小 | ✅ 绿（提示基线可收紧） |
+| 门禁异常退出、解析不出失败签名 | ❌ **红**（不当作「已知欠债」吞掉） |
+
+已记录欠债的数量在 CI 日志里**始终原样打印**。基线是「已知欠债清单」，
+**不是豁免**。详见 [`ci/README.md`](../ci/README.md)。
+
+> **为什么不是「全绿」**：本仓库的门禁在 AR03 P1–P5 交付时即为 RED
+> （接线未完成，见 `docs/CURRENT_PROJECT_STATE.md`「已知缺口」）。
+> 要求全绿等于让 CI 从第一天起就是红的 —— 那就没有门禁意义。
+
+### 2.2 本地逐个门禁
+
 ```bash
 node   scripts/check_module_imports.js           # 模块边界
 node   scripts/check_css_architecture.js          # CSS 六层架构
@@ -57,7 +82,14 @@ python -m pytest tests/characterize -q           # 行为表征
 node   .cursor/infra-tests/redline-guard/harness.js  # 红线契约
 ```
 
-E2E（可选，需 Chromium）：
+查看当前实际失败 / 收紧基线：
+
+```bash
+node scripts/ci/gate_ratchet.js --print      # 打印实际失败签名
+node scripts/ci/gate_ratchet.js --update     # 收紧基线（仅在失败确实变少时）
+```
+
+### 2.3 E2E（可选，需 Chromium）
 
 ```bash
 $env:PYTHON="$PWD\.venv\Scripts\python.exe"   # 必须显式指向 venv，否则 9009
@@ -66,9 +98,9 @@ node scripts/run_e2e_isolated.js
 
 > E2E 走隔离合成根，**全程不打开生产数据文件**。
 
-**当前基线不是全绿**：截至 2026-11-27 有 4 个门禁为 RED（原因见
-[`docs/CURRENT_PROJECT_STATE.md`](../docs/CURRENT_PROJECT_STATE.md) 的「已知缺口」）。
-提交 PR 时请如实粘贴**实际输出**，失败时写明失败签名，不要伪造绿灯。
+**提交 PR 时请如实粘贴**门禁实际输出，失败时写明失败签名，
+**不要伪造绿灯**。若你的改动让失败变少，请一并更新
+`ci/gate-baseline.json` 并在 PR 中说明。
 
 ---
 

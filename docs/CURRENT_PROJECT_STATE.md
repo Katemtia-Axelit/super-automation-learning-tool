@@ -68,8 +68,61 @@ S4 建立的 CI `redline-scan` job **首次运行即失败**，抓到了方案
 | 本地 `refs/stash` | **残留 6 个敏感路径的可达引用** | `git stash clear` 与 `git reflog expire` 被 destructive-guard 拦截（工作区内容需带外处置）。patch 已在 `docs/_local/STASH*.patch` 归档 |
 | 本地 `data/backup/`、`_archive/03_数据库备份/` 等磁盘副本 | 已从 index 解除跟踪 + `.gitignore` 覆盖 | 磁盘副本保留作回滚保险；`git bundle`（101.5 MB）已创建于 `D:/Axelit/.工作/trae/_vault-backup-20261127.bundle` |
 | `gh` token scope 收敛为 `repo` | **待用户在本机完成** | `gh auth refresh -s repo` 为交互式浏览器流程，无法由 Agent 代为完成 |
-| `main` 分支保护规则 | **待设置** | 需 `ci/gates` + `ci/redline-scan` 两个检查先在 GitHub 上建立 |
 | LICENSE / GitHub Release `v0.1.0` | **待用户决定** | 见文末「待决项」 |
+
+---
+
+## 2026-11-28 — CI 棘轮化与分支保护落地（S5 收尾）
+
+> 本节记录把「CI 恒红 + 分支保护死锁」这一状态修正为「CI 可执行且能拦回归」的过程。
+
+### 发现的问题
+
+S4 建立 CI 时，`.github/workflows/ci.yml` 要求 **9 个门禁全绿**。
+但这些门禁在 AR03 P1–P5 交付时**本身就是 RED**（接线未完成，见下方
+2026-11-27 节的「已知缺口」）。实测后果：
+
+| 问题 | 实测症状 |
+|---|---|
+| **CI 恒红** | 自首次推送起，每次 CI 的 `mechanical gates` 都失败。CI 与「门禁全绿」等价于「装饰」 |
+| **分支保护死锁** | `main` 要求 PR + 2 个必过检查，而检查恒红 → 无法直推、也无法合并任何 PR。实测 `git push origin main` 被拒：`GH006: Protected branch update failed` |
+| **隔离 E2E 断链** | `scripts/run_e2e_isolated.js` 把合成 Factory 起在随机端口并传 `SAL_E2E_BASE_URL`，但 `tests/e2e-manual.js` **忽略该变量**、硬编码 `http://127.0.0.1:5000` → 全部用例「连接被拒」。E2E **从未真正跑到合成实例上**，「36 通过」这一历史结论在隔离模式下**不成立** |
+| **门禁触碰生产库** | `scripts/verify_p0_cleanup.py` 的 T4/T5/T6 三处都指向 `data/task_publisher.db`。CI 检出无 `data/` 目录 → 门禁以未捕获异常崩溃；在本机则会在生产目录产生 `-wal`/`-shm` 副产物 —— **违反红线** |
+
+### 处置
+
+| # | 动作 | 说明 |
+|---|---|---|
+| 1 | **CI 改为棘轮（ratchet）** | 新增 `scripts/ci/gate_ratchet.js` + `ci/gate-baseline.json`。语义：**不允许变差，但允许变好**。出现基线之外的新失败 → CI 红（fail-closed）；失败集合缩小 → CI 绿并提示基线可收紧；门禁异常退出 → 视为回归。已记录欠债数量**始终原样打印**。详见 `ci/README.md` |
+| 2 | **修好隔离 E2E** | `tests/e2e-manual.js` 的 `BASE_URL` / `EXEC_PATH` 改为可被环境覆盖；chromium 路径不存在时回退到 playwright 内置解析。修正后 E2E **真正连到合成实例**（审计记录数 1400，零生产触碰） |
+| 3 | **门禁零生产触碰** | `verify_p0_cleanup.py` 的 T4/T5/T6 全部改用 `%TEMP%` 合成库，由仓库既有的 `tests/characterize/sandbox_env.seed` 铺底表（与隔离 E2E / characterize 同一份表结构定义）。实测 `data/` 目录 mtime 与内容零变化 |
+| 4 | **分支保护落地** | `main`：必过 `mechanical gates` + `redline scan`（strict）、`enforce_admins`、`required_linear_history`、禁 force-push、禁删除、会话必须解决。**不要求 PR 审批**（单账号仓库无法自审，`require_last_push_approval` 会造成新的死锁） |
+| 5 | **换行符归一** | 新增 `.gitattributes`：仓库内统一 LF。棘轮基线是**逐行字符串比较**，CRLF/LF 差异会让基线跨平台失配 |
+| 6 | **CI 失败可诊断** | 棘轮在门禁整体崩溃时打印原始输出（末尾 60 行）；CI 增加 `--print` 诊断步骤 |
+
+### 验证
+
+```
+node scripts/ci/gate_ratchet.js --check          -> exit 0（7 个门禁全部与基线一致）
+node .cursor/infra-tests/redline-guard/harness.js -> 45/45 OK
+node .cursor/infra-tests/_platform_check.js        -> OK（平台无关）
+GitHub Actions run 46037291244                    -> mechanical gates ✅ / redline scan ✅
+```
+
+**当前已记录欠债**（棘轮基线，非豁免）：
+
+| 门禁 | 已记录失败 |
+|---|---|
+| `module-imports` | 33 |
+| `css-architecture` | 3 |
+| `schema-consistency` | 1 |
+| `p0-cleanup` | 8 |
+| `pytest-collection` | 2 |
+
+> `pytest tests/characterize` **整体**仍未纳入棘轮：当前 493 failed / 137 errors，
+> 其中大量依赖本机环境（Windows 路径、中文目录编码、本机 chromium 位置），
+> 失败签名不稳定、无法作为可比基线。但**收集阶段**（collection）是确定性的，
+> 已单独成门禁 `pytest-collection`，任何新增的 collection error 都会被拦住。
 
 ---
 
