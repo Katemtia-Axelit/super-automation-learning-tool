@@ -1,0 +1,7 @@
+{
+  "name": "fail-closed-unexpected-schema-RED",
+  "description": "Unexpected top-level schema (a number) on a mutation-targeted hook: must DENY (fail-closed). Current production JSON.parse fails and emits allow — must RED before repair.",
+  "rawStdin": true,
+  "input": "42",
+  "expect": "deny"
+}

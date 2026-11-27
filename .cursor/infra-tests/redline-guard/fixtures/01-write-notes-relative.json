@@ -1,0 +1,13 @@
+{
+  "name": "write-notes-relative",
+  "description": "Write tool targeting src/notes/foo.md with a relative path (real Cursor envelope)",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "src/notes/foo.md",
+      "contents": "hello"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

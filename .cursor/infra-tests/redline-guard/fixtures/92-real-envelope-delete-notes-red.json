@@ -1,0 +1,12 @@
+{
+  "name": "real-envelope-delete-notes-RED",
+  "description": "Delete with REAL Cursor envelope targeting src/notes sentinel. Production hook parses tool/args and falls through to allow — must RED before repair.",
+  "input": {
+    "tool_name": "Delete",
+    "tool_input": {
+      "file_path": "src/notes/__CURSOR_REDLINE_LIVE_PROBE_MUST_NOT_EXIST__"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

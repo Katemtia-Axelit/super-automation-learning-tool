@@ -1,0 +1,14 @@
+{
+  "name": "edit-app-js-allow",
+  "description": "StrReplace on static/app.js — must be allowed (real Cursor envelope)",
+  "input": {
+    "tool_name": "StrReplace",
+    "tool_input": {
+      "path": "static/app.js",
+      "old_string": "a",
+      "new_string": "b"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

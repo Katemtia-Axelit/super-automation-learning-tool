@@ -1,0 +1,13 @@
+{
+  "name": "real-envelope-write-app-filepath-allow",
+  "description": "Real Cursor-style Write envelope uses tool_input.file_path; benign project path must allow.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "static/app.js",
+      "content": "fixture only"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

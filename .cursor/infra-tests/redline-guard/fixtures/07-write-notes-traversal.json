@@ -1,0 +1,13 @@
+{
+  "name": "write-notes-traversal-normalized",
+  "description": "Write tool using . and .. traversal that resolves under src/notes (real Cursor envelope)",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "src/./notes/../notes/foo.md",
+      "contents": "hello"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

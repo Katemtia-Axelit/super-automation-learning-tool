@@ -1,0 +1,5 @@
+[DB] journal_mode=wal, busy_timeout=30000ms
+[CONFIG] Using port: 5000
+[CONFIG] Notes directory: src/notes/vault
+ * Serving Flask app 'server.app.app_factory'
+ * Debug mode: off

@@ -1,0 +1,7 @@
+test_single_candidate_exhausted_returns_404_and_records_refusal (test_gacha_replace_no_repeat.FactoryReplacementNoRepeat.test_single_candidate_exhausted_returns_404_and_records_refusal) ... ok
+test_two_candidates_replace_returns_the_other_candidate (test_gacha_replace_no_repeat.FactoryReplacementNoRepeat.test_two_candidates_replace_returns_the_other_candidate) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 1.881s
+
+OK

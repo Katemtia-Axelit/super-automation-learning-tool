@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\server\backend_api.py", line 12, in <module>
+    from server.services.gacha import DefaultGachaAlgo, WeightInputs
+ModuleNotFoundError: No module named 'server'

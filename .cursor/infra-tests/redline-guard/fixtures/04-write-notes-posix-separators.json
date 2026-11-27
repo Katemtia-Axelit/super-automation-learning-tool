@@ -1,0 +1,13 @@
+{
+  "name": "write-notes-posix-separators",
+  "description": "Write tool using POSIX separators in an absolute path under src/notes (real Cursor envelope)",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "<PROJECT_ROOT>/src/notes/foo.md",
+      "contents": "hello"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

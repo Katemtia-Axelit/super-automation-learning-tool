@@ -1,0 +1,13 @@
+{
+  "name": "git-add-force-notes-deny",
+  "description": "Shell command: git add -f on a src/notes file — must be denied (real Cursor envelope)",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git add -f src/notes/foo.md",
+      "description": "force add notes file"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

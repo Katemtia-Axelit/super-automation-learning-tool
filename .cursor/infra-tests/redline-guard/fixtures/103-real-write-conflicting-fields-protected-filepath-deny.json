@@ -1,0 +1,14 @@
+{
+  "name": "real-write-conflicting-fields-protected-filepath-deny",
+  "description": "Write has protected file_path and benign path; guard must deny independently of field order.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "config/config.json",
+      "path": ".cursor/infra-tests/redline-guard/fixtures/m4_allowed_only.txt",
+      "content": "synthetic fixture only"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

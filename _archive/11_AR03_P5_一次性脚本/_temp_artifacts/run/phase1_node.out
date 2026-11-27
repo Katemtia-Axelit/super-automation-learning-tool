@@ -1,0 +1,12 @@
+FAIL static\core\state.js
+FAIL static\core\constants.js
+FAIL static\core\ui\modal.js
+FAIL static\core\ui\toast.js
+FAIL static\core\ui\theme.js
+FAIL static\core\ui\sandbox.js
+FAIL static\shared\timer.js
+FAIL static\shared\xss.js
+FAIL static\shared\formatters.js
+FAIL static\modules\gacha\index.js
+FAIL static\modules\tasks\index.js
+FAIL static\app.entry.js

@@ -28,6 +28,13 @@ data/task_publisher*.db
 data/backup/
 data/ai_imports/
 ai_workspace/
+# 兜底：任何 .db 及其 WAL/SHM 家族都不得进版本库
+data/*.db
+data/*.db-wal
+data/*.db-shm
+# 课程题库属个人学习资产，不随代码公开（本地保留）
+data/*.txt
+data/*.md
 
 # ============================
 # IDE 与系统临时文件
@@ -61,6 +68,25 @@ static/vendor/*
 # ============================
 cursor教程/
 docs/_e2e_run_*.log
+tests/phase2_gacha_golden_*.log
+.p5_script_refs.json
+.git_p5_status.txt
+_metrics.txt
+_pip.log
+.tmp_p1check/
+
+# ============================
+# 临时产物通配（任意层级）
+# ============================
+.tmp_*
+*.tmp
+
+# ============================
+# 原型 / 美术探索目录（本地资产，不入库）
+# 包含两个权限受限目录，git 无法读取会污染 status 输出；
+# 未忽略时 git add -A 会静默漏文件，造成提交不完整。
+# ============================
+prototypes/
 
 # ============================
 # 知识库笔记（用户数据，全量禁止提交，含备份压缩包）

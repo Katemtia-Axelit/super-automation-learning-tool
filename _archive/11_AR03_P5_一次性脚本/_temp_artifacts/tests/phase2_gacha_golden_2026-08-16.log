@@ -1,0 +1,54 @@
+=== Phase 2 / Todo 10 Gacha Golden Comparison ===
+timestamp: 2026-11-23T20:06:19.567954
+project_root: D:\Axelit\.工作\trae\超级自动化学习工具
+
+tasks generated: 1000 (in 0.01s)
+session contexts: 5 (covering None / empty / cooldown branches)
+current_energy values: 100 (33 low + 33 medium + 34 high)
+
+Plan: 1000 tasks x 100 energies x 1 session = 100,000 comparisons
+       (session_context=None for primary comparison; branch coverage
+        tests use additional sessions on a smaller subsample)
+
+Legacy source: VERBATIM LOCAL COPY (post-cutover; backend_api helpers commented)
+
+--- Primary sweep: 100000 comparisons (session=None) ---
+  elapsed: 0.35s
+  pass: 100000  fail: 0  max_diff: 0.000e+00
+
+First 20 (diverse-task sample, energy='medium'):
+  task= 1000  energy=medium  W_old=0.0100000000  W_new=0.0100000000  diff=0.000e+00
+  task= 1050  energy=medium  W_old=0.1080000000  W_new=0.1080000000  diff=0.000e+00
+  task= 1100  energy=medium  W_old=0.1474200000  W_new=0.1474200000  diff=0.000e+00
+  task= 1150  energy=medium  W_old=5.0625000000  W_new=5.0625000000  diff=0.000e+00
+  task= 1200  energy=medium  W_old=0.0100000000  W_new=0.0100000000  diff=0.000e+00
+  task= 1250  energy=medium  W_old=0.0600000000  W_new=0.0600000000  diff=0.000e+00
+  task= 1300  energy=medium  W_old=0.0100000000  W_new=0.0100000000  diff=0.000e+00
+  task= 1350  energy=medium  W_old=0.3510000000  W_new=0.3510000000  diff=0.000e+00
+  task= 1400  energy=medium  W_old=0.4320000000  W_new=0.4320000000  diff=0.000e+00
+  task= 1450  energy=medium  W_old=0.0518400000  W_new=0.0518400000  diff=0.000e+00
+  task= 1500  energy=medium  W_old=0.1620000000  W_new=0.1620000000  diff=0.000e+00
+  task= 1550  energy=medium  W_old=0.0100000000  W_new=0.0100000000  diff=0.000e+00
+  task= 1600  energy=medium  W_old=0.2025000000  W_new=0.2025000000  diff=0.000e+00
+  task= 1650  energy=medium  W_old=0.0100000000  W_new=0.0100000000  diff=0.000e+00
+  task= 1700  energy=medium  W_old=0.4800000000  W_new=0.4800000000  diff=0.000e+00
+  task= 1750  energy=medium  W_old=0.1458000000  W_new=0.1458000000  diff=0.000e+00
+  task= 1800  energy=medium  W_old=0.0100000000  W_new=0.0100000000  diff=0.000e+00
+  task= 1850  energy=medium  W_old=0.2281500000  W_new=0.2281500000  diff=0.000e+00
+  task= 1900  energy=medium  W_old=0.1123200000  W_new=0.1123200000  diff=0.000e+00
+  task= 1950  energy=medium  W_old=0.1944000000  W_new=0.1944000000  diff=0.000e+00
+
+Last 5 of primary sweep (task=1999, last 5 energies):
+  task= 1999  energy=high    W_old=0.0100000000  W_new=0.0100000000  diff=0.000e+00
+  task= 1999  energy=high    W_old=0.0100000000  W_new=0.0100000000  diff=0.000e+00
+  task= 1999  energy=high    W_old=0.0100000000  W_new=0.0100000000  diff=0.000e+00
+  task= 1999  energy=high    W_old=0.0100000000  W_new=0.0100000000  diff=0.000e+00
+  task= 1999  energy=high    W_old=0.0100000000  W_new=0.0100000000  diff=0.000e+00
+
+--- Branch coverage: 250 comparisons (50 tasks x 5 sessions) ---
+  elapsed: 0.00s
+  pass: 250  fail: 0  max_diff: 0.000e+00
+
+============================================================
+Total: pass=100250 fail=0 max_diff=0.000e+00
+

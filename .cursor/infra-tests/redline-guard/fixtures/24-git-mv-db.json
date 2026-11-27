@@ -1,0 +1,13 @@
+{
+  "name": "git-mv-db-deny",
+  "description": "Shell command: git mv involving data/task_publisher.db — must be denied (real Cursor envelope)",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git mv data/task_publisher.db data/task_publisher_old.db",
+      "description": "rename db"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

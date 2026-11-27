@@ -1,0 +1,12 @@
+{
+  "name": "delete-config",
+  "description": "Delete tool targeting config/config.json (real Cursor envelope)",
+  "input": {
+    "tool_name": "Delete",
+    "tool_input": {
+      "path": "config/config.json"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

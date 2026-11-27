@@ -1,0 +1,31 @@
+[DB] journal_mode=wal, busy_timeout=30000ms
+[INDEX] Created 8 new indexes
+[CONFIG] Using port: 50372
+[CONFIG] Notes directory: vault
+ * Serving Flask app 'server.app.app_factory'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:50372
+Press CTRL+C to quit
+[2026-10-10 13:41:49,185] ERROR in app: Exception on /api/gacha/multi-draw [POST]
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\.venv\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\.venv\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\.venv\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\.venv\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\.venv\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\wn\AppData\Local\Temp\lt_debug8_trw9iej4\runtime\server\blueprints\gacha_bp.py", line 401, in gacha_multi_draw
+    minutes = _parse_available_time(data)
+              ^^^^^^^^^^^^^^^^^^^^^
+NameError: name '_parse_available_time' is not defined
+127.0.0.1 - - [10/Oct/2026 13:41:49] "POST /api/gacha/multi-draw HTTP/1.1" 500 -

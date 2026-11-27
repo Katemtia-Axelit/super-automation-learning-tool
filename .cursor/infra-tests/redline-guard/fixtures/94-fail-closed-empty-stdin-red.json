@@ -1,0 +1,7 @@
+{
+  "name": "fail-closed-empty-stdin-RED",
+  "description": "Hook registered only on mutation tools (Write|StrReplace|Edit|EditNotebook|Delete|Shell|Bash). An empty stdin is an unvalidated mutation intent; fail-CLOSED means deny. Current production emits allow on empty stdin — must RED before repair.",
+  "rawStdin": true,
+  "input": "",
+  "expect": "deny"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "write-app-js-allow",
+  "description": "Write tool targeting static/app.js — clearly non-redline; must be allowed (real Cursor envelope)",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "static/app.js",
+      "contents": "x"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

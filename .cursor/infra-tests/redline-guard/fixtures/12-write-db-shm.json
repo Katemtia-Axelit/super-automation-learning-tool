@@ -1,0 +1,13 @@
+{
+  "name": "write-db-shm",
+  "description": "Write tool targeting data/task_publisher.db-shm (real Cursor envelope)",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "data/task_publisher.db-shm",
+      "contents": "x"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

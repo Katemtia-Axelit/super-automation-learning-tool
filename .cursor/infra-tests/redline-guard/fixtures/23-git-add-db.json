@@ -1,0 +1,13 @@
+{
+  "name": "git-add-db-deny",
+  "description": "Shell command: git add on data/task_publisher.db — must be denied (real Cursor envelope)",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git add data/task_publisher.db",
+      "description": "add db"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

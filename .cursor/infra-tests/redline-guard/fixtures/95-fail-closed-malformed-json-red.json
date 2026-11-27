@@ -1,0 +1,7 @@
+{
+  "name": "fail-closed-malformed-json-RED",
+  "description": "Malformed JSON stdin (string payload) on a mutation-targeted hook: cannot be validated -> must DENY (fail-closed). Current production emits allow on parse failure — must RED before repair.",
+  "rawStdin": true,
+  "input": "<<<NOT-JSON>>>",
+  "expect": "deny"
+}

@@ -1,0 +1,6047 @@
+[
+  {
+    "run": 1,
+    "startedAt": "2026-10-03T16:06:06.881Z",
+    "apiLog": [
+      {
+        "url": "/api/knowledge/categories",
+        "status": 200,
+        "durationMs": 11,
+        "respSize": 302,
+        "atMs": 1275
+      },
+      {
+        "url": "/api/knowledge/notes",
+        "status": 200,
+        "durationMs": 5,
+        "respSize": 3,
+        "atMs": 1281
+      }
+    ],
+    "pageErrors": [],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (NOT FOUND)"
+    ],
+    "timeline": [
+      {
+        "t": 0,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 50,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 100,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 250,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 1000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 1500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 2000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 2500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 3000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 3500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 4000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 5000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 11,
+            "respSize": 302,
+            "atMs": 1275
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 5,
+            "respSize": 3,
+            "atMs": 1281
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      }
+    ],
+    "finalPlaywright": {
+      ".know-layout": {
+        "isVisible": true,
+        "bbox": {
+          "x": 20,
+          "y": 144,
+          "width": 1240,
+          "height": 432
+        }
+      },
+      "#catList": {
+        "isVisible": true,
+        "bbox": {
+          "x": 20,
+          "y": 191,
+          "width": 220,
+          "height": 210
+        }
+      },
+      "#noteList": {
+        "isVisible": true,
+        "bbox": {
+          "x": 20,
+          "y": 474,
+          "width": 220,
+          "height": 38
+        }
+      },
+      "#knowContent": {
+        "isVisible": false,
+        "bbox": {
+          "x": 281,
+          "y": 206,
+          "width": 954,
+          "height": 0
+        }
+      }
+    },
+    "firstFailAt_3000ms": "#knowContent"
+  },
+  {
+    "run": 2,
+    "startedAt": "2026-10-03T16:06:13.749Z",
+    "apiLog": [
+      {
+        "url": "/api/knowledge/categories",
+        "status": 200,
+        "durationMs": 8,
+        "respSize": 302,
+        "atMs": 1219
+      },
+      {
+        "url": "/api/knowledge/notes",
+        "status": 200,
+        "durationMs": 4,
+        "respSize": 3,
+        "atMs": 1224
+      }
+    ],
+    "pageErrors": [],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (NOT FOUND)"
+    ],
+    "timeline": [
+      {
+        "t": 0,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 50,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 100,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 250,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 1000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 1500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 2000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 2500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 3000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 3500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 4000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 5000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1219
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 4,
+            "respSize": 3,
+            "atMs": 1224
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      }
+    ],
+    "finalPlaywright": {
+      ".know-layout": {
+        "isVisible": true,
+        "bbox": {
+          "x": 20,
+          "y": 144,
+          "width": 1240,
+          "height": 432
+        }
+      },
+      "#catList": {
+        "isVisible": true,
+        "bbox": {
+          "x": 20,
+          "y": 191,
+          "width": 220,
+          "height": 210
+        }
+      },
+      "#noteList": {
+        "isVisible": true,
+        "bbox": {
+          "x": 20,
+          "y": 474,
+          "width": 220,
+          "height": 38
+        }
+      },
+      "#knowContent": {
+        "isVisible": false,
+        "bbox": {
+          "x": 281,
+          "y": 206,
+          "width": 954,
+          "height": 0
+        }
+      }
+    },
+    "firstFailAt_3000ms": "#knowContent"
+  },
+  {
+    "run": 3,
+    "startedAt": "2026-10-03T16:06:20.629Z",
+    "apiLog": [
+      {
+        "url": "/api/knowledge/categories",
+        "status": 200,
+        "durationMs": 8,
+        "respSize": 302,
+        "atMs": 1271
+      },
+      {
+        "url": "/api/knowledge/notes",
+        "status": 200,
+        "durationMs": 3,
+        "respSize": 3,
+        "atMs": 1275
+      }
+    ],
+    "pageErrors": [],
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 404 (NOT FOUND)"
+    ],
+    "timeline": [
+      {
+        "t": 0,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 50,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 100,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 250,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 1000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 1500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 2000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 2500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 3000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 3500,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 4000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      },
+      {
+        "t": 5000,
+        "perSelector": {
+          ".know-layout": {
+            "exists": true,
+            "display": "grid",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 1240,
+            "height": 432,
+            "x": 20,
+            "y": 144,
+            "innerHTML_length": 1331,
+            "innerText_length": 180,
+            "childCount": 2,
+            "parent": {
+              "tag": "SECTION",
+              "id": "page-knowledge",
+              "class": "page active",
+              "display": "block",
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 210,
+            "x": 20,
+            "y": 191,
+            "innerHTML_length": 501,
+            "innerText_length": 24,
+            "childCount": 5,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#noteList": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 220,
+            "height": 38,
+            "x": 20,
+            "y": 474,
+            "innerHTML_length": 85,
+            "innerText_length": 9,
+            "childCount": 1,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-side",
+              "display": "flex",
+              "width": 220,
+              "height": 432
+            }
+          },
+          "#knowContent": {
+            "exists": true,
+            "display": "block",
+            "visibility": "visible",
+            "opacity": "1",
+            "width": 954,
+            "height": 0,
+            "x": 281,
+            "y": 206,
+            "innerHTML_length": 0,
+            "innerText_length": 0,
+            "childCount": 0,
+            "parent": {
+              "tag": "DIV",
+              "id": "",
+              "class": "know-main",
+              "display": "block",
+              "width": 1004,
+              "height": 432
+            }
+          }
+        },
+        "pageState": {
+          "exists": true,
+          "display": "block",
+          "hasActive": true,
+          "className": "page active"
+        },
+        "knowContentTimeline": {},
+        "apiLog": [
+          {
+            "url": "/api/knowledge/categories",
+            "status": 200,
+            "durationMs": 8,
+            "respSize": 302,
+            "atMs": 1271
+          },
+          {
+            "url": "/api/knowledge/notes",
+            "status": 200,
+            "durationMs": 3,
+            "respSize": 3,
+            "atMs": 1275
+          }
+        ],
+        "playwrightVisible": {
+          ".know-layout": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 144,
+              "width": 1240,
+              "height": 432
+            }
+          },
+          "#catList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 191,
+              "width": 220,
+              "height": 210
+            }
+          },
+          "#noteList": {
+            "isVisible": true,
+            "bbox": {
+              "x": 20,
+              "y": 474,
+              "width": 220,
+              "height": 38
+            }
+          },
+          "#knowContent": {
+            "isVisible": false,
+            "bbox": {
+              "x": 281,
+              "y": 206,
+              "width": 954,
+              "height": 0
+            }
+          }
+        }
+      }
+    ],
+    "finalPlaywright": {
+      ".know-layout": {
+        "isVisible": true,
+        "bbox": {
+          "x": 20,
+          "y": 144,
+          "width": 1240,
+          "height": 432
+        }
+      },
+      "#catList": {
+        "isVisible": true,
+        "bbox": {
+          "x": 20,
+          "y": 191,
+          "width": 220,
+          "height": 210
+        }
+      },
+      "#noteList": {
+        "isVisible": true,
+        "bbox": {
+          "x": 20,
+          "y": 474,
+          "width": 220,
+          "height": 38
+        }
+      },
+      "#knowContent": {
+        "isVisible": false,
+        "bbox": {
+          "x": 281,
+          "y": 206,
+          "width": 954,
+          "height": 0
+        }
+      }
+    },
+    "firstFailAt_3000ms": "#knowContent"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "name": "delete-app-js-allow",
+  "description": "Delete tool on static/app.js — must be allowed (project-hook scope, not a redline) (real Cursor envelope)",
+  "input": {
+    "tool_name": "Delete",
+    "tool_input": {
+      "path": "static/app.js"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

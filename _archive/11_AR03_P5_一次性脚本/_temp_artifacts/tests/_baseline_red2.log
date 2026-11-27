@@ -1,0 +1,184 @@
+test_budget_uniqueness_and_shorter_fallback (test_gacha_multi_draw.MultiDrawTests.test_budget_uniqueness_and_shorter_fallback)
+Multi-draw must pack up to count distinct cards whose total time ... ok
+test_invalid_requests_do_not_mutate_counters (test_gacha_multi_draw.MultiDrawTests.test_invalid_requests_do_not_mutate_counters)
+Bad count / time must return 400 and zero draw-counter side-effects. ... ok
+test_partial_exhausted_and_eligibility_filters (test_gacha_multi_draw.MultiDrawTests.test_partial_exhausted_and_eligibility_filters)
+If fewer than count cards fit, return the partial valid list; ... ok
+test_compute_weight_priority10_strictly_greater_than_priority1 (test_gacha_nullable_weight_contract.GachaNullableWeightContractTests.test_compute_weight_priority10_strictly_greater_than_priority1) ... ok
+test_compute_weight_with_none_numeric_fields_is_finite_positive (test_gacha_nullable_weight_contract.GachaNullableWeightContractTests.test_compute_weight_with_none_numeric_fields_is_finite_positive) ... ok
+test_single_candidate_exhausted_returns_404_and_records_refusal (test_gacha_replace_no_repeat.FactoryReplacementNoRepeat.test_single_candidate_exhausted_returns_404_and_records_refusal) ... FAIL
+test_two_candidates_replace_returns_the_other_candidate (test_gacha_replace_no_repeat.FactoryReplacementNoRepeat.test_two_candidates_replace_returns_the_other_candidate) ... ok
+test_care_draw_and_replace_respect_time_and_rejection (test_gacha_time_budget.TimeBudgetDrawTests.test_care_draw_and_replace_respect_time_and_rejection) ... FAIL
+test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) ... 
+  test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) (minutes=5) ... FAIL
+  test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) (minutes=15) ... FAIL
+  test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) (minutes=25) ... FAIL
+  test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) (minutes=45) ... FAIL
+  test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) (minutes=90) ... FAIL
+test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) ... 
+  test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes=0) ... FAIL
+  test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes=-1) ... FAIL
+  test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes=481) ... FAIL
+  test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes='abc') ... FAIL
+  test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes=25.5) ... FAIL
+  test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes=None) ... FAIL
+test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) ... FAIL
+test_pool_detail_15_and_45_minute_boundaries (test_gacha_time_budget.TimeBudgetDrawTests.test_pool_detail_15_and_45_minute_boundaries) ... FAIL
+test_compute_weight_priority_and_refusal_monotonicity (test_gacha_weighted_regression.DefaultGachaAlgoUnitTests.test_compute_weight_priority_and_refusal_monotonicity) ... ok
+test_pick_is_cumulative_weight_not_uniform (test_gacha_weighted_regression.DefaultGachaAlgoUnitTests.test_pick_is_cumulative_weight_not_uniform) ... ok
+test_draw_in_sandbox_selects_by_cumulative_weight (test_gacha_weighted_regression.SandboxSubprocessDrawTests.test_draw_in_sandbox_selects_by_cumulative_weight) ... ok
+test_copy_only_python_and_synthetic_data (test_http_characterization.CharacterizationTests.test_copy_only_python_and_synthetic_data) ... ok
+test_create_task_writes_dependency_edge (test_http_characterization.CharacterizationTests.test_create_task_writes_dependency_edge) ... ok
+test_gacha_draw_replace_and_statistics (test_http_characterization.CharacterizationTests.test_gacha_draw_replace_and_statistics) ... ok
+test_gacha_draw_with_nullable_weight_fields (test_http_characterization.CharacterizationTests.test_gacha_draw_with_nullable_weight_fields)
+A nullable synthetic task must not crash weighted HTTP draws. ... ok
+test_gacha_invalid_pool_no_data_change (test_http_characterization.CharacterizationTests.test_gacha_invalid_pool_no_data_change) ... ok
+test_refuse_increments_synthetic_counter (test_http_characterization.CharacterizationTests.test_refuse_increments_synthetic_counter) ... ok
+test_remaining_legacy_api_coverage (test_http_characterization.CharacterizationTests.test_remaining_legacy_api_coverage) ... ok
+test_skip_unlocks_without_success_rate_increment (test_http_characterization.CharacterizationTests.test_skip_unlocks_without_success_rate_increment) ... ok
+test_tasks_and_dependency_unlock (test_http_characterization.CharacterizationTests.test_tasks_and_dependency_unlock) ... ok
+test_ui_entrypoint_renders_synthetic_index (test_http_characterization.CharacterizationTests.test_ui_entrypoint_renders_synthetic_index) ... ok
+test_factory_default_and_legacy_fallback_start (test_launch_chain.LaunchChainTests.test_factory_default_and_legacy_fallback_start) ... ok
+test_factory_default_and_legacy_fallback (test_launcher_selection.LauncherSelectionTests.test_factory_default_and_legacy_fallback) ... ok
+test_a_config_and_agents_use_only_synthetic_keys (test_m4_agent_prompts_contract.M4AgentPromptsContractTests.test_a_config_and_agents_use_only_synthetic_keys) ... ok
+test_b_read_only_prompts_discard_and_dependencies (test_m4_agent_prompts_contract.M4AgentPromptsContractTests.test_b_read_only_prompts_discard_and_dependencies) ... ok
+test_c_factory_forbids_both_note_write_paths (test_m4_agent_prompts_contract.M4AgentPromptsContractTests.test_c_factory_forbids_both_note_write_paths) ... ok
+test_factory_covers_actual_legacy_entry (test_route_inventory.RouteInventoryTests.test_factory_covers_actual_legacy_entry) ... ok
+
+======================================================================
+FAIL: test_single_candidate_exhausted_returns_404_and_records_refusal (test_gacha_replace_no_repeat.FactoryReplacementNoRepeat.test_single_candidate_exhausted_returns_404_and_records_refusal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_replace_no_repeat.py", line 41, in test_single_candidate_exhausted_returns_404_and_records_refusal
+    self.assertEqual(code, 404, body)
+AssertionError: 200 != 404 : {'pool': 'tomato', 'reason': 'too_hard', 'replaced': 20, 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:53', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 0, 'energy_required': 'medium', 'estimated_time': 25, 'group_id': None, 'id': 20, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': None, 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'synthetic-20', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 1, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10 06:05:53'}}
+
+======================================================================
+FAIL: test_care_draw_and_replace_respect_time_and_rejection (test_gacha_time_budget.TimeBudgetDrawTests.test_care_draw_and_replace_respect_time_and_rejection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 70, in test_care_draw_and_replace_respect_time_and_rejection
+    self.assertEqual(care["task"]["id"], 2)
+AssertionError: 1 != 2
+
+======================================================================
+FAIL: test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) (minutes=5)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 52, in test_draw_auto_pool_time_boundaries_and_fallback_to_shorter
+    self.assertEqual(code, status, result)
+AssertionError: 200 != 404 : {'can_replace': True, 'is_replacement': False, 'pool': 'fragment', 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:57', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 0, 'energy_required': 'medium', 'estimated_time': 8, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': None, 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'short-8', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10 06:05:57'}}
+
+======================================================================
+FAIL: test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) (minutes=15)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 54, in test_draw_auto_pool_time_boundaries_and_fallback_to_shorter
+    self.assertEqual(result["pool"], expected_pool, result)
+AssertionError: 'fragment' != 'tomato'
+- fragment
++ tomato
+ : {'can_replace': True, 'is_replacement': False, 'pool': 'fragment', 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:57', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 2, 'energy_required': 'medium', 'estimated_time': 8, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': '2026-10-10T14:05:57.942425', 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'short-8', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10T14:05:57.942425'}}
+
+======================================================================
+FAIL: test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) (minutes=25)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 54, in test_draw_auto_pool_time_boundaries_and_fallback_to_shorter
+    self.assertEqual(result["pool"], expected_pool, result)
+AssertionError: 'fragment' != 'tomato'
+- fragment
++ tomato
+ : {'can_replace': True, 'is_replacement': False, 'pool': 'fragment', 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:57', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 3, 'energy_required': 'medium', 'estimated_time': 8, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': '2026-10-10T14:05:57.960490', 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'short-8', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10T14:05:57.960490'}}
+
+======================================================================
+FAIL: test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) (minutes=45)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 54, in test_draw_auto_pool_time_boundaries_and_fallback_to_shorter
+    self.assertEqual(result["pool"], expected_pool, result)
+AssertionError: 'fragment' != 'deep'
+- fragment
++ deep
+ : {'can_replace': True, 'is_replacement': False, 'pool': 'fragment', 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:57', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 4, 'energy_required': 'medium', 'estimated_time': 8, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': '2026-10-10T14:05:57.981379', 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'short-8', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10T14:05:57.981379'}}
+
+======================================================================
+FAIL: test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) (minutes=90)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 54, in test_draw_auto_pool_time_boundaries_and_fallback_to_shorter
+    self.assertEqual(result["pool"], expected_pool, result)
+AssertionError: 'fragment' != 'deep'
+- fragment
++ deep
+ : {'can_replace': True, 'is_replacement': False, 'pool': 'fragment', 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:57', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 5, 'energy_required': 'medium', 'estimated_time': 8, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': '2026-10-10T14:05:57.996396', 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'short-8', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10T14:05:57.996396'}}
+
+======================================================================
+FAIL: test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 124, in test_invalid_budget_rejected_without_draw_side_effect
+    self.assertEqual(code, 400, body)
+AssertionError: 200 != 400 : {'can_replace': True, 'is_replacement': False, 'pool': 'fragment', 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:58', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 0, 'energy_required': 'medium', 'estimated_time': 8, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': None, 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'short-8', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10 06:05:58'}}
+
+======================================================================
+FAIL: test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes=-1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 124, in test_invalid_budget_rejected_without_draw_side_effect
+    self.assertEqual(code, 400, body)
+AssertionError: 200 != 400 : {'can_replace': True, 'is_replacement': False, 'pool': 'fragment', 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:58', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 1, 'energy_required': 'medium', 'estimated_time': 8, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': '2026-10-10T14:05:58.937649', 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'short-8', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10T14:05:58.937649'}}
+
+======================================================================
+FAIL: test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes=481)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 124, in test_invalid_budget_rejected_without_draw_side_effect
+    self.assertEqual(code, 400, body)
+AssertionError: 200 != 400 : {'can_replace': True, 'is_replacement': False, 'pool': 'fragment', 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:58', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 2, 'energy_required': 'medium', 'estimated_time': 8, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': '2026-10-10T14:05:59.133971', 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'short-8', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10T14:05:59.133971'}}
+
+======================================================================
+FAIL: test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes='abc')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 124, in test_invalid_budget_rejected_without_draw_side_effect
+    self.assertEqual(code, 400, body)
+AssertionError: 200 != 400 : {'can_replace': True, 'is_replacement': False, 'pool': 'fragment', 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:58', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 3, 'energy_required': 'medium', 'estimated_time': 8, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': '2026-10-10T14:05:59.160334', 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'short-8', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10T14:05:59.160334'}}
+
+======================================================================
+FAIL: test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes=25.5)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 124, in test_invalid_budget_rejected_without_draw_side_effect
+    self.assertEqual(code, 400, body)
+AssertionError: 200 != 400 : {'can_replace': True, 'is_replacement': False, 'pool': 'fragment', 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:58', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 4, 'energy_required': 'medium', 'estimated_time': 8, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': '2026-10-10T14:05:59.175141', 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'short-8', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10T14:05:59.175141'}}
+
+======================================================================
+FAIL: test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) (minutes=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 124, in test_invalid_budget_rejected_without_draw_side_effect
+    self.assertEqual(code, 400, body)
+AssertionError: 200 != 400 : {'can_replace': True, 'is_replacement': False, 'pool': 'fragment', 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:05:58', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 5, 'energy_required': 'medium', 'estimated_time': 8, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': '2026-10-10T14:05:59.201359', 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'short-8', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10T14:05:59.201359'}}
+
+======================================================================
+FAIL: test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 127, in test_invalid_budget_rejected_without_draw_side_effect
+    self.assertEqual(counts, 0)
+AssertionError: 6 != 0
+
+======================================================================
+FAIL: test_pool_detail_15_and_45_minute_boundaries (test_gacha_time_budget.TimeBudgetDrawTests.test_pool_detail_15_and_45_minute_boundaries)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_budget.py", line 109, in test_pool_detail_15_and_45_minute_boundaries
+    self.assertEqual(pool_ids["fragment"], set())
+AssertionError: Items in the first set but not the second:
+1
+
+----------------------------------------------------------------------
+Ran 30 tests in 38.831s
+
+FAILED (failures=15)

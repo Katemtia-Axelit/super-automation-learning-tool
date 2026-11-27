@@ -1,0 +1,13 @@
+{
+  "name": "git-add-dot-allow-clean",
+  "description": "Shell command: git add . with a CLEAN protected-tracked set — must be allowed (broad precondition passed) (real Cursor envelope)",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git add .",
+      "description": "add all"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

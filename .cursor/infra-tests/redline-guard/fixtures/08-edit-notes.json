@@ -1,0 +1,14 @@
+{
+  "name": "edit-notes",
+  "description": "StrReplace on a path under src/notes (real Cursor envelope)",
+  "input": {
+    "tool_name": "StrReplace",
+    "tool_input": {
+      "path": "src/notes/foo.md",
+      "old_string": "a",
+      "new_string": "b"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

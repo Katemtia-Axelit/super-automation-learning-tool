@@ -1,0 +1,13 @@
+{
+  "name": "git-reset-hard-allow",
+  "description": "Shell command: git reset --hard — generic danger; PROJECT hook must NOT own this (real Cursor envelope)",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git reset --hard",
+      "description": "reset hard"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "write-config-backup-not-denied",
+  "description": "Write tool targeting config/config.json.backup — must NOT be denied just because the name starts with config.json (real Cursor envelope)",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "config/config.json.backup",
+      "contents": "x"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

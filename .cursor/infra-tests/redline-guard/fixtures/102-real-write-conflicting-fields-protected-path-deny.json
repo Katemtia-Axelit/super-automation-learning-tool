@@ -1,0 +1,14 @@
+{
+  "name": "real-write-conflicting-fields-protected-path-deny",
+  "description": "Write has benign file_path and protected path; guard must inspect all supplied path fields and deny.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": ".cursor/infra-tests/redline-guard/fixtures/m4_allowed_only.txt",
+      "path": "src/notes/__m4_synthetic_never_write.md",
+      "content": "synthetic fixture only"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

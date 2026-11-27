@@ -1,0 +1,14 @@
+{
+  "name": "edit-config",
+  "description": "StrReplace on config/config.json (real Cursor envelope)",
+  "input": {
+    "tool_name": "StrReplace",
+    "tool_input": {
+      "path": "config/config.json",
+      "old_string": "a",
+      "new_string": "b"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

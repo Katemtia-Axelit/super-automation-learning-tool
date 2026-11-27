@@ -1,0 +1,5 @@
+[CONFIG] Using port: 5000
+[CONFIG] Notes directory: src/notes/vault
+[DB] journal_mode=wal, busy_timeout=30000ms
+ * Serving Flask app 'backend_api'
+ * Debug mode: off

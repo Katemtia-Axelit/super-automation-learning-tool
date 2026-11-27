@@ -1,0 +1,17 @@
+---
+description: Runtime CWD contract for all startup paths
+alwaysApply: true
+---
+
+# Runtime CWD Rule
+
+**RULE_CONTRACT_ID: LT_RUNTIME_CWD_V1**
+
+- Any product runtime that resolves project-relative configuration must run with
+  the project root as its working directory.
+- The supported default chain is `scripts/启动学习工具.bat` →
+  `scripts/start_web_safe.bat` → `scripts/launch_server.py` →
+  `server/backend_api.py`; `launch_server.py` sets the project-root CWD.
+- `run_app.py → server.app.create_app()` remains a verification/migration entry,
+  not the default product entry.
+- Do not inspect `config/config.json` merely to rediscover this invariant.

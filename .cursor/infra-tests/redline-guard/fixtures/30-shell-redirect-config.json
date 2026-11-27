@@ -1,0 +1,13 @@
+{
+  "name": "write-config-backup-via-shell-deny",
+  "description": "Shell command: write to config/config.json via redirection - uses <PROJECT_ROOT> (real Cursor envelope)",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "echo 'x' > <PROJECT_ROOT>\\config\\config.json",
+      "description": "redirect into config.json"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

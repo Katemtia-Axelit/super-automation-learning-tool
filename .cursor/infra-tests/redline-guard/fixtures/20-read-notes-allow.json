@@ -1,0 +1,12 @@
+{
+  "name": "read-notes-allow",
+  "description": "Read-only tool on src/notes must not be denied (Read/Grep/Glob are read-only) (real Cursor envelope)",
+  "input": {
+    "tool_name": "Read",
+    "tool_input": {
+      "path": "src/notes/foo.md"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

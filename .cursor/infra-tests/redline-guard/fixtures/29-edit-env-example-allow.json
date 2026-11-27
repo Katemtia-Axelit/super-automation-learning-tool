@@ -1,0 +1,14 @@
+{
+  "name": "write-config-backup-allow-passthrough",
+  "description": "StrReplace on a non-redline file config/.env.example must be allowed (real Cursor envelope)",
+  "input": {
+    "tool_name": "StrReplace",
+    "tool_input": {
+      "path": "config/.env.example",
+      "old_string": "x",
+      "new_string": "y"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

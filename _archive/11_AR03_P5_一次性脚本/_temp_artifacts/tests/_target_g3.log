@@ -1,0 +1,11 @@
+test_budget_uniqueness_and_shorter_fallback (test_gacha_multi_draw.MultiDrawTests.test_budget_uniqueness_and_shorter_fallback)
+Multi-draw must pack up to count distinct cards whose total time ... ok
+test_invalid_requests_do_not_mutate_counters (test_gacha_multi_draw.MultiDrawTests.test_invalid_requests_do_not_mutate_counters)
+Bad count / time must return 400 and zero draw-counter side-effects. ... ok
+test_partial_exhausted_and_eligibility_filters (test_gacha_multi_draw.MultiDrawTests.test_partial_exhausted_and_eligibility_filters)
+If fewer than count cards fit, return the partial valid list; ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 2.833s
+
+OK

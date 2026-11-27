@@ -1,0 +1,8 @@
+{
+  "name": "fail-closed-missing-tool-name-RED",
+  "description": "Missing tool_name on a mutation-targeted hook: cannot be validated -> must DENY (fail-closed). Current production emits allow when tool is empty — must RED before repair.",
+  "input": {
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "config-shape-current-must-RED",
+  "description": "Validate that .cursor/hooks.json matches the REAL Cursor project-hook contract: top-level { version, hooks: { <event>: [{command, matcher, failClosed?, timeout?}, ...], ... } }. Phase 5B1 used a flat-array shape with per-entry id/event/permission, which is NOT a supported Cursor contract. THIS FIXTURE RUNS THE PRODUCTION HARNESS AND MUST FAIL until both hooks.json AND redline-guard.js are corrected.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "src/notes/foo.md",
+      "contents": "x"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

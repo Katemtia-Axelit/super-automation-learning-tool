@@ -1,0 +1,13 @@
+{
+  "name": "write-config",
+  "description": "Write tool targeting config/config.json (real Cursor envelope)",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "config/config.json",
+      "contents": "{}"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

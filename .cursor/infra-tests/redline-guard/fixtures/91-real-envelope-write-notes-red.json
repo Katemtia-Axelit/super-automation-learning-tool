@@ -1,0 +1,13 @@
+{
+  "name": "real-envelope-write-notes-RED",
+  "description": "CARE: real Cursor preToolUse envelope uses tool_name/tool_input, not tool/args. With the production hook still parsing tool/args, this REAL envelope passes through to allow — wrong; redline must deny. Must RED before contract repair.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "src/notes/foo.md",
+      "content": "real envelope payload"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

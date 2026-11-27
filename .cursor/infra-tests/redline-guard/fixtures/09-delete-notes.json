@@ -1,0 +1,12 @@
+{
+  "name": "delete-notes",
+  "description": "Delete tool targeting a path under src/notes (real Cursor envelope)",
+  "input": {
+    "tool_name": "Delete",
+    "tool_input": {
+      "path": "src/notes/foo.md"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

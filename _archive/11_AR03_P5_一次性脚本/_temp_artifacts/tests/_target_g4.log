@@ -1,0 +1,21 @@
+test_budget_15_boundary_picks_only_fragments (test_gacha_time_multidraw_regression.MultiDrawRemainingTimeTests.test_budget_15_boundary_picks_only_fragments)
+Budget 15 must never return a 25m or 40m card; it should ... ok
+test_budget_15_with_only_25m_returns_404 (test_gacha_time_multidraw_regression.MultiDrawRemainingTimeTests.test_budget_15_with_only_25m_returns_404)
+Sanity: if no task fits the budget, the route returns 404 and ... ok
+test_budget_35_picks_25_then_10_not_40 (test_gacha_time_multidraw_regression.MultiDrawRemainingTimeTests.test_budget_35_picks_25_then_10_not_40)
+Budget 35 with 25m+40m+10m+5m+12m+60m+90m available: ... ok
+test_replace_invalid_minutes_400_no_side_effect (test_gacha_time_multidraw_regression.TimeAwareReplaceTests.test_replace_invalid_minutes_400_no_side_effect) ... ok
+test_replace_respects_minutes_and_skips_rejected (test_gacha_time_multidraw_regression.TimeAwareReplaceTests.test_replace_respects_minutes_and_skips_rejected) ... FAIL
+
+======================================================================
+FAIL: test_replace_respects_minutes_and_skips_rejected (test_gacha_time_multidraw_regression.TimeAwareReplaceTests.test_replace_respects_minutes_and_skips_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\Axelit\.工作\trae\超级自动化学习工具\tests\characterize\test_gacha_time_multidraw_regression.py", line 179, in test_replace_respects_minutes_and_skips_rejected
+    self.assertEqual(code, 404, body)
+AssertionError: 200 != 404 : {'pool': 'fragment', 'reason': 'no_time', 'replaced': 2, 'task': {'category': 'daily', 'completed': 0, 'completed_count': 0, 'created_at': '2026-10-10 06:10:33', 'deadline': None, 'description': None, 'difficulty': None, 'draw_count_today': 0, 'energy_required': 'medium', 'estimated_time': 5, 'group_id': None, 'id': 1, 'in_discard_pile': 0, 'is_daily': 0, 'is_unlocked': 1, 'last_completed_at': None, 'last_drawn_at': None, 'linked_note_path': None, 'min_push_time': '20:00', 'name': 'frag-5', 'next_available_at': None, 'parent_task_id': None, 'preferred_time': None, 'prerequisite_ids': [], 'priority': 5, 'rarity': 'common', 'refusal_count': 0, 'repeat_type': 'none', 'resistance': 'medium', 'success_rate': 0.0, 'tags': [], 'task_profile': 'deadline_flexible', 'task_type': 'normal', 'updated_at': '2026-10-10 06:10:33'}}
+
+----------------------------------------------------------------------
+Ran 5 tests in 4.559s
+
+FAILED (failures=1)

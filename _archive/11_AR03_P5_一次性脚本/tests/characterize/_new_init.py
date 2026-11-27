@@ -1,0 +1,38 @@
+def init_synthetic_db(db_path):
+    conn = sqlite3.connect(str(db_path))
+    conn.execute("PRAGMA foreign_keys=ON")
+    conn.execute("""CREATE TABLE IF NOT EXISTS tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        completed INTEGER DEFAULT 0,
+        is_unlocked INTEGER DEFAULT 1,
+        prerequisite_ids TEXT DEFAULT '[]',
+        success_rate REAL DEFAULT 0.0,
+        refusal_count INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        category TEXT DEFAULT 'daily',
+        priority INTEGER DEFAULT 5,
+        description TEXT,
+        estimated_time INTEGER DEFAULT 30,
+        preferred_time TEXT,
+        deadline TEXT,
+        resistance TEXT DEFAULT 'medium',
+        energy_required TEXT DEFAULT 'medium',
+        rarity TEXT DEFAULT 'common',
+        is_daily INTEGER DEFAULT 0,
+        repeat_type TEXT DEFAULT 'none',
+        difficulty TEXT,
+        linked_note_path TEXT,
+        task_type TEXT DEFAULT 'normal',
+        task_profile TEXT,
+        parent_task_id INTEGER,
+        group_id INTEGER,
+        last_completed_at TEXT,
+        next_available_at TEXT,
+        last_drawn_at TEXT,
+        draw_count_today INTEGER DEFAULT 0,
+        min_push_time TEXT DEFAULT '20:00',
+        in_discard_pile INTEGER DEFAULT 0,
+        completed_count INTEGER DEFAULT 0
+    )""")

@@ -1,0 +1,9 @@
+test_care_draw_and_replace_respect_time_and_rejection (test_gacha_time_budget.TimeBudgetDrawTests.test_care_draw_and_replace_respect_time_and_rejection) ... ok
+test_draw_auto_pool_time_boundaries_and_fallback_to_shorter (test_gacha_time_budget.TimeBudgetDrawTests.test_draw_auto_pool_time_boundaries_and_fallback_to_shorter) ... ok
+test_invalid_budget_rejected_without_draw_side_effect (test_gacha_time_budget.TimeBudgetDrawTests.test_invalid_budget_rejected_without_draw_side_effect) ... ok
+test_pool_detail_15_and_45_minute_boundaries (test_gacha_time_budget.TimeBudgetDrawTests.test_pool_detail_15_and_45_minute_boundaries) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 3.751s
+
+OK

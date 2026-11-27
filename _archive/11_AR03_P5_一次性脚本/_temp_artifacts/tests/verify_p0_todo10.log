@@ -1,0 +1,42 @@
+
+[T1] import server.blueprints ¡ú backend_api NOT loaded
+  PASS  server.backend_api absent after `import server.blueprints`
+  PASS  server.blueprints.tasks_bp loaded (real BP)
+  PASS  server.blueprints.gacha_bp loaded (real BP)
+  PASS  server.blueprints.tags_bp loaded (real BP)
+        import time: 216.6 ms
+
+[T2] import server.blueprints.<stub_bp> ¡ú backend_api NOT loaded
+  PASS  import server.blueprints.state_bp did NOT load backend_api
+  PASS  import server.blueprints.schedule_bp did NOT load backend_api
+  PASS  import server.blueprints.feedback_bp did NOT load backend_api
+  PASS  import server.blueprints.timer_bp did NOT load backend_api
+  PASS  import server.blueprints.knowledge_bp did NOT load backend_api
+  PASS  import server.blueprints.config_bp did NOT load backend_api
+  PASS  import server.blueprints.prompts_bp did NOT load backend_api
+  PASS  import server.blueprints.agent_bp did NOT load backend_api
+  PASS  import server.blueprints.discard_bp did NOT load backend_api
+
+[T3] attribute access on stub BP loads backend_api once then caches
+  PASS  before attribute access: backend_api still NOT loaded
+  PASS  after first attribute access: backend_api loaded
+  PASS  state_bp module globals cached the import (PEP 562)
+
+[T4] create_app() registers the expected real BP routes
+[DB] journal_mode=wal, busy_timeout=30000ms
+  PASS  bp 'tasks': expected 9 routes, got 9
+  PASS  bp 'gacha': expected 6 routes, got 6
+  PASS  bp 'tags': expected 4 routes, got 4
+
+[T5] make_request_conn() PRAGMA assertions
+  PASS  PRAGMA foreign_keys=ON (got 1)
+  PASS  PRAGMA journal_mode=WAL (got wal)
+  PASS  PRAGMA busy_timeout=30000ms (got 30000)
+  PASS  row_factory=sqlite3.Row works (dict-style access)
+
+[T6] create_app() enables foreign_keys before ensure_all
+[DB] journal_mode=wal, busy_timeout=30000ms
+  PASS  ensure_all sees foreign_keys=ON (got 1)
+
+============================================================
+ALL ASSERTIONS PASSED

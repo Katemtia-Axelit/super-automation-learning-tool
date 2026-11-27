@@ -1,0 +1,13 @@
+{
+  "name": "git-add-notes-deny",
+  "description": "Shell command: git add on a src/notes file — must be denied (real Cursor envelope)",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git add src/notes/foo.md",
+      "description": "add notes file"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

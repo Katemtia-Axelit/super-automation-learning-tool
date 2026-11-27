@@ -1,0 +1,13 @@
+{
+  "name": "remove-item-db-deny",
+  "description": "Shell command: Remove-Item on data/task_publisher.db — must be denied (real Cursor envelope)",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "Remove-Item data/task_publisher.db",
+      "description": "delete db"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

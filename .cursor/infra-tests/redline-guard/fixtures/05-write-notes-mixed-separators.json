@@ -1,0 +1,13 @@
+{
+  "name": "write-notes-mixed-separators",
+  "description": "Write tool using mixed Windows and POSIX separators (real Cursor envelope)",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "<PROJECT_ROOT>\\src/notes\\foo.md",
+      "contents": "hello"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

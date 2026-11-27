@@ -1,0 +1,12 @@
+{
+  "name": "real-envelope-delete-app-filepath-allow",
+  "description": "Real Cursor-style Delete envelope uses tool_input.file_path; benign project path must allow.",
+  "input": {
+    "tool_name": "Delete",
+    "tool_input": {
+      "file_path": "static/__NONEXISTENT_REDLINE_GUARD_FIXTURE__"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

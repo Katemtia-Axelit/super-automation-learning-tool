@@ -1,0 +1,54 @@
+{
+  "terminalAllowlist": [
+    "python",
+    "py",
+    "python.exe",
+    "node",
+    "npm",
+    "npx",
+    "git status",
+    "git diff",
+    "git log",
+    "git show",
+    "git branch",
+    "git remote",
+    "git fetch",
+    "git pull",
+    "git add",
+    "git commit",
+    "dir",
+    "ls",
+    "type",
+    "Get-Content",
+    "cat",
+    "findstr",
+    "Select-String",
+    "Test-Path",
+    "Get-ChildItem",
+    "Get-Process",
+    "netstat",
+    "curl.exe -I",
+    "ping",
+    "ipconfig",
+    "powershell -Command",
+    ".venv\\Scripts\\python.exe",
+    "venv\\Scripts\\python.exe"
+  ],
+  "mcpAllowlist": [],
+  "autoRun": {
+    "allow_instructions": [
+      "Read-only filesystem commands are safe: listing, reading, stat, search (dir, ls, type, cat, Get-Content, findstr, grep, rg, git status, git diff, git log).",
+      "Test runners, linters, type checks and formatters are safe: pytest, unittest, npm test, tsc --noEmit.",
+      "Git read commands are safe: status, diff, log, show, branch, remote, fetch.",
+      "Local dev server start/stop via project scripts is safe (launch_server.py / stop_server.py).",
+      "The project's own Python environment (.venv) commands are safe."
+    ],
+    "block_instructions": [
+      "Destructive commands require approval: rm, del, rmdir, Remove-Item, git reset --hard, git clean -fd, git push --force, DROP TABLE.",
+      "Any command writing to .env, secrets, or credential files requires approval.",
+      "Global package installation (npm install -g, pip install outside a venv) requires approval.",
+      "Database schema migrations or destructive SQL require approval.",
+      "Commands that modify system-wide settings (registry, services, firewall) require approval."
+    ]
+  }
+}

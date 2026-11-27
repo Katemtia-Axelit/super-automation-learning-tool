@@ -1,0 +1,13 @@
+{
+  "name": "write-db-wal",
+  "description": "Write tool targeting data/task_publisher.db-wal (real Cursor envelope)",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "data/task_publisher.db-wal",
+      "contents": "x"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

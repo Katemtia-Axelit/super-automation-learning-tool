@@ -1,0 +1,14 @@
+{
+  "name": "real-envelope-strreplace-notes-filepath-deny",
+  "description": "Real Cursor-style StrReplace envelope uses tool_input.file_path; protected notes path must deny.",
+  "input": {
+    "tool_name": "StrReplace",
+    "tool_input": {
+      "file_path": "src/notes/foo.md",
+      "old_string": "a",
+      "new_string": "b"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

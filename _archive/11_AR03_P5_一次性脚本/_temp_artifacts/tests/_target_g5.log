@@ -1,0 +1,13 @@
+test_budget_15_boundary_picks_only_fragments (test_gacha_time_multidraw_regression.MultiDrawRemainingTimeTests.test_budget_15_boundary_picks_only_fragments)
+Budget 15 must never return a 25m or 40m card; it should ... ok
+test_budget_15_with_only_25m_returns_404 (test_gacha_time_multidraw_regression.MultiDrawRemainingTimeTests.test_budget_15_with_only_25m_returns_404)
+Sanity: if no task fits the budget, the route returns 404 and ... ok
+test_budget_35_picks_25_then_10_not_40 (test_gacha_time_multidraw_regression.MultiDrawRemainingTimeTests.test_budget_35_picks_25_then_10_not_40)
+Budget 35 with 25m+40m+10m+5m+12m+60m+90m available: ... ok
+test_replace_invalid_minutes_400_no_side_effect (test_gacha_time_multidraw_regression.TimeAwareReplaceTests.test_replace_invalid_minutes_400_no_side_effect) ... ok
+test_replace_respects_minutes_and_skips_rejected (test_gacha_time_multidraw_regression.TimeAwareReplaceTests.test_replace_respects_minutes_and_skips_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 4.559s
+
+OK

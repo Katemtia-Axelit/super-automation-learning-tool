@@ -1,0 +1,10 @@
+{
+  "name": "fail-closed-write-missing-tool-input-RED",
+  "description": "Write intent with no tool_input.path: cannot classify target -> on a mutation-only hook this is an unvalidated mutation -> must DENY. Current production emits allow when tool_input.path is missing — must RED before repair.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {},
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

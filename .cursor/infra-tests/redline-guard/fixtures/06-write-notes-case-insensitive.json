@@ -1,0 +1,13 @@
+{
+  "name": "write-notes-case-insensitive",
+  "description": "Write tool using upper-cased SRC\\NOTES prefix; Windows is case-insensitive (real Cursor envelope)",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "SRC\\NOTES\\Foo.md",
+      "contents": "hello"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

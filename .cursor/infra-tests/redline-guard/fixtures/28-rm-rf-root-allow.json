@@ -1,0 +1,13 @@
+{
+  "name": "rm-rf-root-allow",
+  "description": "Shell command: rm -rf / — generic danger; PROJECT hook must NOT own this (real Cursor envelope)",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "rm -rf /",
+      "description": "nuke root"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

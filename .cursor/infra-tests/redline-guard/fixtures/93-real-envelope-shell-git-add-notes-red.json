@@ -1,0 +1,12 @@
+{
+  "name": "real-envelope-shell-git-add-notes-RED",
+  "description": "Shell with REAL Cursor envelope targeting src/notes via git add. Production hook misses tool_name/tool_input envelope and falls through to allow — must RED before repair.",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git add src/notes/foo.md"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

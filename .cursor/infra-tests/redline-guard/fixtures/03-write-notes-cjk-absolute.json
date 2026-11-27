@@ -1,0 +1,13 @@
+{
+  "name": "write-notes-cjk-absolute",
+  "description": "Write tool targeting an absolute Windows path with CJK characters under src/notes (the real project root) (real Cursor envelope)",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "path": "<PROJECT_ROOT>\\src\\notes\\中文笔记.md",
+      "contents": "hello"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

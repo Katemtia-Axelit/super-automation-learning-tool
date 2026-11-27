@@ -1,0 +1,43 @@
+---
+description: Project data redlines and mutation policy
+alwaysApply: true
+---
+
+# Project data redlines
+
+**RULE_CONTRACT_ID: LT_DATA_REDLINES_V2**
+
+These are project policy invariants. The hook is defense in depth; this rule
+must not claim that every native Cursor edit surface is technically intercepted.
+
+## Protected paths
+
+The following paths are project redlines. Cursor must not mutate them during
+ordinary tasks. `.cursor/hooks/redline-guard.js` denies the mutation surfaces
+that traverse the hook, but policy does not depend on hook coverage being
+complete.
+
+- `src/notes/**` — Obsidian knowledge base; local-only user data; never add to Git.
+- `data/task_publisher.db` — live application database.
+- `data/task_publisher.db-wal` and `data/task_publisher.db-shm` — atomic family
+  of the same live database.
+- `config/config.json` — runtime configuration containing keys and paths.
+
+## Tool scope
+
+- The project hook checks covered Cursor mutation requests for these paths.
+  User-global destructive-operation protection is a separate layer.
+- Read-only inspection follows the task-specific scope.
+
+## No in-Cursor bypass
+
+There is no `permission: "ask"` escape hatch, no env-token
+allow-list, no chat OVERRIDE parser, no task-created bypass
+marker. The hook returns `permission: "deny"` and that is final.
+
+## Authorized out-of-band mutation
+
+If a change to a redline is genuinely needed, the Controller or the
+user applies it out of band. After that, the agent may continue
+working with the new state. The agent must never attempt to bypass
+or weaken the hook.

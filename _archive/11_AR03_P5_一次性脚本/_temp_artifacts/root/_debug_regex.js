@@ -1,0 +1,11 @@
+var fs = require('fs');
+var c = fs.readFileSync('scripts/art-asset-registry.js', 'utf8');
+var n = c.replace(/\r\n/g, '\n');
+var re1 = /manifestPath:\s*path\.join\(repoRoot\(\),\s*'static',\s*'assets',\s*'art-manifest\.json'\s*\)/;
+console.log('manifest match:', re1.test(n) ? 'YES' : 'NO');
+var idx1 = n.indexOf("'static', 'assets', 'art-manifest.json'");
+console.log('near manifest:', JSON.stringify(n.slice(Math.max(0, idx1 - 80), idx1 + 80)));
+var re2 = /assetsDir:\s*path\.join\(repoRoot\(\),\s*'static',\s*'assets'\s*\)/;
+console.log('assetsDir match:', re2.test(n) ? 'YES' : 'NO');
+var re3 = /cssOutPath:\s*path\.join\(repoRoot\(\),\s*'static',\s*'assets',\s*'art-overrides\.css'\s*\)/;
+console.log('css match:', re3.test(n) ? 'YES' : 'NO');
