@@ -153,3 +153,10 @@ jobs:
 
       - name: redline guard contract tests
         run: node .cursor/infra-tests/redline-guard/harness.js
+
+      # The guard must behave identically on non-Windows runners. Before
+      # 2026-11-28 its case folding was gated on process.platform, so the
+      # `SRC\NOTES\Foo.md` bypass was allowed on ubuntu-latest while the
+      # Windows fixture expected `deny`.
+      - name: redline guard platform independence
+        run: node .cursor/infra-tests/_platform_check.js

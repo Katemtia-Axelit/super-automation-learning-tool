@@ -113,9 +113,21 @@ function splitSegments(p) {
     return n.split('/').filter((s) => s.length > 0);
 }
 
-// caseFold for Windows-style comparison
+// caseFold for path-segment comparison.
+//
+// A redline is a *content class*. If the guard only folds case on Windows,
+// then the exact same bypass (`SRC\NOTES\Foo.md`) is allowed on Linux/macOS
+// CI runners — the guard would be platform-dependent, i.e. weaker exactly
+// where it is least visible. The 2026-11-28 CI run proved this: the
+// `write-notes-case-insensitive` fixture expected `deny` and got `allow`
+// on ubuntu-latest.
+//
+// Folding is therefore unconditional. This is *stricter* than the real
+// filesystem on case-sensitive platforms, which is the correct direction
+// for a guard: a false deny on Linux costs a user one workaround, while a
+// false allow lets private data through.
 function caseFold(s) {
-    return isWindows() ? String(s).toLowerCase() : String(s);
+    return String(s).toLowerCase();
 }
 
 function pathEqualSegments(a, b) {
