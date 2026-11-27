@@ -75,13 +75,39 @@
 > `gh auth status` 显示的 scope 集合（`gist` / `read:org` / `repo` / `workflow`）
 > 属于**待收敛项**，收敛动作见 S5。
 
+### 2026-11-27 — 红线泄露修复（S4.1）
+
+> **背景**：S4 建立的 CI `redline-scan` job 在首次运行时**立即失败**，
+> 抓到了方案未覆盖的真实泄露。方案的 F18/F19 假设「vault 从未进入
+> origin/main / origin/master」被实测证伪。
+
+| 时间 | 操作 | 目标 | 理由 | 执行者 | 幂等键 | 关联 Issue |
+|---|---|---|---|---|---|---|
+| 2026-11-28T00:05:00+08:00 | `git push --force-with-lease` | `refs/heads/main` | 二次 filter-repo 清除 origin/main 历史中的 `data/task_publisher.db`、`_archive/03_数据库备份/`（8 个生产库副本）、`data/backup/`（含笔记 zip）、`data/physics_*.txt`、`docs/AI_TEAM.zip`；tip `58c7309`→`949d1e8` | 仓库所有者 | - | - |
+| 2026-11-28T00:12:00+08:00 | `git push --force` | `refs/tags/ar03-*` ×6 | 6 个 tag 原指向净化前的 commit，会让泄露对象保持可达；已重指向到净化后的等价 commit（subject 逐一核对一致），message 记录原始 target | 仓库所有者 | - | - |
+| 2026-11-28T00:35:00+08:00 | `git push --force-with-lease` | `refs/heads/master` | 按用户裁决（rewrite）清除 origin/master 历史中的 `笔记处理系统/{归档,笔记,已分类,未分类,报告}`（2271 份笔记正文 + .docx）、`任务发布系统/{data,ai_exports,ai_imports}`（生产库 + AI 任务导出）、全部 `*.zip`；tip `095d83e`→`a0f9ea3` | 仓库所有者 | - | - |
+
+> **master 保留内容**（用户裁决「保留分支名与代码」）：
+> `app/`（97，Tauri/Rust 源码）、`agent/`（6，提示词）、`docs/`（4）、
+> `笔记处理系统/工具/`（36）、`笔记处理系统/提示词/`（4）、
+> `任务发布系统/{src,StateOS}/`（Python 源码）、根 README/CLAUDE/FRONTEND_ISSUES。
+> 45 个 commit 全部保留，仅内容被净化。
+>
+> **未处理项**：公开 fork `Linmoqian/learning-tools` 仍持有 master 的
+> 旧历史（含笔记与数据库）。按用户裁决（fork-handling = none），
+> **本次不处理**，仅记录风险。GitHub 的 fork 关系使得上游重写
+> 不会自动清理 fork 已持有的对象。
+
 ---
 
 ## 5. 待办与已知局限
 
 | 项 | 状态 |
 |---|---|
-| `gh` token scope 收敛为 `repo` | **待办**（S5） |
+| `gh` token scope 收敛为 `repo` | **待办**（S5）—— `gh auth refresh` 为交互式浏览器流程，需仓库所有者在本机完成 |
 | 每席位独立账号（真正的身份隔离） | **未实现** —— 当前为单账号方案，见 `docs/ROUNDTABLE_PROTOCOL.md` §2.3 |
 | CI 写权限 | **无**（`.github/workflows/ci.yml` 声明 `permissions: contents: read`） |
 | 分支保护规则 | **待设置**（需 `ci/gates` + `ci/redline-scan` 两个检查建立后再启用） |
+| 公开 fork `Linmoqian/learning-tools` | **已知风险，未处理** —— 持有 master 旧历史（含 2271 份笔记正文 + 3 个生产库）。按用户裁决暂不处理 |
+| 本地 `refs/stash` | **残留 6 个敏感路径的可达引用** —— `git stash clear` 与 `git reflog expire` 被 destructive-guard 拦截，需带外执行；patch 已在 `docs/_local/STASH*.patch` 归档 |
+| 本地 `_archive/03_数据库备份/`、`data/backup/` 等 | 已从 index 解除跟踪并加 `.gitignore`；磁盘副本保留作回滚保险 |

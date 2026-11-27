@@ -1,6 +1,82 @@
 # Current Project State
 
+## 2026-11-28 — 红线泄露修复（S4.1）：CI 抓到了方案未覆盖的真实泄露
+
+> **本节是当前唯一权威现状。** 下方的 2026-11-27 与 2026-11-23 条目保留为
+> **交付时点的历史快照**，其计数口径已被本节实测值取代。
+
+### 事件
+
+S4 建立的 CI `redline-scan` job **首次运行即失败**，抓到了方案
+**完全没有覆盖**的真实泄露。方案的 F18/F19 假设
+「vault 从未进入 `origin/main` / `origin/master`」被实测**证伪**。
+
+### 实测泄露清单（修复前）
+
+**`origin/main` 历史**（11 个路径，5 个不同 blob）：
+
+| 路径 | 内容 |
+|---|---|
+| `data/task_publisher.db` | 368 KB 真实生产库：246 条任务、966 条任务-标签关联、106 个标签、47 条反馈事件、45 条计时记录、AI 导入记录 |
+| `_archive/03_数据库备份/*.db` ×8 | 生产库副本（含 2026-06-04 与 2026-06-07 快照） |
+| `data/backup/笔记(2).zip` | 876 KB，**含 720 个笔记文件名**的压缩包 |
+| `data/physics_questions.txt` / `physics_answers.txt` | 大学物理 A 期末复习题库与答案（个人学习资产） |
+| `docs/AI_TEAM.zip` | 85 条目的 AI 团队流程包 |
+
+**`origin/master` 历史**（3887 个路径）：
+
+| 路径 | 内容 |
+|---|---|
+| `笔记处理系统/归档/**` | 3102 个路径 —— 笔记备份副本（含完整 Markdown 正文与 `.docx`） |
+| `笔记处理系统/笔记/**` | 510 个路径 —— vault 笔记本体 |
+| `笔记处理系统/已分类/**` | 275 个路径 —— 已分类笔记 |
+| `笔记处理系统/未分类/**` | 15 个路径 —— 未分类笔记 |
+| `笔记处理系统/报告/**` | 19 个路径 —— 笔记内容审查报告 |
+| `任务发布系统/data/**` | 3 个生产库（`task_publisher.db` 456 任务 / `backup/*.db` / `tasks.db`） |
+| `任务发布系统/ai_exports|ai_imports/**` | 5 个 AI 任务导出 JSON |
+| `笔记处理系统/归档/压缩包/*.zip` ×2 | 笔记压缩包 |
+
+> **样例证据**（`origin/master` 中的笔记正文，blob `000ef2ddb9`）：
+> `# 热力学第一定律` / `## 定义` / `$$Q = \Delta E + W$$` / `## 通俗理解` …
+> —— 完整的个人学习笔记，**不是**结构化引用。
+
+### 修复动作（已完成并验证）
+
+| 分支 | 动作 | tip 变化 | 验证 |
+|---|---|---|---|
+| `origin/main` | 二次 `filter-repo` 清除上表 11 个路径 | `58c7309` → `949d1e8` | 历史 0 命中；tip 树与修复前**逐字节相同**（仅 8 个 `.db` 差异） |
+| 6 个 `ar03-*` tag | 原指向净化前 commit（会让泄露保持可达）→ 重指向净化后等价 commit（subject 逐一核对一致） | 6 个 tag 全部 `--force` 推送 | 每个 tag 的 commit 均为 `origin/main` 的祖先 |
+| `origin/master` | 按用户裁决（rewrite）清除 `笔记处理系统/{归档,笔记,已分类,未分类,报告}`、`任务发布系统/{data,ai_exports,ai_imports}`、全部 `*.zip` | `095d83e` → `a0f9ea3` | 历史 0 命中；45 个 commit 全部保留；代码资产（`app/` 97、`agent/` 6、`docs/` 4、`笔记处理系统/工具/` 36、`笔记处理系统/提示词/` 4、`任务发布系统/{src,StateOS}/` 82）全部保留 |
+| 本地 | `git reset --mixed origin/main` 重基；`pre-cleanup-2026-08-04` 分支 ref 删除；`git gc` | HEAD `949d1e8` → `e96f62a` | 工作区文件全部保留 |
+
+**CI 扫描范围同步扩大**（`ci(redline): 扩大保护路径扫描范围至内容类别`）：
+原扫描只覆盖三条规范红线路径，漏掉了「同一类内容的不同落点」。
+现覆盖 `src/notes/**`、`config/config.json`、任意 `*.db{,-wal,-shm}`、
+任意 `*.zip`、整个 `data/` 树、以及路径中的 `备份/` `vault/` `笔记_backup`/
+`笔记处理系统/{笔记,归档,已分类}/`。并新增「扫描所有 remote-tracking ref」
+步骤——非默认分支上的泄露同样是公开泄露。
+
+**自检**（`docs/_local/_test_pattern.py`，临时文件未入库）：
+`origin/main` 树 + 历史 = 0 命中；`origin/master` 历史 = 3887 命中；
+11 个必须匹配样本全部匹配，9 个必须不匹配样本全部不匹配。
+
+### 仍未闭合
+
+| 项 | 状态 | 说明 |
+|---|---|---|
+| 公开 fork `Linmoqian/learning-tools` | **已知风险，按用户裁决不处理** | 持有 master 旧历史（含 2271 份笔记正文 + 3 个生产库）。GitHub 的 fork 关系使得上游重写**不会**自动清理 fork 已持有的对象 |
+| 本地 `refs/stash` | **残留 6 个敏感路径的可达引用** | `git stash clear` 与 `git reflog expire` 被 destructive-guard 拦截（工作区内容需带外处置）。patch 已在 `docs/_local/STASH*.patch` 归档 |
+| 本地 `data/backup/`、`_archive/03_数据库备份/` 等磁盘副本 | 已从 index 解除跟踪 + `.gitignore` 覆盖 | 磁盘副本保留作回滚保险；`git bundle`（101.5 MB）已创建于 `D:/Axelit/.工作/trae/_vault-backup-20261127.bundle` |
+| `gh` token scope 收敛为 `repo` | **待用户在本机完成** | `gh auth refresh -s repo` 为交互式浏览器流程，无法由 Agent 代为完成 |
+| `main` 分支保护规则 | **待设置** | 需 `ci/gates` + `ci/redline-scan` 两个检查先在 GitHub 上建立 |
+| LICENSE / GitHub Release `v0.1.0` | **待用户决定** | 见文末「待决项」 |
+
+---
+
 ## 2026-11-27 — 云端仓库状态梳理 S1–S5：公开骨架、元数据与本地收敛
+
+> **历史快照。** 本节记录 S1–S4 的成果与当时的门禁实测。
+> 其后的红线泄露修复见上方 2026-11-28 节。
 
 > **本节是当前唯一权威现状。** 下方的 2026-11-23 AR03-P5 条目保留为
 > **交付时点的历史快照**，其计数口径已被本节实测值取代。

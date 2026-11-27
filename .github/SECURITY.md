@@ -84,10 +84,19 @@ gh api user
 仓库已具备机械防线：
 
 - `.gitignore` 声明
-- CI `redline-scan` job：扫描 PR diff、`git ls-files`、**可达历史**、凭据模式
+- CI `redline-scan` job：扫描 PR diff、`git ls-files`、**可达历史**、
+  **所有 remote-tracking ref**、凭据模式
 - `.cursor/hooks/redline-guard.js`：本地 `preToolUse` fail-closed 强制
 
+扫描范围**宽于**上面四条路径：任意 `*.db{,-wal,-shm}`、任意 `*.zip`、
+整个 `data/` 树、以及路径中的 `备份/` `vault/` `笔记_backup/` 等
+vault 特征目录名。**红线是内容类别，不是单一文件名。**
+
 但这些**不能替代**你的报告。若你发现了绕过，请告诉我们。
+
+> **已知残留**（2026-11-28 审计）：公开 fork `Linmoqian/learning-tools`
+> 仍持有旧 `master` 历史中的笔记与数据库。上游重写不会自动清理 fork
+> 已持有的对象——若你在该 fork 中看到这些内容，这是已知项。
 
 ---
 

@@ -214,17 +214,30 @@ node scripts/run_e2e_isolated.js
 | `data/task_publisher.db{,-wal,-shm}` | 实时应用数据库（WAL 家族） | 同上 |
 | `config/config.json` | 运行配置（含密钥与路径） | 同上 |
 
+**红线是内容类别，不是单一文件名。** 2026-11-28 的审计证明：只按三条规范路径
+扫描会漏掉同一类内容的其他落点。因此 CI `redline-scan` 实际覆盖：
+
+- `src/notes/**`、`config/config.json`
+- 任意路径下的 `*.db` / `*.db-wal` / `*.db-shm`（曾漏掉 `_archive/` 下的生产库副本）
+- 任意路径下的 `*.zip`（曾漏掉打包成 zip 的笔记）
+- 整个 `data/` 树（课程题库、AI 导出、备份）
+- 路径中的 `备份/`、`vault/`、`笔记_backup/`、`笔记处理系统/{笔记,归档,已分类}/`
+
 **红线是仓库属性，不是本机约定**：
 
 - **L1 声明** — `.gitignore`、`AGENTS.md`、`.github/CONTRIBUTING.md`、`.github/SECURITY.md`
-- **L2 仓库** — CI `redline-scan` job：扫描 PR 三点 diff **与** `git ls-files`
-  （能发现「先加后删」绕过）
+- **L2 仓库** — CI `redline-scan` job：扫描 PR 三点 diff、**`git ls-files`**、
+  **可达历史**、**所有 remote-tracking ref**、凭据模式
 - **L3 强制** — `main` 分支保护：禁止直推，`ci/gates` + `ci/redline-scan` 必过
 - **L4 本地** — `.cursor/hooks/redline-guard.js`（`preToolUse`，fail closed）
   + `scripts/guard/protected_paths_guard.js`
 
 > `.cursor/infra-tests/redline-guard/` 内含 45 条契约用例，
 > 是红线行为的**可执行说明**。
+>
+> **已知残留风险**：公开 fork `Linmoqian/learning-tools` 仍持有旧 `master` 历史
+> 中的笔记与数据库。上游重写**不会**自动清理 fork 已持有的对象。
+> 处置状态见 `docs/CURRENT_PROJECT_STATE.md`。
 
 ---
 
@@ -255,6 +268,9 @@ node scripts/run_e2e_isolated.js
 
 两者**无共同祖先**，从未合并，也不应合并。`master` 的独有文档资产已抢救至
 `docs/legacy/tauri/`。
+
+> 两个分支的历史都已过红线净化（2026-11-28）：`main` 清除了生产数据库与
+> 备份，`master` 清除了 2271 份个人笔记正文与数据库，代码资产完整保留。
 
 ---
 

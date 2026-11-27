@@ -26,13 +26,17 @@
 | 层 | 机制 |
 |---|---|
 | L1 声明 | 本文件、`.gitignore`、`AGENTS.md`、`SECURITY.md` |
-| L2 仓库 | CI `redline-scan` job：扫描 PR 三点 diff、**`git ls-files`**、**可达历史**、凭据模式 |
+| L2 仓库 | CI `redline-scan` job：扫描 PR diff、`git ls-files`、**可达历史**、**所有 remote-tracking ref**、凭据模式 |
 | L3 强制 | `main` 分支保护：禁止直推，`ci/gates` + `ci/redline-scan` 必过 |
 | L4 本地 | `.cursor/hooks/redline-guard.js`（`preToolUse`，fail closed） |
 
-> L2 的三点扫描能发现「先加后删」的绕过；历史扫描能发现已入库的红线对象。
-> `.cursor/infra-tests/redline-guard/` 内含 45 条契约用例，
-> 是红线行为的**可执行说明**。
+> **红线是内容类别，不是单一文件名。** L2 的扫描范围**刻意宽于**上面三条
+> 规范路径，因为 2026-11-28 的审计证明窄扫描会漏掉同一类内容的其他落点：
+> `_archive/` 下的生产数据库副本、打包成 `.zip` 的笔记、`data/` 下的课程题库
+> 都不在三条规范路径里，却同样是私有数据。
+>
+> L2 的四点扫描能发现「先加后删」的绕过；历史扫描能发现已入库的红线对象；
+> remote-ref 扫描能发现只在非默认分支上的泄露。
 
 **若红线对象确实需要变更**：由仓库所有者在本机带外处理，
 **不要**尝试绕过或削弱任何一层强制。
