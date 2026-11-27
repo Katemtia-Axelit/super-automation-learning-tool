@@ -1,0 +1,258 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-10-12T09:00:00.000Z",
+  "purpose": "Machine-readable art asset slot registry for LT_M1_5E.  All SVG paths are relative to this directory.  A slot status of 'missing' means the file does not exist; 'found' means it exists and was validated.",
+  "slots": {
+    "card_faces": {
+      "description": "Card front background layers keyed by theme token",
+      "required": true,
+      "themes": [
+        "math",
+        "lang",
+        "history",
+        "code",
+        "write",
+        "science",
+        "review",
+        "default"
+      ],
+      "slots": [
+        {
+          "id": "front-bg-{theme}",
+          "css_var": "--art-card-{theme}-front",
+          "css_fallback": "linear-gradient(180deg, rgba(255,255,255,0.06), transparent)",
+          "relative_path": "cards/faces/theme-{theme}/front-bg.svg",
+          "theme_variants": true,
+          "unavailable_reason": "SVG asset not yet provided by art dialogue"
+        }
+      ]
+    },
+    "card_backs": {
+      "description": "Card back (drawn-card flip-back) and discard pile",
+      "required": false,
+      "slots": [
+        {
+          "id": "back-common",
+          "css_var": "--art-card-back-layer",
+          "css_fallback": "none",
+          "relative_path": "cards/backs/common/back-pattern.svg",
+          "fallback_chain": [
+            {
+              "id": "back-per-theme-{theme}",
+              "relative_path": "cards/backs/per-theme/theme-{theme}/back-pattern.svg",
+              "description": "Per-theme override (theme-specific back).  Looked up by build() when common is missing.",
+              "theme_variants": true
+            }
+          ],
+          "unavailable_reason": "SVG asset not yet provided"
+        },
+        {
+          "id": "back-common-emblem",
+          "css_var": "--art-card-back-emblem-layer",
+          "css_fallback": "none",
+          "relative_path": "cards/backs/common/emblem.svg",
+          "unavailable_reason": "SVG asset not yet provided"
+        }
+      ]
+    },
+    "card_deck": {
+      "description": "Draw pile decoration (5 stacked cards in gacha stage)",
+      "required": false,
+      "slots": [
+        {
+          "id": "deck-base",
+          "css_var": "--art-deck-layer",
+          "css_fallback": "none",
+          "relative_path": "deck/deck-base.svg",
+          "unavailable_reason": "SVG asset not yet provided"
+        }
+      ]
+    },
+    "discard_pile": {
+      "description": "Discard pile card back",
+      "required": false,
+      "slots": [
+        {
+          "id": "discard-back",
+          "css_var": "--art-discard-layer",
+          "css_fallback": "none",
+          "relative_path": "discard/discard-back.svg",
+          "note": "CSS .discard-pile-visual-card already applies grayscale(0.6) brightness(0.8); SVG should be full-color",
+          "unavailable_reason": "SVG asset not yet provided"
+        }
+      ]
+    },
+    "timer_dock": {
+      "description": "Timer dock (bottom bar in gacha stage) decoration",
+      "required": false,
+      "slots": [
+        {
+          "id": "dock-frame",
+          "css_var": "--art-dock-layer",
+          "css_fallback": "none",
+          "relative_path": "dock/frame.svg",
+          "unavailable_reason": "SVG asset not yet provided"
+        },
+        {
+          "id": "pocket-watch",
+          "css_var": "--art-dock-watch-layer",
+          "css_fallback": "none",
+          "relative_path": "dock/pocket-watch.svg",
+          "note": "Optional decorative watch face behind #timerDockTime text",
+          "unavailable_reason": "SVG asset not yet provided"
+        }
+      ]
+    },
+    "progress_ticks": {
+      "description": "Timer progress bar tick overlay",
+      "required": false,
+      "slots": [
+        {
+          "id": "progress-ticks",
+          "css_var": "--art-timer-progress-tick",
+          "css_fallback": "none",
+          "relative_path": "progress/progress-ticks.svg",
+          "note": "Tiled SVG overlaid on the gold progress gradient.  Default: none (pure gradient preserved).",
+          "unavailable_reason": "SVG asset not yet provided"
+        }
+      ]
+    },
+    "flying_card": {
+      "description": "Flying card animation overlay",
+      "required": false,
+      "slots": [
+        {
+          "id": "fly-card",
+          "css_var": "--art-fly-card-layer",
+          "css_fallback": "none",
+          "relative_path": "flying/flying-card.svg",
+          "note": "Optional inner layer for .flying-card (card-fly-layer div)",
+          "unavailable_reason": "SVG asset not yet provided"
+        }
+      ]
+    },
+    "corner_ornaments": {
+      "description": "Four corner decorations on task cards",
+      "required": false,
+      "slots": [
+        {
+          "id": "corner-all",
+          "css_var": "--art-card-ornament-layer",
+          "css_fallback": "none",
+          "relative_path": "cards/ornaments/corner-all.svg",
+          "note": "Combined SVG with 4 corners; or separate tl/tr/bl/br files in same directory",
+          "unavailable_reason": "SVG asset not yet provided"
+        }
+      ]
+    },
+    "multi_item_thumb": {
+      "description": "Multi-draw result item thumbnail icons",
+      "required": false,
+      "slots": [
+        {
+          "id": "multi-thumb-default",
+          "css_var": "--art-multi-item-thumb",
+          "css_fallback": "none",
+          "relative_path": "ui/multi-thumb.svg",
+          "note": "Display controlled by --art-multi-item-thumb-display token.  Valid CSS: 'block', 'flex', 'inline-flex', etc. NOT numeric values.  See art-overrides.css source for correct wiring.",
+          "unavailable_reason": "SVG asset not yet provided"
+        }
+      ],
+      "activation_vars": [
+        {
+          "id": "multi-thumb-enable-display",
+          "css_var": "--art-multi-item-thumb-display",
+          "valid_values": ["block", "flex", "inline-flex", "inline-block", "none"],
+          "description": "CSS display property.  Set to 'block' or 'flex' to reveal the thumbnail box."
+        },
+        {
+          "id": "multi-thumb-enable-content",
+          "css_var": "--art-multi-item-thumb-content",
+          "description": "CSS content property.  Typically left at 'none'; thumbnail is driven by background-image."
+        }
+      ]
+    },
+    "modal_frame": {
+      "description": "Modal background frame decoration",
+      "required": false,
+      "slots": [
+        {
+          "id": "modal-frame",
+          "css_var": "--art-modal-frame",
+          "css_fallback": "none",
+          "relative_path": "ui/modal-frame.svg",
+          "note": "Applied to all .modal::before layers.  Does not obscure form controls (z-index:1)",
+          "unavailable_reason": "SVG asset not yet provided"
+        }
+      ]
+    },
+    "feedback_paper": {
+      "description": "Feedback modal parchment background",
+      "required": false,
+      "slots": [
+        {
+          "id": "feedback-paper",
+          "css_var": "--art-modal-frame",
+          "css_fallback": "none",
+          "relative_path": "feedback/feedback-paper.svg",
+          "note": "Shares --art-modal-frame; SVG should have transparent center",
+          "unavailable_reason": "SVG asset not yet provided"
+        }
+      ]
+    },
+    "care_illustration": {
+      "description": "Task complete care modal illustration",
+      "required": false,
+      "slots": [
+        {
+          "id": "care-illust",
+          "css_var": "--art-care-illustration-layer",
+          "css_fallback": "none",
+          "relative_path": "care/care-illust-success.svg",
+          "note": "Must not cover the 3 action buttons at the bottom of #careModal",
+          "unavailable_reason": "SVG asset not yet provided"
+        }
+      ]
+    }
+  },
+  "css_hooks": {
+    "description": "All --art-* CSS custom properties defined in src/index.html M1.5B/C seams.  art-overrides.css provides the runtime values.",
+    "hooks": [
+      "--art-deck-layer",
+      "--art-card-back-layer",
+      "--art-card-back-emblem-layer",
+      "--art-discard-layer",
+      "--art-dock-layer",
+      "--art-dock-watch-layer",
+      "--art-timer-progress-tick",
+      "--art-fly-card-layer",
+      "--art-card-ornament-layer",
+      "--art-card-pattern-layer",
+      "--art-card-header-band",
+      "--art-timer-panel-frame",
+      "--art-modal-frame",
+      "--art-care-illustration-layer",
+      "--art-multi-item-thumb",
+      "--art-multi-item-thumb-display",
+      "--art-multi-item-thumb-content"
+    ]
+  },
+  "constraints": {
+    "directory_traversal_forbidden": true,
+    "no_external_urls": true,
+    "no_symlinks": true,
+    "no_script_tags_in_svg": true,
+    "no_foreignobject_in_svg": true,
+    "no_unsafe_svg_elements": true,
+    "svg_required_root_attributes": ["viewBox"],
+    "valid_viewbox_pattern": "^\\d+(\\.\\d+)?\\s+\\d+(\\.\\d+)?\\s+\\d+(\\.\\d+)?\\s+\\d+(\\.\\d+)?$"
+  },
+  "status_summary": {
+    "total_slots": 24,
+    "available": 0,
+    "unavailable": 24,
+    "missing": 24,
+    "ready_for_build": true,
+    "note": "Build will produce art-overrides.css with all vars set to 'none' (no URLs).  When real SVG assets are added, re-run: node scripts/art-asset-registry.js build"
+  }
+}

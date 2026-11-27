@@ -1,0 +1,120 @@
+/* ============================================================
+ * components.css —— 通用组件样式
+ * AR03-P4（CSS 模块化）
+ *
+ * 职责：btn / input / select / textarea / badge / card（容器）/ modal（基础）
+ *       / toast / 空态 / 表单 / diff / activity-row / timer 状态行。
+ *
+ * 注意：`.modal` 的**基础外观**在本文件；其 `::before` 美术装饰层与
+ *       `> *` 的 z-index 提升在 cards.css（--art-modal-frame 消费端）——
+ *       这是选择器唯一归属表的**唯一显式豁免**。
+ * ============================================================ */
+
+.btn {
+  background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border);
+  padding: 8px 18px; border-radius: var(--radius-md); cursor: pointer; font-family: var(--font-body);
+  font-size: 0.95rem; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+}
+.btn:hover { border-color: var(--gold); }
+.btn.pri { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: #0a0e1a; border: 0; font-weight: 700; }
+.btn.pri:hover { box-shadow: 0 0 20px rgba(240,192,64,0.3); }
+.btn.danger { background: var(--danger-veil); border: 1px solid var(--red); color: var(--red); }
+.btn.sm { padding: 5px 10px; font-size: 0.8rem; }
+.btn.ic { padding: 6px 8px; min-width: 30px; justify-content: center; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+input, select, textarea {
+  background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 9px 12px; font-family: var(--font-body);
+  font-size: 0.9rem; outline: 0; transition: 0.2s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+select option { background: var(--bg-primary); color: var(--text-primary); }
+textarea { resize: vertical; min-height: 70px; }
+label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px; }
+input[type=number] { width: 80px; }
+input.full-width, select.full-width, textarea.full-width { width: 100%; }
+.badge {
+  display: inline-block; padding: 2px 10px; border-radius: 10px;
+  font-size: 0.75rem; margin: 2px; cursor: pointer; transition: 0.2s;
+}
+.badge:hover { opacity: 0.8; }
+.bg-gold { background: var(--accent-veil-chip); color: var(--gold); }
+.bg-blue { background: rgba(74,143,231,0.15); color: var(--blue); }
+.bg-green { background: rgba(39,174,96,0.15); color: var(--green); }
+.bg-red { background: rgba(231,76,60,0.15); color: var(--red); }
+.bg-purple { background: rgba(155,89,182,0.15); color: var(--purple); }
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 18px; transition: 0.2s;
+}
+.card:hover { border-color: var(--hover-veil-strong); }
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.card-title { font-family: var(--font-heading); font-size: 1.05rem; }
+.card-meta { font-size: 0.8rem; color: var(--text-muted); }
+.card-body { line-height: 1.6; font-size: 0.9rem; color: var(--text-secondary); }
+.card-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.section-title {
+  font-family: var(--font-heading); font-size: 1.15rem; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title i { color: var(--gold); }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+.empty-state i { font-size: 3rem; margin-bottom: 16px; display: block; }
+.toast-container { position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  padding: 12px 20px; border-radius: var(--radius-md); animation: slideUp 0.3s;
+  font-size: 0.9rem; max-width: 350px; cursor: pointer;
+}
+.toast.suc { background: rgba(39,174,96,0.2); border: 1px solid var(--green); color: var(--green); }
+.toast.err { background: rgba(231,76,60,0.2); border: 1px solid var(--red); color: var(--red); }
+.toast.inf { background: rgba(74,143,231,0.2); border: 1px solid var(--blue); color: var(--blue); }
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7); z-index: 999; display: flex;
+  align-items: center; justify-content: center; animation: fadeIn 0.2s;
+}
+.modal {
+  background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 24px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s;
+}
+.modal h2 { font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 16px; }
+.modal .form-group { margin-bottom: 12px; }
+.modal .frow { display: flex; gap: 12px; }
+.modal .frow > * { flex: 1; }
+/* `.modal-actions` 的特异性说明（AR03-P4 源序等价性修复）：
+ *
+ * 迁移前，`.modal-actions` 与通用间距工具类 `.mt16` 在**同一段内联 <style>**
+ * 中，且 `.modal-actions`（索引 111）在 `.mt16`（索引 91）**之后** —— 同特异度
+ * 下后者胜 → 实际生效的是 `margin-top: 20px`，`.mt16` 是**无效的冗余类**。
+ *
+ * 迁移后工具类被移入 layout.css（在 components.css **之前**加载）。若仍用
+ * 单类选择器 `.modal-actions`，`.mt16`（0,1,0）会胜过它 → `margin-top`
+ * 由 20px 变成 16px —— 这是一个**真实的视觉回归**（按钮行间距变化）。
+ *
+ * 修复：用 `:where()` 把**基座**选择器的特异度压到 0，再叠加一个类 → 整体
+ * 特异度 0,1,0 + `.modal-actions` 自身 = 0,2,0，**恒定胜过**单类工具类，
+ * 且与文件加载顺序无关 → 视觉恒为 20px，与迁移前逐像素一致。
+ *
+ * ⚠️ 不能写成 `.modal .modal-actions`：设置页（`src/index.html` 的
+ * "modal-actions mt16"）**不在 .modal 内**。收窄作用域会让设置页按钮行
+ * 丢掉 `display: flex`（Chromium 对 flex 子项做 blockify：inline-flex → flex），
+ * 进而丢掉 `justify-content: flex-end` 的右对齐 —— 又一个视觉回归。
+ * 因此这里必须保持**全站匹配**。
+ */
+:where(.modal-actions) { display: flex; justify-content: flex-end; gap: 8px; }
+.modal-actions { margin-top: 20px; }
+.diff-summary { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; }
+.diff-lines { max-height: 280px; overflow: auto; font-family: Consolas, monospace; font-size: 0.8rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px; }
+.diff-line-add { color: #6ecf8a; }
+.diff-line-rem { color: #e88; }
+.diff-line-chg { color: var(--gold); }
+.activity-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.activity-row:last-child { border-bottom: none; }
+.timer-panel-status { font-family: var(--font-heading); font-size: 1.6rem; color: var(--gold); margin: 8px 0; }
+.timer-idle { color: var(--text-muted); font-size: 0.9rem; }
+.timer-outcome-btns { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+/* E) modal frames: same variable across all five. ::before layer
+ *    sits behind content; .modal > * and form controls are
+ *    promoted to z-index 1. Range, button, focus, error text
+ *    remain interactive. */
+.modal { position: relative; overflow: hidden; }

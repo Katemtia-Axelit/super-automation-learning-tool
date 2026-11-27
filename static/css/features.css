@@ -1,0 +1,276 @@
+/* ============================================================
+ * features.css —— 业务模块专属样式
+ * AR03-P4（CSS 模块化）
+ *
+ * 职责：gacha（含 timer-dock / gacha-multi 全套）/ tasks / schedule /
+ *       knowledge / sleep / state / agent / prompts / feedback /
+ *       自由任务面板（原 freeTaskStyle 全部内容）。
+ *
+ * 注意：`.drawn-card-stage` **不在**本文件 —— 它是卡牌舞台，归 cards.css。
+ * ============================================================ */
+
+.gacha-container { text-align: center; max-width: 600px; margin: 0 auto; }
+.gacha-energy, .gacha-pools { display: none; }
+.gacha-main-btn {
+  width: 64px; height: 64px; border-radius: 50%; border: 1px solid rgba(240,192,64,0.35);
+  background: rgba(15,20,34,0.75); color: rgba(240,192,64,0.75); font-family: var(--font-body);
+  font-size: 0.75rem; cursor: pointer; transition: 0.25s; position: relative; margin: 10px auto 0;
+  display: flex; align-items: center; justify-content: center; z-index: 2; box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+}
+.gacha-main-btn i { font-size: 1.25rem !important; }
+.gacha-main-btn:hover { transform: scale(1.04); box-shadow: 0 0 14px rgba(240,192,64,0.2); border-color: rgba(240,192,64,0.55); color: var(--gold); }
+.gacha-main-btn:active { transform: scale(0.96); }
+.gacha-main-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+.gacha-draw-stage {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  margin: 0; min-height: 280px; padding: 60px 20px 80px;
+}
+.gacha-draw-stage .timer-dock {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 8px 16px; min-width: 240px; text-align: center; backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.gacha-draw-stage .timer-dock-idle { font-size: 0.85rem; color: var(--text-muted); }
+.gacha-draw-stage .timer-dock-active .timer-task-name { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gacha-draw-stage .timer-dock-active .timer-time { font-family: var(--font-heading); font-size: 1.5rem; color: var(--gold); }
+.gacha-draw-stage .timer-dock-active .timer-progress { width: 100%; height: 4px; background: var(--bg-tertiary); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.gacha-draw-stage .timer-dock-active .timer-progress-bar { height: 100%; background: linear-gradient(90deg, var(--gold-dark), var(--gold)); border-radius: 2px; transition: width 1s linear; }
+.gacha-draw-stage .timer-dock-btns { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+.task-info-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0; font-size: calc(0.85rem * var(--card-scale, 1)); color: var(--text-secondary); }
+.task-info-row span { display: flex; align-items: center; gap: 4px; }
+.replace-reason { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.replace-reason label { background: var(--bg-secondary); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+.replace-reason input[type=radio] { display: none; }
+.replace-reason input:checked + label { background: var(--accent-veil-chip); color: var(--gold); border: 1px solid var(--gold); }
+.task-toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.tag-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 10px; font-size: 0.78rem; background: var(--accent-veil-chip); color: var(--gold); }
+.tag-chip .remove { font-size: 0.7rem; cursor: pointer; margin-left: 2px; opacity: 0.6; }
+.tag-chip .remove:hover { opacity: 1; }
+.tag-input-wrap { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-secondary); min-height: 38px; align-items: center; }
+.tag-input-wrap input { border: 0 !important; background: 0 !important; flex: 1; min-width: 60px; padding: 4px; }
+.schedule-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.schedule-nav button { background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1rem; transition: 0.2s; }
+.schedule-nav button:hover { border-color: var(--gold); color: var(--gold); }
+.schedule-nav .date-label { font-family: var(--font-heading); font-size: 1.1rem; min-width: 140px; text-align: center; }
+.sched-grid { display: grid; grid-template-columns: 90px 1fr; gap: 2px; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.sched-time { font-size: 0.78rem; color: var(--text-muted); padding: 12px 8px; text-align: right; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; }
+.sched-slot { min-height: 50px; padding: 4px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; cursor: pointer; transition: 0.2s; }
+.sched-slot:hover { background: var(--hover-veil-subtle); }
+.sched-slot input.slot-act { border: 0; background: 0; padding: 8px; color: var(--text-primary); font-family: var(--font-body); font-size: 0.85rem; width: 100%; }
+.know-layout { display: grid; grid-template-columns: 220px 1fr; gap: 16px; min-height: 60vh; }
+.know-side { display: flex; flex-direction: column; gap: 10px; }
+.know-main { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; overflow-y: auto; max-height: 70vh; }
+.cat-item { padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; }
+.cat-item:hover { background: var(--hover-veil-subtle); }
+.cat-item.active { background: var(--accent-veil); border-color: var(--gold); }
+.note-item { padding: 8px 12px; border-radius: var(--radius-sm); cursor: pointer; transition: 0.2s; font-size: 0.88rem; border-left: 2px solid transparent; }
+.note-item:hover { background: var(--hover-veil-subtle); }
+.note-item.active { border-left-color: var(--gold); color: var(--gold); }
+.note-item .note-meta { font-size: 0.7rem; color: var(--text-muted); }
+.md-content { line-height: 1.8; font-size: 1.05rem; }
+.md-content h1, .md-content h2, .md-content h3 { font-family: var(--font-heading); color: var(--gold); margin: 16px 0 8px; }
+.md-content p { margin: 8px 0; }
+.md-content ul, .md-content ol { padding-left: 20px; margin: 8px 0; }
+.md-content code { background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+.md-content pre { background: var(--bg-tertiary); padding: 12px; border-radius: var(--radius-md); overflow-x: auto; font-size: 0.85em; }
+.md-content a { color: var(--blue); }
+.md-content blockquote { border-left: 3px solid var(--gold); padding-left: 16px; color: var(--text-secondary); margin: 8px 0; }
+.md-content table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+.md-content th, .md-content td { border: 1px solid var(--border); padding: 8px; font-size: 0.9em; }
+.feedback-emoji { display: flex; gap: 12px; justify-content: center; margin: 12px 0; }
+.feedback-emoji button { font-size: 1.4rem; background: 0; border: 2px solid transparent; border-radius: var(--radius-lg); padding: 6px 12px; cursor: pointer; transition: 0.2s; color: var(--text-secondary); }
+.feedback-emoji button:hover, .feedback-emoji button.sel { border-color: var(--gold); background: var(--accent-veil); color: var(--gold); }
+.prompt-file-item { padding: 8px 12px; cursor: pointer; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 4px; font-size: 0.85rem; }
+.prompt-file-item:hover, .prompt-file-item.active { background: var(--active-veil); border-color: var(--gold); }
+.prompt-file-list { max-height: 160px; overflow-y: auto; margin-bottom: 8px; }
+.energy-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 8px; }
+.sleep-grid { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; margin-top: 12px; }
+.sleep-stats { display: flex; gap: 24px; }
+.sleep-stat { text-align: center; }
+.sleep-stat .num { font-family: var(--font-heading); font-size: 1.5rem; color: var(--gold); }
+.sleep-stat .lbl { font-size: 0.75rem; color: var(--text-muted); }
+.state-scores { display: flex; flex-wrap: wrap; gap: 16px; margin: 12px 0; }
+.state-score { text-align: center; min-width: 72px; }
+.state-score .num { font-family: var(--font-heading); font-size: 1.35rem; color: var(--gold); }
+.state-score .lbl { font-size: 0.75rem; color: var(--text-muted); }
+.assess-q { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.assess-q label { display: block; font-size: 0.9rem; margin-bottom: 6px; }
+.assess-q input[type=range] { width: 100%; }
+.assess-q-val { font-size: 0.8rem; color: var(--text-muted); text-align: right; }
+.feedback-option { display: block; padding: 8px 10px; margin-bottom: 6px; border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; font-size: 0.9rem; }
+.feedback-option:hover, .feedback-option.sel { border-color: var(--gold); background: var(--accent-veil-soft); }
+.feedback-option input { margin-right: 8px; }
+.agent-ro-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.agent-ro-tab { padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; font-size: 0.85rem; }
+.agent-ro-tab.active { border-color: var(--gold); background: var(--accent-veil); }
+.agent-ro-layout { display: grid; grid-template-columns: 220px 1fr; gap: 12px; min-height: 320px; }
+.agent-ro-list, .agent-ro-files { max-height: 360px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 6px; }
+.agent-ro-item { padding: 8px; border-radius: var(--radius-md); cursor: pointer; font-size: 0.85rem; margin-bottom: 4px; }
+.agent-ro-item:hover, .agent-ro-item.active { background: var(--active-veil); border: 1px solid var(--gold); }
+.agent-ro-detail { font-size: 0.85rem; color: var(--text-secondary); }
+.agent-ro-content { font-family: Consolas, monospace; font-size: 0.8rem; white-space: pre-wrap; max-height: 280px; overflow: auto; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px; }
+/* Stats bar - 缩小到角落 */
+.gacha-stats-bar { font-size: 0.72rem; color: var(--text-muted); margin-top: 8px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; opacity: 0.7; }
+.gacha-stats-bar span { display: flex; align-items: center; gap: 4px; }
+.gacha-stats-bar strong { color: var(--gold); font-weight: 600; }
+/* Card size control - 位置微调 */
+.card-size-control { position: absolute; right: 20px; bottom: 4px; display: flex; align-items: center; gap: 6px; z-index: 5; opacity: 0.6; transition: opacity 0.2s; }
+.card-size-control:hover { opacity: 1; }
+.card-size-control label { font-size: 0.68rem; color: var(--text-muted); white-space: nowrap; }
+.card-size-control input[type=range] { width: 70px; accent-color: var(--gold); }
+/* 抽卡标签选择行 */
+.gacha-tag-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0 0; }
+/* 抽卡控件行 */
+.gacha-controls-row { display: flex; align-items: center; justify-content: center; gap: 24px; margin: 12px 0 0; flex-wrap: wrap; }
+.gacha-time-row { display: flex; align-items: center; gap: 6px; }
+/* Multi-draw controls */
+.gacha-multi-row { display: flex; align-items: center; gap: 12px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+.gacha-multi-row.hidden { display: none !important; }
+.gacha-multi-btn {
+  background: linear-gradient(135deg, rgba(201,159,46,0.85), rgba(240,192,64,0.95));
+  color: #0a0e1a; border: 0; font-weight: 700; padding: 8px 16px;
+  border-radius: var(--radius-md); cursor: pointer; font-family: var(--font-body);
+  font-size: 0.9rem; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.gacha-multi-btn:hover { box-shadow: 0 0 16px rgba(240,192,64,0.35); }
+.gacha-multi-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+.gacha-multi-count-wrap { display: flex; align-items: center; gap: 6px; }
+.gacha-multi-count-wrap label { font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
+.gacha-multi-count-wrap select {
+  background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 7px 10px; font-family: var(--font-body);
+  font-size: 0.9rem; cursor: pointer; min-width: 70px;
+}
+/* Multi-draw result area */
+.gacha-multi-result { margin-top: 12px; }
+.gacha-multi-result.hidden { display: none !important; }
+.gacha-multi-summary {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 10px 14px; margin-bottom: 10px; font-size: 0.85rem; color: var(--text-secondary);
+  backdrop-filter: blur(10px); display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+}
+.gacha-multi-summary strong { color: var(--gold); }
+.gacha-multi-list {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+}
+/* 原生 <button type="button"> 样式化（与旧 div 外观对齐，新增键盘焦点环） */
+button.gacha-multi-item,
+.gacha-multi-item {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 8px 12px; cursor: pointer; transition: 0.2s; min-width: 140px; max-width: 200px;
+  backdrop-filter: blur(10px);
+  /* 关键：原生 button 默认继承 button font/line-height，重置为卡片文本 */
+  font-family: var(--font-body); color: var(--text-primary);
+  text-align: left; display: flex; flex-direction: column; gap: 4px;
+}
+button.gacha-multi-item:hover,
+.gacha-multi-item:hover { border-color: var(--gold); background: var(--accent-veil-soft); }
+button.gacha-multi-item:focus-visible,
+.gacha-multi-item:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+button.gacha-multi-item[aria-pressed="true"],
+.gacha-multi-item.activated { border-color: var(--gold); background: var(--accent-veil-strong); }
+button.gacha-multi-item:disabled,
+.gacha-multi-item:disabled { opacity: 0.45; cursor: not-allowed; }
+.gacha-multi-item-title {
+  font-family: var(--font-heading); font-size: 0.85rem; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0;
+}
+.gacha-multi-item-meta { font-size: 0.72rem; color: var(--text-muted); display: flex; gap: 8px; }
+.gacha-multi-item-tag {
+  display: inline-block; padding: 1px 6px; border-radius: 6px;
+  font-size: 0.65rem; background: var(--accent-veil-chip); color: var(--gold);
+}
+.gacha-draw-stage .timer-dock::before {
+  content: ''; position: absolute; inset: 0; border-radius: var(--radius-lg);
+  background-image: var(--art-dock-layer, none);
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  pointer-events: none; z-index: 0;
+}
+/* Defensive: keep dock text / progress / buttons above the optional layer. */
+.gacha-draw-stage .timer-dock .timer-task-name,
+.gacha-draw-stage .timer-dock .timer-time,
+.gacha-draw-stage .timer-dock .timer-progress,
+.gacha-draw-stage .timer-dock .timer-progress-bar,
+.gacha-draw-stage .timer-dock .timer-dock-btns,
+.gacha-draw-stage .timer-dock > * { position: relative; z-index: 1; }
+/* F) gacha-multi-item thumbnail: opt-in, non-interactive icon.
+ *    Sits left of text only when explicitly enabled via
+ *    `--art-multi-item-thumb-enable: 1` (or any truthy value).
+ *    The native <button> remains the click target; the
+ *    thumbnail is `pointer-events: none` and never steals focus
+ *    or aria-pressed state.  Default state preserves the
+ *    pre-M1.5C layout exactly: no left padding, no ::before
+ *    visible, no border, no background-color fill. */
+.gacha-multi-item { position: relative; }
+.gacha-multi-item::before {
+  content: var(--art-multi-item-thumb-enable, none); /* default = no thumbnail */
+  position: absolute; left: 8px; top: 8px; width: 22px; height: 22px;
+  border-radius: 6px; background-image: var(--art-multi-item-thumb, none);
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  background-color: transparent; border: 0;
+  pointer-events: none; z-index: 0;
+  display: var(--art-multi-item-thumb-enable, none); /* hide the whole box when off */
+}
+.gacha-multi-item > * { position: relative; z-index: 1; }
+/* === 自由任务面板 LT_RETENTION_FREE_TASK_MAIN_UI_MVP_20261023_Q（浏览器本地优先） === */
+    #freeTaskPanel { padding: 14px 18px; }
+#freeTaskPanel > summary { cursor: pointer; display: flex; align-items: center; gap: 10px; list-style: none; }
+#freeTaskPanel > summary::-webkit-details-marker { display: none; }
+#freeTaskPanel > summary::marker { content: ''; }
+#freeTaskPanel > summary::before { content: '\25B8'; color: var(--gold); font-size: 0.9rem; }
+#freeTaskPanel[open] > summary::before { content: '\25BE'; }
+#freeTaskPanel .free-task-state { margin-left: auto; font-size: 0.8rem; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+#freeTaskPanel .free-task-body { margin-top: 14px; display: flex; flex-direction: column; gap: 14px; }
+#freeTaskPanel .free-task-note { font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary); border-left: 3px solid var(--gold); padding-left: 10px; }
+#freeTaskPanel .free-task-form { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end; }
+#freeTaskPanel .free-task-field { display: flex; flex-direction: column; gap: 4px; min-width: 190px; flex: 1 1 190px; }
+#freeTaskPanel .free-task-field > label, #freeTaskPanel .free-task-field > legend { font-size: 0.82rem; color: var(--text-secondary); }
+#freeTaskPanel fieldset.free-task-field { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 6px 12px 10px; }
+#freeTaskPanel .free-task-choice { display: inline-flex; align-items: center; gap: 6px; margin-right: 16px; font-size: 0.88rem; color: var(--text-primary); }
+#freeTaskPanel .free-task-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+#freeTaskPanel .free-task-error, #freeTaskPanel .free-task-storage-error { font-size: 0.85rem; color: var(--red); margin: 0; }
+#freeTaskPanel .free-task-current { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; background: var(--bg-secondary); }
+#freeTaskPanel .free-task-current-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+#freeTaskPanel .free-task-current-name { font-size: 1rem; color: var(--text-primary); }
+#freeTaskPanel .free-task-remaining { font-family: var(--font-heading); font-size: 1.6rem; color: var(--gold); }
+#freeTaskPanel .free-task-meta, #freeTaskPanel .free-task-hint { font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px; }
+#freeTaskPanel .free-task-notice { font-size: 0.85rem; color: var(--gold); margin-top: 6px; }
+#freeTaskPanel .free-task-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+#freeTaskPanel .free-task-stat { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px 12px; background: var(--bg-secondary); }
+#freeTaskPanel .free-task-stat .num { display: block; font-family: var(--font-heading); font-size: 1.3rem; color: var(--gold); }
+#freeTaskPanel .free-task-stat .lbl { font-size: 0.78rem; color: var(--text-secondary); }
+#freeTaskPanel .free-task-history-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+#freeTaskPanel .free-task-history-title { font-size: 0.9rem; color: var(--text-primary); }
+#freeTaskPanel .free-task-confirm { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-secondary); padding: 8px 0; }
+#freeTaskPanel .free-task-history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+#freeTaskPanel .free-task-history-list li { font-size: 0.83rem; color: var(--text-secondary); border-left: 2px solid var(--border); padding-left: 8px; }
+#freeTaskPanel [hidden] { display: none !important; }
+/* 自由任务本地备份（LT_RETENTION_FREE_TASK_LOCAL_BACKUP_20261023_S）：仅本机 JSON，不上传服务器 */
+    #freeTaskPanel .free-task-backup { border-top: 1px solid var(--border); padding-top: 10px; }
+#freeTaskPanel .free-task-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+#freeTaskPanel .free-task-status { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+#freeTaskPanel .free-task-backup .free-task-history-head { margin-bottom: 4px; }
+/* 首页入口按钮：低干扰、可发现、不引入新美术风格 */
+    .free-task-shortcut-row { display: flex; justify-content: center; margin-top: 10px; }
+.free-task-shortcut-btn {
+      font-size: 0.86rem; padding: 6px 14px; color: var(--text-secondary);
+      background: transparent; border-style: dashed; opacity: 0.9;
+    }
+.free-task-shortcut-btn:hover, .free-task-shortcut-btn:focus-visible {
+      color: var(--gold); border-color: var(--gold); opacity: 1;
+    }
+.free-task-shortcut-btn i { font-size: 0.8rem; }
+/* 首页「当前自由任务」只读状态条（LT_RETENTION_FREE_TASK_HOME_STATUS_20261023_T）
+       复用 free-task.js 同一个 current / tick，不是第二个计时器，不写任何数据 */
+    #freeTaskHomeStatus {
+      display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline;
+      gap: 1px 6px; margin: 6px 0 0; padding: 0 6px; text-align: center;
+      font-size: 0.8rem; line-height: 1.5; color: var(--text-secondary);
+    }
+#freeTaskHomeStatus[hidden] { display: none !important; }
+#freeTaskHomeStatus i { font-size: 0.72rem; color: var(--gold); }
+/* 长活动名在 390px 下换行，不新增横向溢出 */
+    #freeTaskHomeStatusText { overflow-wrap: anywhere; }
+#freeTaskHomeStatusClock { font-family: var(--font-heading); color: var(--gold); white-space: nowrap; }

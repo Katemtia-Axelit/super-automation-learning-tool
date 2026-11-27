@@ -1,0 +1,117 @@
+/* ============================================================
+ * theme.css —— 全局主题 Token 唯一权威 + 自托管字体声明
+ * AR03-P4（CSS 模块化 + Theme 收敛）
+ *
+ * 职责：
+ *   - :root / :root[data-theme="light"] —— 全站**唯一**的主题变量定义处
+ *   - @font-face —— 自托管字体（Cinzel / Cinzel Decorative / Cormorant Garamond）
+ *   - 语义化交互变量（hover / active / accent / danger）的 dark + light 双套值
+ *
+ * 所有权边界（AR03-P4 Plan §2.1）：
+ *   - 本文件**只**拥有「全局主题 Token」。
+ *   - 卡牌变量（--card-*）只在 cards.css 定义。
+ *   - 美术变量（--art-*）由 static/assets/art-overrides.css 定义，此处**不出现**。
+ *   - 运行时变量（--card-scale / --deck-i）由 JS / DOM 提供，此处**不定义**。
+ *     迁移前 `:root { --card-scale: 1 }` 是兜底默认值；本迁移**移除**它 ——
+ *     所有消费点均写作 `var(--card-scale, 1)`，自带 fallback，行为不变；
+ *     而 JS（app.js 的 cardSizeRange）会在用户操作后写入真实值。
+ *
+ * dark 值为迁移前的原硬编码字面量 → **Dark 模式视觉逐像素不变**。
+ * ============================================================ */
+
+/* === 自托管字体（来自 Google Fonts，已下到 static/vendor/fonts/） === */
+@font-face { font-family: 'Cinzel'; font-style: normal; font-weight: 400; font-display: swap; src: url('/static/vendor/fonts/cinzel-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Cinzel'; font-style: normal; font-weight: 500; font-display: swap; src: url('/static/vendor/fonts/cinzel-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Cinzel'; font-style: normal; font-weight: 600; font-display: swap; src: url('/static/vendor/fonts/cinzel-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Cinzel'; font-style: normal; font-weight: 700; font-display: swap; src: url('/static/vendor/fonts/cinzel-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Cinzel Decorative'; font-style: normal; font-weight: 400; font-display: swap; src: url('/static/vendor/fonts/cinzel-decorative-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Cinzel Decorative'; font-style: normal; font-weight: 700; font-display: swap; src: url('/static/vendor/fonts/cinzel-decorative-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 400; font-display: swap; src: url('/static/vendor/fonts/cormorant-garamond-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 500; font-display: swap; src: url('/static/vendor/fonts/cormorant-garamond-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 600; font-display: swap; src: url('/static/vendor/fonts/cormorant-garamond-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 700; font-display: swap; src: url('/static/vendor/fonts/cormorant-garamond-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 400; font-display: swap; src: url('/static/vendor/fonts/cormorant-garamond-400-italic.woff2') format('woff2'); }
+:root {
+  --font-display: 'Cinzel Decorative', serif;
+  --font-heading: 'Cinzel', serif;
+  --font-body: 'Cormorant Garamond', serif;
+  --bg-deep: #0a0e1a;
+  --bg-primary: #0f1422;
+  --bg-secondary: #1a2038;
+  --bg-tertiary: #222a48;
+  --bg-card: rgba(26,32,56,0.85);
+  --border: rgba(255,255,255,0.06);
+  --text-primary: #f0e8da;
+  --text-secondary: #a8a0b8;
+  --text-muted: #6b6480;
+  --gold: #f0c040;
+  --gold-light: #fae8a0;
+  --gold-dark: #c99f2e;
+  --blue: #4a8fe7;
+  --green: #27ae60;
+  --red: #e74c3c;
+  --purple: #9b59b6;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  color-scheme: dark;
+
+  /* === 语义化交互变量（AR03-P4 §3.2） ===
+   * dark 值 = 迁移前的原硬编码字面量 → **Dark 模式视觉逐像素不变**。
+   * light 值 = 浅色背景下的可读性修复值（见 §3.4 的 A–H 分类审计）。 */
+  --hover-veil: rgba(255,255,255,0.05);
+  --hover-veil-subtle: rgba(255,255,255,0.03);
+  --hover-veil-strong: rgba(255,255,255,0.1);
+  --active-veil: rgba(255,255,255,0.05);
+  --accent-veil: rgba(240,192,64,0.1);
+  --accent-veil-soft: rgba(240,192,64,0.08);
+  --accent-veil-strong: rgba(240,192,64,0.18);
+  --accent-veil-chip: rgba(240,192,64,0.15);
+  --danger-veil: rgba(231,76,60,0.1);
+}
+/* === Light Theme 重映射（仅 5 个核心变量，其他组件用 var() 自动跟随）=== */
+:root[data-theme="light"] {
+  --bg-deep: #f5f1e8;
+  --bg-primary: #fbf8f0;
+  --bg-secondary: #f0eadb;
+  --bg-tertiary: #e6dec8;
+  --bg-card: rgba(255,252,243,0.92);
+  --border: rgba(0,0,0,0.08);
+  --text-primary: #2a241c;
+  --text-secondary: #5a5040;
+  --text-muted: #8a7a60;
+  color-scheme: light;
+
+  /* 浅色背景上白色低透明度底不可见 → 改用黑色低透明度；
+   * 金色低透明度底对比不足 → 改用更饱和的深金。 */
+  --hover-veil: rgba(0,0,0,0.05);
+  --hover-veil-subtle: rgba(0,0,0,0.035);
+  --hover-veil-strong: rgba(0,0,0,0.12);
+  --active-veil: rgba(0,0,0,0.05);
+  --accent-veil: rgba(201,159,46,0.18);
+  --accent-veil-soft: rgba(201,159,46,0.14);
+  --accent-veil-strong: rgba(201,159,46,0.26);
+  --accent-veil-chip: rgba(201,159,46,0.16);
+  --danger-veil: rgba(231,76,60,0.12);
+}
+
+/* ============================================================
+ * prefers-contrast: more（AR03-P4 §3.4）
+ *
+ * **只**提升 `--border` 这**一个**变量 —— 不引入 `--border-strong` 等
+ * 第二个边框变量（避免制造新的 Token 权威歧义）。
+ * 卡牌边框走独立的 `--card-border`，**不受影响** → 卡牌深色设计语言
+ * 与 M1.5 合同 §2.4「渐变卡背叠加 1px 边框」均保持不变。
+ *
+ * 归属说明：全局主题 Token 的**定义处唯一**，因此该重映射放在 theme.css
+ * （而不是 responsive.css）。responsive.css 只负责 `@media` 外壳。
+ * ============================================================ */
+@media (prefers-contrast: more) {
+  :root {
+    --border: rgba(255,255,255,0.2);
+  }
+  :root[data-theme="light"] {
+    --border: rgba(0,0,0,0.22);
+  }
+}
