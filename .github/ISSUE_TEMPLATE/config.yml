@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 当前项目状态 / 已知缺口
+    url: https://github.com/Katemtia-Axelit/super-automation-learning-tool/blob/main/docs/CURRENT_PROJECT_STATE.md
+    about: 先看现状权威文档。多数「这是 Bug 吗」的问题这里已有答案。
+  - name: 文档导航与权威顺序
+    url: https://github.com/Katemtia-Axelit/super-automation-learning-tool/blob/main/docs/README.md
+    about: 不确定该看哪份文档时，从这里进入。
+  - name: 架构总览
+    url: https://github.com/Katemtia-Axelit/super-automation-learning-tool/blob/main/docs/ARCHITECTURE.md
+    about: 运行架构与分层职责的权威说明。
+  - name: 安全漏洞报告（不要发公开 Issue）
+    url: https://github.com/Katemtia-Axelit/super-automation-learning-tool/blob/main/.github/SECURITY.md
+    about: 凭据泄露、隐私数据外泄等问题请走私下通道，不要开公开 Issue。

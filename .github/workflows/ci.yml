@@ -1,0 +1,118 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# CI has no write permission. No job may push, tag, comment, or open issues.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: mechanical gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-web.txt -r requirements.txt
+          pip install pytest
+
+      # --- mechanical gates (read-only, no production data) ---
+      - name: gate - module import boundaries
+        run: node scripts/check_module_imports.js
+
+      - name: gate - CSS architecture
+        run: node scripts/check_css_architecture.js
+
+      - name: gate - layout utility conflicts
+        run: node scripts/check_layout_utility_conflicts.js
+
+      - name: gate - schema consistency
+        run: python scripts/check_schema_consistency.py
+
+      - name: gate - legacy convergence / route inventory
+        run: python scripts/verify_p0_cleanup.py
+
+      - name: gate - route inventory report
+        run: python scripts/route_inventory.py
+
+      - name: gate - gacha golden snapshot
+        run: python scripts/phase2_gacha_golden.py
+
+      - name: gate - characterize suite
+        run: python -m pytest tests/characterize -q
+
+  redline-scan:
+    name: redline scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: protected paths must not appear in the PR diff
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          echo "base=$base head=$head"
+          if git diff --name-only "$base" "$head" \
+             | grep -nE '^(src/notes/|data/task_publisher\.db|data/task_publisher\.db-(wal|shm)|config/config\.json$)' ; then
+            echo "::error::protected path touched by this PR"
+            exit 1
+          fi
+          echo "OK: no protected path in PR diff"
+
+      - name: protected paths must not be tracked in the repository
+        run: |
+          set -euo pipefail
+          if git ls-files \
+             | grep -nE '^(src/notes/|data/task_publisher\.db|data/task_publisher\.db-(wal|shm)|config/config\.json$)' ; then
+            echo "::error::protected path is tracked by git"
+            exit 1
+          fi
+          echo "OK: no protected path tracked"
+
+      # Catches "add then delete" bypasses that only inspect the final tree.
+      - name: protected paths must not appear anywhere in reachable history
+        run: |
+          set -euo pipefail
+          hits="$(git rev-list --objects --all \
+            | grep -E ' (src/notes/|data/task_publisher\.db|data/task_publisher\.db-(wal|shm)|config/config\.json$)' || true)"
+          if [ -n "$hits" ]; then
+            echo "::error::protected path present in history:"
+            echo "$hits"
+            exit 1
+          fi
+          echo "OK: no protected path reachable in history"
+
+      - name: credentials must not be committed
+        run: |
+          set -euo pipefail
+          if git grep -nIE '(ghp_[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)' -- . ; then
+            echo "::error::credential-shaped content found in the tree"
+            exit 1
+          fi
+          echo "OK: no credential-shaped content"
+
+      - name: redline guard contract tests
+        run: node .cursor/infra-tests/redline-guard/harness.js

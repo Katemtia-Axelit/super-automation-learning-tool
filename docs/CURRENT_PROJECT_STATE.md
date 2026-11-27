@@ -1,6 +1,99 @@
 # Current Project State
 
+## 2026-11-27 — 云端仓库状态梳理 S1–S5：公开骨架、元数据与本地收敛
+
+> **本节是当前唯一权威现状。** 下方的 2026-11-23 AR03-P5 条目保留为
+> **交付时点的历史快照**，其计数口径已被本节实测值取代。
+>
+> **实测方法**：`git ls-files`（树）、`create_app()` + `url_map`（路由）、
+> 直接运行机械门禁（结果取自 2026-11-27 当日运行）。
+
+### 实测现状（2026-11-27）
+
+| 项 | 实测值 | 与 2026-11-23 快照的差异 |
+|---|---|---|
+| 仓库内 Blueprint 文件 | **15**（`server/blueprints/*_bp.py`） | — |
+| **实际注册**的 Blueprint | **8**（`tasks` `gacha` `tags` `state` `timer` `schedule` `knowledge` `feedback`） | 快照称 14 → **实际未接线** |
+| 实际路由 | **79**（其中 `/api/*` **77**） | 快照称 82 → **实际未接线** |
+| Service 模块 | **23** | 一致 |
+| Repository 模块 | **13** | 一致 |
+| CSS 层 | **6**（theme→layout→components→features→cards→responsive） | 一致 |
+| 集中式表（`ensure_all()` 拥有） | 门禁**无法核验**（`REQUIRED_TABLES` 未导出） | — |
+| `static/app.js` 行数 | **3482** | — |
+
+### 机械门禁实测结果（2026-11-27）
+
+| 门禁 | 结果 | 失败签名 |
+|---|---|---|
+| `check_module_imports.js` | **RED** | `static/app.js` 全局白名单含 3 个已不存在的条目：`window._setCurrentDrawnTask` / `window._getCurrentDrawnTask` / `window.__tasksOwner` |
+| `check_css_architecture.js` | **RED**（3 项） | ① `src/index.html` 仍有 1 个内联 `<style>`；② `<link>` 顺序实际 `[]`，期望 `[theme, layout, components, features, cards, responsive]`；③ 找不到主题早期同步脚本 `sal.theme` |
+| `check_layout_utility_conflicts.js` | **GREEN** | 已索引 143 类，0 冲突 |
+| `check_schema_consistency.py` | **RED** | `ImportError: cannot import name 'REQUIRED_TABLES' from 'server.schema'` |
+| `verify_p0_cleanup.py` | **RED** | `tasks` 期望 10 实得 9；`gacha` 期望 8 实得 6；`discard` / `config` / `index` / `agent_policy` / `prompts` / `agent` 期望 >0 实得 **0** |
+| `phase2_gacha_golden.py` | **GREEN** | `max_diff=0` |
+| `pytest tests/characterize` | **RED** | 2 个 collection error：`test_free_task_factory_optin.py`、`test_schema_authority.py`（同一 `REQUIRED_TABLES` 缺失根因） |
+| `route_inventory.py` | 报告工具 | 产出路由清单，不作 pass/fail 门禁 |
+| `.cursor/infra-tests/redline-guard/harness.js` | **GREEN** | 45 条契约用例全部符合预期 |
+
+### 已知缺口（**不结案**）
+
+1. **`server/schema/__init__.py` 未导出 `REQUIRED_TABLES`** —— 阻断
+   `check_schema_consistency.py` 与 2 个 characterization 测试的 collection。
+   这是**单一根因**影响 3 处红灯。
+2. **`app_factory` 只注册 8 个 Blueprint** —— 仓库内实有 15 个
+   `*_bp.py`（`agent` / `agent_policy` / `config` / `discard` / `free_task`
+   / `index` / `prompts` 未注册）。这些 BP 的路由因此**对外不存在**。
+   P2 交付文档声称的「14 BP / 82 路由」**未被实际接线证实**。
+3. **`src/index.html` 未接入 CSS 分层** —— 仍有内联 `<style>`，无六层 `<link>`，
+   缺主题早期同步脚本。
+4. **`static/app.js` 白名单过期** —— 3 个条目指向已不存在的全局符号。
+5. **`server/backend_api.py` 仍保有 DDL / DML / 路由注册** —— 违反 P1 合同
+   「DDL 只允许在 `server/schema/**`」。无自动门禁，人工核对。
+6. **`/api/tasks/21` 出现 1 次 HTTP 500** —— 请求方法未确定，根因未确认。
+   详见 `docs/P4_AUDIT_CORRECTIONS_20261122.md`。
+
+> 以上缺口**如实记录，不伪造绿灯**。修复属于后续工程批次，
+> 需按 `AGENTS.md` 的 MNN-SNN-GNN 证书制派工。
+
+### 本轮变更摘要（S1–S5）
+
+| 编号 | 事项 | 结果 |
+|---|---|---|
+| S0 | 分叉保全 | AR03 worktree 差异与 2 条 stash 归档至 `docs/_local/`；worktree 与 milestone 分支已移除 |
+| S1 | 默认分支 | `master` → `main`（`master` 保留原名，不合并不删除）；`origin/master` 独有资产抢救至 `docs/legacy/tauri/` |
+| S1.5 | 历史净化 | `git-filter-repo` 清除 vault 路径引用文件与 127 MB 遗留归档；50 个 commit 重写；`--force-with-lease` 推送 |
+| S2 | 基础设施入库 | `.cursor/**`（红线强制器 + 45 条契约用例 + 规则）、扩充 `.gitignore` |
+| S3 | P1–P5 成果入库 | 6 个 tag：`ar03-baseline-infra` … `ar03-p5-convergence` |
+| S4 | 公开骨架 | README 重写、`.github/` 全套（CI + 4 模板 + PR 模板 + CODEOWNERS + CONTRIBUTING + SECURITY）、仓库元数据、9 个标签、`docs/ROUNDTABLE_PROTOCOL.md`、`docs/external-write-log.md` |
+| S5 | 本地收敛 | 见下方「本地状态」 |
+
+### 仓库元数据（2026-11-27 实测）
+
+| 字段 | 值 |
+|---|---|
+| `default_branch` | `main` |
+| `description` | `本地优先的 AI 笔记 + 抽卡学习工具（Flask + SQLite）；本仓库为公开事实源` |
+| `topics` | `ai-notes` `flask` `gacha` `local-first` `obsidian` `retention` `sqlite` `study-tool` |
+| `has_wiki` | `false`（关闭，避免与 `docs/` 形成双真相源） |
+| `has_discussions` | `false`（圆桌用 Issue） |
+| `license` | **null** —— 待用户决定 |
+| `homepage` | **null** —— 本地应用无站点 |
+
+### 待决项
+
+| 项 | 状态 |
+|---|---|
+| LICENSE（MIT / AGPL-3.0 / 保留所有权） | **待用户决定** |
+| GitHub Release `v0.1.0-public-fact-source` | **待用户决定**（tag 草案已备） |
+| `main` 分支保护规则 | **待设置**（需 CI 两个检查先建立） |
+| `gh` token scope 收敛为 `repo` | **待办**（S5） |
+
+---
+
 ## 2026-11-23 — AR03-P5 完成：Legacy 最终收敛 + Schema 一致性 + 目录治理 + 最终交付
+
+> **历史快照。** 以下是 P5 交付时点（2026-11-23）的记录，
+> 其中的计数已被上方 2026-11-27 的实测值取代；保留供审计追溯。
 
 > **里程碑**：AR03-P5 —— Legacy 最终收敛 + Schema 一致性 + 目录治理 + 最终交付。
 > **交付报告**：`docs/P5_FINAL_DELIVERY_REPORT_20261122.md`
@@ -43,6 +136,11 @@
 
 `/api/tasks/21` 出现 **1 次 HTTP 500**，请求方法未确定，根因未确认。
 详见 `docs/P4_AUDIT_CORRECTIONS_20261122.md` §"与 P2 历史诊断的区分"。
+
+> 2026-11-27 复核：本限制**仍未结案**。同时发现 P5 交付声明的
+> 「14 BP / 82 路由 / 1738 passed」在**当前工作树**未能复现
+> （实际 8 BP / 79 路由，且 characterization 有 2 个 collection error）。
+> 详见本文档顶部 2026-11-27 节的「实测现状」与「机械门禁实测结果」。
 
 ---
 

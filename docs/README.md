@@ -1,5 +1,12 @@
 # docs/ Navigation
 
+> **2026-11-27 增量（仓库治理梳理 S1–S5）**：本仓库已成为**公开事实源**。
+> 默认分支 = `main`；`master`（2026-06 Tauri/Rust 形态）保留原名供追溯，不合并不删除。
+> 新增公开骨架：`.github/`（CI + 4 类 Issue 模板 + PR 模板 + CODEOWNERS + CONTRIBUTING + SECURITY）、
+> `docs/ROUNDTABLE_PROTOCOL.md`（圆桌规范权威）、`docs/external-write-log.md`（外部写操作审计台账）。
+> **README 已重写为七段式，只做指针、不复制动态计数**。
+> 当前门禁**并非全绿**（4 个 RED）——缺口清单与失败签名见 `CURRENT_PROJECT_STATE.md` 顶部 2026-11-27 节。
+
 > **2026-11-23 增量（AR03-P5 收尾）**：P5 已完成 —— Legacy 最终收敛、Schema 一致性门禁、目录治理、架构文档重写与最终交付。
 > 入口文档：**`ARCHITECTURE.md`**（当前架构权威，已按当前代码重写，含 5 张 Mermaid）、**`P5_FINAL_DELIVERY_REPORT_20261122.md`**（交付证据）、**`ARCHIVE_INDEX.md`**（归档批次索引）。
 > 旧的 2026-10-04 架构快照已归档到 `architecture/2026-10-04_snapshot.md`，仅供追溯，**不得**作为事实引用。
@@ -8,10 +15,12 @@
 
 Current source-of-truth entry points:
 
-1. `CURRENT_PROJECT_STATE.md` — current implementation status, verified baselines, known gaps, and next sequence.
+1. `CURRENT_PROJECT_STATE.md` — **唯一现状权威**：current implementation status, verified baselines, known gaps, and next sequence. **The topmost dated section is the live one; older dated sections are historical snapshots.**
 2. `ARCHITECTURE.md` — the running system's implementation architecture (claims remain date-stamped and must be checked against current code).
 3. `RPG_PROGRESSION_PRODUCT_SPEC_V1.0.md` — the frozen product-design authority for the RPG Progression module; it defines intended product behavior, not proof of implementation.
 4. `RPG_PROGRESSION_INTEGRATION_ROADMAP.md` — the parked engineering backlog and proposed phase gates; not an implementation specification or authorization to start.
+5. `ROUNDTABLE_PROTOCOL.md` — the roundtable protocol authority: seat identities, fixed comment header, idempotency-key definition, audit requirements.
+6. `external-write-log.md` — the audit ledger for every write to GitHub (issues, PRs, repo settings, labels, pushes).
 
 AR03-P5 deliverables (2026-11-23):
 

@@ -1,0 +1,21 @@
+# 所有文件默认由仓库所有者审核。
+# 需要强制指定 owner 时取消对应行注释并填写实际账号/团队。
+
+* @Katemtia-Axelit
+
+# 红线强制器与规则：任何改动都必须经 owner 审核
+/.cursor/ @Katemtia-Axelit
+/.github/ @Katemtia-Axelit
+/.cursor/rules/ @Katemtia-Axelit
+/.cursor/hooks/ @Katemtia-Axelit
+
+# 权威文档：改动等于改动事实源，需显式审核
+/docs/CURRENT_PROJECT_STATE.md @Katemtia-Axelit
+/docs/ARCHITECTURE.md @Katemtia-Axelit
+/docs/README.md @Katemtia-Axelit
+
+# 启动链与打包脚本：影响所有用户
+/scripts/启动学习工具.bat @Katemtia-Axelit
+/scripts/start_web_safe.bat @Katemtia-Axelit
+/scripts/launch_server.py @Katemtia-Axelit
+/scripts/guard/ @Katemtia-Axelit
