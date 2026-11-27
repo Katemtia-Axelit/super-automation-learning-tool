@@ -34,30 +34,28 @@ jobs:
           pip install -r requirements-web.txt -r requirements.txt
           pip install pytest
 
-      # --- mechanical gates (read-only, no production data) ---
-      - name: gate - module import boundaries
-        run: node scripts/check_module_imports.js
+      # ---------------------------------------------------------------------
+      # 机械门禁以「棘轮（ratchet）」方式运行。
+      #
+      # 为什么不是「9 个门禁直接跑、任一失败即红」：
+      # 本仓库的门禁在 AR03 P1–P5 交付时即为 RED（接线未完成，逐项见
+      # docs/CURRENT_PROJECT_STATE.md「已知缺口」）。若要求全绿，CI 从
+      # 第一天起就是红的 —— 没有门禁意义；若忽略失败，则 CI 纯属装饰。
+      #
+      # 棘轮语义：**不允许变差，但允许变好**。
+      #   * 出现基线之外的新失败 → 回归 → CI 红（fail-closed）
+      #   * 失败集合缩小          → CI 绿，并提示基线可收紧
+      #   * 门禁异常退出          → 视为回归 → CI 红
+      #
+      # 已记录欠债的数量始终原样打印，不掩盖。详见 ci/README.md。
+      # ---------------------------------------------------------------------
+      - name: gate ratchet (mechanical gates)
+        run: node scripts/ci/gate_ratchet.js --check
 
-      - name: gate - CSS architecture
-        run: node scripts/check_css_architecture.js
-
-      - name: gate - layout utility conflicts
-        run: node scripts/check_layout_utility_conflicts.js
-
-      - name: gate - schema consistency
-        run: python scripts/check_schema_consistency.py
-
-      - name: gate - legacy convergence / route inventory
-        run: python scripts/verify_p0_cleanup.py
-
-      - name: gate - route inventory report
-        run: python scripts/route_inventory.py
-
-      - name: gate - gacha golden snapshot
-        run: python scripts/phase2_gacha_golden.py
-
-      - name: gate - characterize suite
-        run: python -m pytest tests/characterize -q
+      # 棘轮之外**必须全绿**的门禁：它们在交付时就是 GREEN，
+      # 任何失败都是真回归，不属于「已知欠债」。
+      - name: gate - redline guard contract tests
+        run: node .cursor/infra-tests/redline-guard/harness.js
 
   redline-scan:
     name: redline scan

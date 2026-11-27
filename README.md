@@ -167,6 +167,13 @@ AR03 P1–P5 分批重构已入库，但**部分接线未完成**，机械门禁
 | `server/backend_api.py` 仍保有 DDL / DML / 路由注册 | 违反 P1 合同「DDL 只允许在 `server/schema/**`」 | 无自动门禁，人工核对 |
 | `/api/tasks/21` 出现 1 次 HTTP 500 | 请求方法未确定，根因未确认 | **已知限制，未结案** |
 
+### 2026-11-28 修正
+
+| 项 | 修正前 | 修正后 |
+|---|---|---|
+| 隔离 E2E | `run_e2e_isolated.js` 把合成 Factory 起在随机端口并传入 `SAL_E2E_BASE_URL`，但 `tests/e2e-manual.js` **忽略该变量**，硬编码 `http://127.0.0.1:5000` → 全部用例「连接被拒」，E2E 实际从未真正跑到合成实例上 | `BASE_URL` / `EXEC_PATH` 改为可被环境覆盖；chromium 路径不存在时回退到 playwright 内置解析。修正后 E2E **真正连到合成实例**，用例得以实际执行 |
+| CI 门禁 | 要求 9 门禁全绿 → 自首次推送起 CI 恒红，分支保护因此无法满足，`main` 陷入**推送死锁** | 改为棘轮（ratchet）：新失败才红。见第 5 节 |
+
 已通过的门禁：`check_layout_utility_conflicts.js`（143 类、0 冲突）、
 `phase2_gacha_golden.py`（max_diff=0）。
 
@@ -196,6 +203,29 @@ node scripts/run_e2e_isolated.js
 ```
 
 > **`PYTHON` 必须显式指向 `.venv` 解释器**，否则子进程以 `code=9009` 退出。
+
+### CI 如何执行这些门禁
+
+CI **不**要求「9 个门禁全绿」。原因见第 4 节：本仓库的门禁在
+AR03 P1–P5 交付时即为 RED（接线未完成），要求全绿等于让 CI 从第一天起
+就是红的 —— 那样 CI 就没有门禁意义。
+
+CI 采用**棘轮（ratchet）**：**不允许变差，但允许变好**。
+
+| 情形 | CI 结果 |
+|---|---|
+| 出现已记录基线之外的新失败 | ❌ **红**（回归，fail-closed） |
+| 失败集合比基线更小 | ✅ 绿（提示基线可收紧） |
+| 门禁异常退出、无法解析失败签名 | ❌ **红**（不当作"已知欠债"吞掉） |
+
+已记录欠债的数量在 CI 日志里**始终原样打印**。基线是"已知欠债清单"，
+**不是豁免**。详见 [`ci/README.md`](ci/README.md)。
+
+```bash
+node scripts/ci/gate_ratchet.js --check      # CI 用：检查有无回归
+node scripts/ci/gate_ratchet.js --print      # 打印当前实际失败
+node scripts/ci/gate_ratchet.js --update     # 收紧基线（失败变少时）
+```
 
 **数据安全**：E2E 走 `scripts/run_e2e_isolated.js` —— Node fs 守卫（事前阻断）
 + Python `sys.addaudithook` 审计（事中）+ 合成根自检（fail closed）三重机制，
