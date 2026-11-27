@@ -330,6 +330,16 @@ function main() {
         `[ratchet] ❌ ${r.id}: 门禁异常退出且无法解析失败签名 → ` +
           `视为回归\n         ${r.crashed}\n`
       );
+      // 门禁整体崩溃时，原始输出是唯一可诊断线索。必须原样打印，
+      // 否则 CI 日志里只有一行摘要，无从判断是环境问题还是代码问题。
+      process.stdout.write(
+        `[ratchet] --- ${r.id} 原始输出（末尾 60 行）---\n`
+      );
+      const lines = r.output.split(/\r?\n/).filter((l) => l.trim().length > 0);
+      for (const line of lines.slice(-60)) {
+        process.stdout.write(`         | ${line}\n`);
+      }
+      process.stdout.write(`[ratchet] --- ${r.id} 原始输出结束 ---\n`);
       regressions += 1;
       continue;
     }
