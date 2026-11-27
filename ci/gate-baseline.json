@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-27T16:48:12.663Z",
+  "gates": {
+    "module-imports": {
+      "exitCode": 1,
+      "failures": [
+        "[app-delegation] static/app.js :: api 必须委托给 SAL.core.*（P1 切片 4：唯一权威）",
+        "[app-delegation] static/app.js :: closeModal 必须委托给 SAL.core.*（P1 切片 4：唯一权威）",
+        "[app-delegation] static/app.js :: escapeHtml 必须委托给 SAL.core.*（P1 切片 4：唯一权威）",
+        "[app-delegation] static/app.js :: showModal 必须委托给 SAL.core.*（P1 切片 4：唯一权威）",
+        "[app-delegation] static/app.js :: toast 必须委托给 SAL.core.*（P1 切片 4：唯一权威）",
+        "[app-global-whitelist] static/app.js :: 未登记的可写全局 window._renderLock（新业务实现必须落到 owner 模块；确需全局时先登记白名单并写明理由）",
+        "[app-global-whitelist] static/app.js :: 未登记的可写全局 window._renderPending（新业务实现必须落到 owner 模块；确需全局时先登记白名单并写明理由）",
+        "[app-global-whitelist] static/app.js :: 未登记的可写全局 window.unifiedGachaEventDelivery（新业务实现必须落到 owner 模块；确需全局时先登记白名单并写明理由）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__createFreeCardOwner 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__createTasksOwner 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__createTimerOwner 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__getFreeCardOwnerSync 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__getTasksOwnerSync 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__getTimerOwnerSync 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__setAllTags 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__setAllTasks 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__setFreeCardOwner 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__setTasksOwner 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__setTimerOwner 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.__tasksOwner 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window._getCurrentDrawnTask 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window._getMultiDrawResults 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window._setCurrentDrawnTask 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window._setMultiDrawResults 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.doReplace 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.readAllowRepeatReplaced 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.renderDrawnCardResult 已不存在（请同步清理白名单）",
+        "[app-global-whitelist] static/app.js :: 白名单条目 window.showReplaceReason 已不存在（请同步清理白名单）",
+        "[contract] static/modules/tasks/index.js :: 未注册进 registry 的模块不得实现 registry 契约（meta/mount/unmount）",
+        "[helper-single-authority] static/app.js :: closeModal 必须委托给 SAL.core.*（不得保留第二份实现）",
+        "[helper-single-authority] static/app.js :: escapeHtml 必须委托给 SAL.core.*（不得保留第二份实现）",
+        "[helper-single-authority] static/app.js :: showModal 必须委托给 SAL.core.*（不得保留第二份实现）",
+        "[helper-single-authority] static/app.js :: toast 必须委托给 SAL.core.*（不得保留第二份实现）"
+      ]
+    },
+    "css-architecture": {
+      "exitCode": 1,
+      "failures": [
+        "[②] src/index.html 仍有 1 个内联 <style> 块（应为 0）",
+        "[④] CSS <link> 顺序错误：实际 []，期望 [theme, layout, components, features, cards, responsive]",
+        "[④] src/index.html 找不到主题早期同步脚本（sal.theme）"
+      ]
+    },
+    "layout-utility-conflicts": {
+      "exitCode": 0,
+      "failures": []
+    },
+    "schema-consistency": {
+      "exitCode": 1,
+      "failures": [
+        "ImportError: cannot import name 'REQUIRED_TABLES' from 'server.schema' (<path>)"
+      ]
+    },
+    "p0-cleanup": {
+      "exitCode": 1,
+      "failures": [
+        "bp 'agent': expected 9 routes, got 0",
+        "bp 'agent_policy': expected 1 routes, got 0",
+        "bp 'config': expected 3 routes, got 0",
+        "bp 'discard': expected 3 routes, got 0",
+        "bp 'gacha': expected 8 routes, got 6",
+        "bp 'index': expected 1 routes, got 0",
+        "bp 'prompts': expected 5 routes, got 0",
+        "bp 'tasks': expected 10 routes, got 9"
+      ]
+    },
+    "gacha-golden": {
+      "exitCode": 0,
+      "failures": []
+    },
+    "pytest-collection": {
+      "exitCode": 2,
+      "failures": [
+        "collection-error tests/characterize/test_free_task_factory_optin.py",
+        "collection-error tests/characterize/test_schema_authority.py"
+      ]
+    }
+  }
+}

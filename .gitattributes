@@ -1,0 +1,36 @@
+# 保持仓库内文件的换行符在所有平台一致。
+#
+# 为什么重要：CI 的棘轮基线（ci/gate-baseline.json）与门禁产出的失败签名
+# 做的是**逐行字符串比较**。若基线文件在 Windows checkout 后变成 CRLF，
+# 而 CI 在 Linux 上读到 LF（或反之），比较会因看不见的 \r 而失配。
+#
+# `* text=auto` 让 git 在仓库内统一存 LF、在 checkout 时按平台转换；
+# 对本来就不该被转换的文件用 -text 排除。
+* text=auto eol=lf
+
+# 二进制资源，不做换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.db binary
+*.db-wal binary
+*.db-shm binary
+
+# Windows 批处理必须保留 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 明确按文本处理且必须 LF
+*.js text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+*.css text eol=lf
+*.html text eol=lf

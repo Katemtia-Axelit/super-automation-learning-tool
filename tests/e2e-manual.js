@@ -4,17 +4,35 @@
  * 每个测试独立页面，状态隔离
  */
 const { chromium } = require('playwright-core');
+const fs = require('fs');
 
-const BASE_URL = 'http://127.0.0.1:5000';
-const EXEC_PATH = 'C:\\Users\\wn\\AppData\\Local\\ms-playwright\\chromium-1234\\chrome-win64\\chrome.exe';
+// BASE_URL / EXEC_PATH 都必须可被环境覆盖，否则隔离 harness
+// （scripts/run_e2e_isolated.js）把合成 Factory 起在随机端口后，
+// 本文件仍会去连 127.0.0.1:5000 —— 结果是「连接被拒」，而不是
+// 真正跑到合成实例上。隔离 harness 已经传 SAL_E2E_BASE_URL。
+const BASE_URL = process.env.SAL_E2E_BASE_URL || 'http://127.0.0.1:5000';
+// Windows 上 playwright-core 的默认下载路径；CI 用 PLAYWRIGHT_CHROMIUM
+// 或系统 chromium 覆盖。
+const EXEC_PATH =
+  process.env.SAL_E2E_CHROMIUM ||
+  process.env.PLAYWRIGHT_CHROMIUM ||
+  'C:\\Users\\wn\\AppData\\Local\\ms-playwright\\chromium-1234\\chrome-win64\\chrome.exe';
 
 async function runTests() {
   console.log('启动浏览器...');
-  const browser = await chromium.launch({
+  const launchOptions = {
     headless: true,
-    executablePath: EXEC_PATH,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+  };
+  // 只有当本机确实存在该可执行文件时才传 executablePath。
+  // 否则（CI / Linux / 未装 playwright 浏览器）让 playwright 自行解析，
+  // 避免 "Executable doesn't exist" 直接炸掉整个 E2E。
+  if (EXEC_PATH && fs.existsSync(EXEC_PATH)) {
+    launchOptions.executablePath = EXEC_PATH;
+  } else {
+    console.log('[e2e] 未找到本地 chromium，使用 playwright 内置解析');
+  }
+  const browser = await chromium.launch(launchOptions);
 
   const context = await browser.newContext({
     viewport: { width: 1280, height: 720 }
