@@ -154,7 +154,48 @@ for bp_name, expected in EXPECTED_ROUTE_COUNTS.items():
 print("\n[T5] make_request_conn() PRAGMA assertions")
 fresh_syspath()
 from server.app.extensions import make_request_conn, SQLITE_BUSY_TIMEOUT_MS
-db_path = os.path.join(PROJECT_ROOT, "data", "task_publisher.db")
+# T5 只验证 make_request_conn() 的 PRAGMA 设置，**不需要**真实生产库。
+#
+# 这里曾经直接指向 `data/task_publisher.db`（生产库路径）。后果有二：
+#   1. **CI 上必然崩** —— CI 检出里没有 data/ 目录，sqlite 无法打开该路径，
+#      门禁以未捕获异常退出（exit != 0）而不是给出可解析的失败签名；
+#   2. **触碰生产库** —— 即使只读打开 WAL 家族，也会让 sqlite 在
+#      `data/` 下产生 `-wal` / `-shm` 副产物，等于在生产目录上写文件。
+#      这违反项目红线（`data/task_publisher.db*` 属受保护路径）。
+#
+# 改为在 %TEMP% 下用一次性合成库验证 PRAGMA，语义完全等价，零生产触碰。
+import tempfile
+_tmp_dir = tempfile.mkdtemp(prefix="sal_verify_p0_")
+# 合成库目录必须**已存在** —— sqlite 不会自动创建父目录。
+os.makedirs(os.path.join(_tmp_dir, "data"), exist_ok=True)
+os.makedirs(os.path.join(_tmp_dir, "vault"), exist_ok=True)
+db_path = os.path.join(_tmp_dir, "data", "synthetic.sqlite3")
+
+# 用**仓库自己的合成 schema seeder** 铺底表（tasks / tags / task_tags /
+# gacha_records / task_dependencies ...）。
+#
+# 为什么需要铺底：`ensure_indexes()` 会为 `tasks` 建索引，而 `tasks` 表
+# 在当前架构里**不由 `server/schema/**` 创建**（它来自 legacy 层）。
+# 在一个空库上直接跑 ensure_all() 会因 `no such table: main.tasks` 崩掉 ——
+# 这正是 CI 上该门禁异常退出的第二个原因。
+#
+# 用既有 seeder 而不是就地写 DDL，是为了保证门禁用的表结构与
+# 隔离 E2E / characterize 测试用的是**同一份**定义，不会各自漂移。
+def _seed_synthetic_db(path):
+    from pathlib import Path
+    sys.path.insert(0, os.path.join(PROJECT_ROOT, "tests", "characterize"))
+    try:
+        import sandbox_env
+        root = Path(path).parent.parent
+        sandbox_env.seed(root)
+    finally:
+        try:
+            sys.path.remove(os.path.join(PROJECT_ROOT, "tests", "characterize"))
+        except ValueError:
+            pass
+
+
+_seed_synthetic_db(db_path)
 conn = make_request_conn(db_path)
 try:
     fk = conn.execute("PRAGMA foreign_keys").fetchone()[0]
@@ -183,9 +224,28 @@ def _spy_ensure_all(conn):
     return _ensure_all_orig(conn)
 _af.ensure_all_schema = _spy_ensure_all
 from server.app import create_app as _ca
-_ca()
+# T6 会跑 create_app()，它会连数据库并执行 ensure_all 迁移。
+# 默认的库路径指向生产库（`data/task_publisher.db`）—— 在 CI 上该路径
+# 不存在会导致门禁崩溃，在本机上则会在生产目录里创建/迁移真实库。
+#
+# create_app(config=...) 接受显式配置，用它把库与 notes 指向合成路径，
+# 保持 T6 的断言原样、零生产触碰。
+from server.app import config as _cfg_mod
+_synthetic_cfg = _cfg_mod.load_config()
+_synthetic_cfg["_db_path"] = db_path
+_synthetic_cfg["_notes_dir"] = os.path.join(_tmp_dir, "vault")
+_ca(config=_synthetic_cfg)
 check(int(captured.get("foreign_keys", 0)) == 1,
       f"ensure_all sees foreign_keys=ON (got {captured.get('foreign_keys')})")
+
+# ---------------------------------------------------------------------------
+# 清理：合成库连同其 WAL/SHM 副产物一起清掉，不留残迹。
+# ---------------------------------------------------------------------------
+try:
+    import shutil
+    shutil.rmtree(_tmp_dir, ignore_errors=True)
+except Exception:
+    pass
 
 # ---------------------------------------------------------------------------
 # Summary

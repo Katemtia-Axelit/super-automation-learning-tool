@@ -52,6 +52,13 @@ jobs:
       - name: gate ratchet (mechanical gates)
         run: node scripts/ci/gate_ratchet.js --check
 
+      # 棘轮把失败签名归一化后比较，因此当某个门禁**整体崩溃**（而不是
+      # 「有若干条已知失败」）时，日志里只有一行摘要、看不到原始输出。
+      # 这一步在棘轮失败后重跑一次并打印原始输出，让失败可诊断。
+      - name: gate ratchet - diagnostics (on failure)
+        if: failure()
+        run: node scripts/ci/gate_ratchet.js --print
+
       # 棘轮之外**必须全绿**的门禁：它们在交付时就是 GREEN，
       # 任何失败都是真回归，不属于「已知欠债」。
       - name: gate - redline guard contract tests
