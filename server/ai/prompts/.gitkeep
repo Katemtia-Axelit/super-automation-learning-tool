@@ -1,0 +1,10 @@
+# server/ai/prompts/
+
+Phase 2 will populate this directory with one `.md` file per prompt template,
+each loaded by `server.ai.llm_client`.
+
+Currently the prompts live inline in `backend_api.py` (`load_prompt` reads
+from a hard-coded `ai_workspace/prompts/` directory).
+
+Phase 1: empty placeholder. Adding a `.gitkeep` so the folder survives across
+git commits.
