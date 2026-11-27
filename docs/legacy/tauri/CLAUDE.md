@@ -1,5 +1,17 @@
 # CLAUDE.md
 
+> **⚠️ 历史快照，不得作为现行指引引用。**
+>
+> 本文件来自 `origin/master` —— 2026-06 的 **Tauri v2 + React 18 + Rust actix-web
+> 桌面版**形态。当前产品已不是这个形态。
+>
+> - **现行** Agent 行为规范：仓库根 [`AGENTS.md`](../../../AGENTS.md)（**唯一权威**）
+> - **现行** 架构：[`docs/ARCHITECTURE.md`](../../ARCHITECTURE.md)
+> - **现行** 现状：[`docs/CURRENT_PROJECT_STATE.md`](../../CURRENT_PROJECT_STATE.md)
+> - 本目录说明：[`docs/legacy/tauri/README.md`](README.md)
+>
+> 下方全文按原样保留，仅供追溯。
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## 项目概览

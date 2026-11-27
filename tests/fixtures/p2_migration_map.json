@@ -1,0 +1,955 @@
+{
+  "generated_by": "scripts/_build_p2_migration_map.py",
+  "project_root": "D:\\Axelit\\.工作\\trae\\超级自动化学习工具",
+  "blueprint_count": 15,
+  "app_level_routes": [
+    {
+      "rule": "/api/health",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "_health"
+    }
+  ],
+  "blueprints": {
+    "agent_bp": {
+      "blueprint": "agent_bp",
+      "file": "server/blueprints/agent_bp.py",
+      "imports": [
+        "repositories.db",
+        "services.agent",
+        "services.ai"
+      ],
+      "routes": [
+        {
+          "rule": "/api/agent/agents",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "agent.list_agents"
+        },
+        {
+          "rule": "/api/agent/agents/<agent_id>/prompt",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "agent.get_agent_prompt"
+        },
+        {
+          "rule": "/api/agent/files/raw",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "agent.list_raw_files"
+        },
+        {
+          "rule": "/api/agent/files/raw/content",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "agent.get_raw_file_content"
+        },
+        {
+          "rule": "/api/agent/files/vault",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "agent.list_vault_files"
+        },
+        {
+          "rule": "/api/agent/files/vault/content",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "agent.get_vault_file_content"
+        },
+        {
+          "rule": "/api/agent/import-tasks",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "agent.import_tasks"
+        },
+        {
+          "rule": "/api/agent/process",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "agent.process"
+        },
+        {
+          "rule": "/api/agent/save-note",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "agent.save_note"
+        }
+      ]
+    },
+    "agent_policy_bp": {
+      "blueprint": "agent_policy_bp",
+      "file": "server/blueprints/agent_policy_bp.py",
+      "imports": [
+        "services.agent_policy"
+      ],
+      "routes": [
+        {
+          "rule": "/api/agent-policy/status",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "agent_policy.agent_policy_status"
+        }
+      ]
+    },
+    "config_bp": {
+      "blueprint": "config_bp",
+      "file": "server/blueprints/config_bp.py",
+      "imports": [
+        "repositories.db",
+        "services.config",
+        "services.export"
+      ],
+      "routes": [
+        {
+          "rule": "/api/config",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "config.get_config"
+        },
+        {
+          "rule": "/api/config/save",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "config.save_config"
+        },
+        {
+          "rule": "/api/export",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "config.export_system_state"
+        }
+      ]
+    },
+    "discard_bp": {
+      "blueprint": "discard_bp",
+      "file": "server/blueprints/discard_bp.py",
+      "imports": [
+        "repositories.db",
+        "services.discard"
+      ],
+      "routes": [
+        {
+          "rule": "/api/discard-pile",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "discard.get_discard_pile"
+        },
+        {
+          "rule": "/api/discard-pile/<int:task_id>/restore",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "discard.restore_from_discard"
+        },
+        {
+          "rule": "/api/tasks/<int:task_id>/move-to-discard",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "discard.move_to_discard"
+        }
+      ]
+    },
+    "feedback_bp": {
+      "blueprint": "feedback_bp",
+      "file": "server/blueprints/feedback_bp.py",
+      "imports": [
+        "repositories.db",
+        "services.feedback"
+      ],
+      "routes": [
+        {
+          "rule": "/api/task-feedback",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "feedback.api_list_task_feedback"
+        },
+        {
+          "rule": "/api/task-feedback",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "feedback.api_create_task_feedback"
+        },
+        {
+          "rule": "/api/tasks/<int:task_id>/feedback",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "feedback.api_task_feedback"
+        }
+      ]
+    },
+    "free_task_bp": {
+      "blueprint": "free_task_bp",
+      "file": "server/blueprints/free_task_bp.py",
+      "imports": [
+        "services.free_task_adapter",
+        "services.free_task_events"
+      ],
+      "routes": []
+    },
+    "gacha_bp": {
+      "blueprint": "gacha_bp",
+      "file": "server/blueprints/gacha_bp.py",
+      "imports": [
+        "repositories.db",
+        "repositories.gacha_repo",
+        "services.agent_policy",
+        "services.free_card_policy",
+        "services.gacha",
+        "services.tasks"
+      ],
+      "routes": [
+        {
+          "rule": "/api/gacha/care-draw",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "gacha.care_draw"
+        },
+        {
+          "rule": "/api/gacha/draw",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "gacha.draw"
+        },
+        {
+          "rule": "/api/gacha/free-card/suggestion",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "gacha.free_card_suggestion"
+        },
+        {
+          "rule": "/api/gacha/multi-draw",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "gacha.gacha_multi_draw"
+        },
+        {
+          "rule": "/api/gacha/pools",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "gacha.list_pools"
+        },
+        {
+          "rule": "/api/gacha/pools/detail",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "gacha.pools_detail"
+        },
+        {
+          "rule": "/api/gacha/replace",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "gacha.gacha_replace"
+        },
+        {
+          "rule": "/api/gacha/statistics",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "gacha.gacha_statistics"
+        }
+      ]
+    },
+    "index_bp": {
+      "blueprint": "index_bp",
+      "file": "server/blueprints/index_bp.py",
+      "imports": [],
+      "routes": [
+        {
+          "rule": "/",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "index.index"
+        }
+      ]
+    },
+    "knowledge_bp": {
+      "blueprint": "knowledge_bp",
+      "file": "server/blueprints/knowledge_bp.py",
+      "imports": [
+        "repositories.note_index_repo",
+        "services.knowledge"
+      ],
+      "routes": [
+        {
+          "rule": "/api/knowledge/categories",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "knowledge.get_knowledge_categories"
+        },
+        {
+          "rule": "/api/knowledge/graph",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "knowledge.get_knowledge_graph"
+        },
+        {
+          "rule": "/api/knowledge/note-content/<path:note_path>",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "knowledge.get_note_content_full"
+        },
+        {
+          "rule": "/api/knowledge/note/<path:note_path>",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "knowledge.get_note_content"
+        },
+        {
+          "rule": "/api/knowledge/notes",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "knowledge.get_notes"
+        },
+        {
+          "rule": "/api/knowledge/open-in-obsidian",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "knowledge.open_in_obsidian"
+        },
+        {
+          "rule": "/api/knowledge/point-detail/<subject>/<point_name>",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "knowledge.get_knowledge_point_detail"
+        },
+        {
+          "rule": "/api/knowledge/points",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "knowledge.get_knowledge_points"
+        },
+        {
+          "rule": "/api/knowledge/recent",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "knowledge.get_recent_knowledge"
+        }
+      ]
+    },
+    "prompts_bp": {
+      "blueprint": "prompts_bp",
+      "file": "server/blueprints/prompts_bp.py",
+      "imports": [
+        "services.prompts"
+      ],
+      "routes": [
+        {
+          "rule": "/api/prompts",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "prompts.list_prompts"
+        },
+        {
+          "rule": "/api/prompts/<path:name>",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "prompts.get_prompt"
+        },
+        {
+          "rule": "/api/prompts/<path:name>",
+          "methods": [
+            "PUT"
+          ],
+          "endpoint": "prompts.save_prompt"
+        },
+        {
+          "rule": "/api/prompts/<path:name>/backup/latest",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "prompts.prompt_backup_latest"
+        },
+        {
+          "rule": "/api/prompts/<path:name>/restore-latest",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "prompts.prompt_restore_latest"
+        }
+      ]
+    },
+    "schedule_bp": {
+      "blueprint": "schedule_bp",
+      "file": "server/blueprints/schedule_bp.py",
+      "imports": [
+        "repositories.db",
+        "services.schedule"
+      ],
+      "routes": [
+        {
+          "rule": "/api/schedule/activities",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "schedule.get_activities"
+        },
+        {
+          "rule": "/api/schedule/activities",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "schedule.add_activity"
+        },
+        {
+          "rule": "/api/schedule/activities/<int:act_id>",
+          "methods": [
+            "DELETE"
+          ],
+          "endpoint": "schedule.delete_activity"
+        },
+        {
+          "rule": "/api/schedule/daily",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "schedule.get_daily_schedule"
+        },
+        {
+          "rule": "/api/schedule/daily",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "schedule.save_daily_schedule"
+        },
+        {
+          "rule": "/api/schedule/slots",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "schedule.get_schedule_slots"
+        },
+        {
+          "rule": "/api/schedule/weekly",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "schedule.get_weekly_schedule"
+        },
+        {
+          "rule": "/api/schedule/weekly",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "schedule.save_weekly_schedule"
+        }
+      ]
+    },
+    "state_bp": {
+      "blueprint": "state_bp",
+      "file": "server/blueprints/state_bp.py",
+      "imports": [
+        "repositories.db",
+        "repositories.state_repo",
+        "services.state"
+      ],
+      "routes": [
+        {
+          "rule": "/api/state/assessment",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "state.get_today_assessment"
+        },
+        {
+          "rule": "/api/state/assessment",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "state.submit_assessment"
+        },
+        {
+          "rule": "/api/state/assessment/correlate",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "state.get_correlation"
+        },
+        {
+          "rule": "/api/state/assessment/history",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "state.get_assessment_history"
+        },
+        {
+          "rule": "/api/state/daily-tone",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "state.get_daily_tone"
+        },
+        {
+          "rule": "/api/state/daily-tone",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "state.set_daily_tone"
+        },
+        {
+          "rule": "/api/state/energy",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "state.record_energy"
+        },
+        {
+          "rule": "/api/state/questions",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "state.get_assessment_questions"
+        },
+        {
+          "rule": "/api/state/sleep",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "state.get_sleep"
+        },
+        {
+          "rule": "/api/state/sleep",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "state.record_sleep"
+        },
+        {
+          "rule": "/api/state/weekly-energy",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "state.get_weekly_energy"
+        }
+      ]
+    },
+    "tags_bp": {
+      "blueprint": "tags_bp",
+      "file": "server/blueprints/tags_bp.py",
+      "imports": [
+        "repositories.db",
+        "services.tags"
+      ],
+      "routes": [
+        {
+          "rule": "/api/tags",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "tags.list_tags"
+        },
+        {
+          "rule": "/api/tags",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "tags.create_tag"
+        },
+        {
+          "rule": "/api/tags/<int:tag_id>",
+          "methods": [
+            "DELETE"
+          ],
+          "endpoint": "tags.delete_tag"
+        },
+        {
+          "rule": "/api/tags/batch",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "tags.batch_assign_tags"
+        }
+      ]
+    },
+    "tasks_bp": {
+      "blueprint": "tasks_bp",
+      "file": "server/blueprints/tasks_bp.py",
+      "imports": [
+        "repositories.db",
+        "services.tasks"
+      ],
+      "routes": [
+        {
+          "rule": "/api/dependencies",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "tasks.get_dependencies"
+        },
+        {
+          "rule": "/api/tasks",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "tasks.list_tasks"
+        },
+        {
+          "rule": "/api/tasks",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "tasks.create_task"
+        },
+        {
+          "rule": "/api/tasks/<int:task_id>",
+          "methods": [
+            "DELETE"
+          ],
+          "endpoint": "tasks.delete_task"
+        },
+        {
+          "rule": "/api/tasks/<int:task_id>",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "tasks.get_task"
+        },
+        {
+          "rule": "/api/tasks/<int:task_id>",
+          "methods": [
+            "PUT"
+          ],
+          "endpoint": "tasks.update_task"
+        },
+        {
+          "rule": "/api/tasks/<int:task_id>/complete",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "tasks.complete_task"
+        },
+        {
+          "rule": "/api/tasks/<int:task_id>/dependents",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "tasks.get_dependents"
+        },
+        {
+          "rule": "/api/tasks/<int:task_id>/refuse",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "tasks.refuse_task"
+        },
+        {
+          "rule": "/api/tasks/<int:task_id>/skip",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "tasks.skip_task"
+        }
+      ]
+    },
+    "timer_bp": {
+      "blueprint": "timer_bp",
+      "file": "server/blueprints/timer_bp.py",
+      "imports": [
+        "repositories.db",
+        "services.timer"
+      ],
+      "routes": [
+        {
+          "rule": "/api/timer/active",
+          "methods": [
+            "GET"
+          ],
+          "endpoint": "timer.get_active_timer"
+        },
+        {
+          "rule": "/api/timer/complete",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "timer.complete_timer"
+        },
+        {
+          "rule": "/api/timer/pause",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "timer.pause_timer"
+        },
+        {
+          "rule": "/api/timer/resume",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "timer.resume_timer"
+        },
+        {
+          "rule": "/api/timer/start",
+          "methods": [
+            "POST"
+          ],
+          "endpoint": "timer.start_timer"
+        }
+      ]
+    }
+  },
+  "services": {
+    "__init__": {
+      "file": "server/services/__init__.py",
+      "imports": []
+    },
+    "agent": {
+      "file": "server/services/agent.py",
+      "imports": [
+        "repositories.vault_repo",
+        "services.prompts",
+        "services.tasks"
+      ]
+    },
+    "agent_policy": {
+      "file": "server/services/agent_policy.py",
+      "imports": []
+    },
+    "ai": {
+      "file": "server/services/ai.py",
+      "imports": []
+    },
+    "config": {
+      "file": "server/services/config.py",
+      "imports": []
+    },
+    "discard": {
+      "file": "server/services/discard.py",
+      "imports": [
+        "repositories.discard_repo"
+      ]
+    },
+    "export": {
+      "file": "server/services/export.py",
+      "imports": [
+        "repositories.export_repo"
+      ]
+    },
+    "feedback": {
+      "file": "server/services/feedback.py",
+      "imports": [
+        "repositories.feedback_repo",
+        "repositories.state_repo",
+        "repositories.task_repo",
+        "services.free_task"
+      ]
+    },
+    "free_card_policy": {
+      "file": "server/services/free_card_policy.py",
+      "imports": [
+        "services.agent_policy",
+        "services.free_task"
+      ]
+    },
+    "free_task": {
+      "file": "server/services/free_task.py",
+      "imports": []
+    },
+    "free_task_adapter": {
+      "file": "server/services/free_task_adapter.py",
+      "imports": []
+    },
+    "free_task_adapter_ab_astra": {
+      "file": "server/services/free_task_adapter_ab_astra.py",
+      "imports": []
+    },
+    "free_task_adapter_ab_opus": {
+      "file": "server/services/free_task_adapter_ab_opus.py",
+      "imports": []
+    },
+    "free_task_domain": {
+      "file": "server/services/free_task_domain.py",
+      "imports": []
+    },
+    "free_task_events": {
+      "file": "server/services/free_task_events.py",
+      "imports": []
+    },
+    "free_task_session_ownership": {
+      "file": "server/services/free_task_session_ownership.py",
+      "imports": []
+    },
+    "gacha": {
+      "file": "server/services/gacha.py",
+      "imports": [
+        "repositories.gacha_repo"
+      ]
+    },
+    "knowledge": {
+      "file": "server/services/knowledge.py",
+      "imports": [
+        "repositories.note_index_repo"
+      ]
+    },
+    "prompts": {
+      "file": "server/services/prompts.py",
+      "imports": [
+        "repositories.prompt_repo"
+      ]
+    },
+    "schedule": {
+      "file": "server/services/schedule.py",
+      "imports": [
+        "repositories.schedule_repo"
+      ]
+    },
+    "state": {
+      "file": "server/services/state.py",
+      "imports": []
+    },
+    "tags": {
+      "file": "server/services/tags.py",
+      "imports": [
+        "repositories.tags_repo"
+      ]
+    },
+    "tasks": {
+      "file": "server/services/tasks.py",
+      "imports": [
+        "repositories.task_repo"
+      ]
+    },
+    "timer": {
+      "file": "server/services/timer.py",
+      "imports": [
+        "repositories.timer_repo"
+      ]
+    }
+  },
+  "repositories": {
+    "__init__": {
+      "file": "server/repositories/__init__.py",
+      "imports": []
+    },
+    "db": {
+      "file": "server/repositories/db.py",
+      "imports": []
+    },
+    "discard_repo": {
+      "file": "server/repositories/discard_repo.py",
+      "imports": []
+    },
+    "export_repo": {
+      "file": "server/repositories/export_repo.py",
+      "imports": []
+    },
+    "feedback_repo": {
+      "file": "server/repositories/feedback_repo.py",
+      "imports": []
+    },
+    "gacha_repo": {
+      "file": "server/repositories/gacha_repo.py",
+      "imports": []
+    },
+    "note_index_repo": {
+      "file": "server/repositories/note_index_repo.py",
+      "imports": []
+    },
+    "prompt_repo": {
+      "file": "server/repositories/prompt_repo.py",
+      "imports": []
+    },
+    "schedule_repo": {
+      "file": "server/repositories/schedule_repo.py",
+      "imports": []
+    },
+    "state_repo": {
+      "file": "server/repositories/state_repo.py",
+      "imports": []
+    },
+    "tags_repo": {
+      "file": "server/repositories/tags_repo.py",
+      "imports": []
+    },
+    "task_repo": {
+      "file": "server/repositories/task_repo.py",
+      "imports": []
+    },
+    "timer_repo": {
+      "file": "server/repositories/timer_repo.py",
+      "imports": []
+    },
+    "vault_repo": {
+      "file": "server/repositories/vault_repo.py",
+      "imports": []
+    }
+  },
+  "service_modules": [
+    "__init__.py",
+    "agent.py",
+    "agent_policy.py",
+    "ai.py",
+    "config.py",
+    "discard.py",
+    "export.py",
+    "feedback.py",
+    "free_card_policy.py",
+    "free_task.py",
+    "free_task_adapter.py",
+    "free_task_adapter_ab_astra.py",
+    "free_task_adapter_ab_opus.py",
+    "free_task_domain.py",
+    "free_task_events.py",
+    "free_task_session_ownership.py",
+    "gacha.py",
+    "knowledge.py",
+    "prompts.py",
+    "schedule.py",
+    "state.py",
+    "tags.py",
+    "tasks.py",
+    "timer.py"
+  ],
+  "repository_modules": [
+    "__init__.py",
+    "db.py",
+    "discard_repo.py",
+    "export_repo.py",
+    "feedback_repo.py",
+    "gacha_repo.py",
+    "note_index_repo.py",
+    "prompt_repo.py",
+    "schedule_repo.py",
+    "state_repo.py",
+    "tags_repo.py",
+    "task_repo.py",
+    "timer_repo.py",
+    "vault_repo.py"
+  ]
+}

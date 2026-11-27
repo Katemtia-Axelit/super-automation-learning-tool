@@ -1,0 +1,63 @@
+{
+  "generatedAt": "2026-11-22T07:23:13.257Z",
+  "source": "src/index.html <style> main block (pre-migration)",
+  "note": "卡牌 8 变体 + base 的 --card-* 变量；迁移后必须逐字一致（卡牌深色设计语言保护）。",
+  "cardThemeVars": {
+    "base": {
+      "--card-bg": "#1a2038",
+      "--card-accent": "#f0c040",
+      "--card-border": "rgba(240,192,64,0.35)",
+      "--card-pattern": "rgba(255,255,255,0.04)",
+      "--card-glow": "rgba(240,192,64,0.45)",
+      "--card-text": "#f0e8da",
+      "--card-muted": "#8a8298"
+    },
+    "theme-math": {
+      "--card-bg": "linear-gradient(145deg, #121a32, #1a2848)",
+      "--card-accent": "#6eb5ff",
+      "--card-border": "rgba(110,181,255,0.42)",
+      "--card-glow": "rgba(110,181,255,0.5)"
+    },
+    "theme-lang": {
+      "--card-bg": "linear-gradient(145deg, #142018, #1a3024)",
+      "--card-accent": "#8fd4a0",
+      "--card-border": "rgba(143,212,160,0.42)",
+      "--card-glow": "rgba(240,200,100,0.35)"
+    },
+    "theme-history": {
+      "--card-bg": "linear-gradient(145deg, #241a12, #322418)",
+      "--card-accent": "#d4a574",
+      "--card-border": "rgba(212,165,116,0.4)",
+      "--card-glow": "rgba(180,80,60,0.25)"
+    },
+    "theme-code": {
+      "--card-bg": "linear-gradient(145deg, #0e1418, #152028)",
+      "--card-accent": "#4ecdc4",
+      "--card-border": "rgba(78,205,196,0.35)",
+      "--card-glow": "rgba(78,205,196,0.4)"
+    },
+    "theme-write": {
+      "--card-bg": "linear-gradient(145deg, #1e1828, #2a2238)",
+      "--card-accent": "#c9b8e8",
+      "--card-border": "rgba(201,184,232,0.35)",
+      "--card-glow": "rgba(201,184,232,0.3)"
+    },
+    "theme-science": {
+      "--card-bg": "linear-gradient(145deg, #121828, #1a2240)",
+      "--card-accent": "#7eb8ff",
+      "--card-border": "rgba(126,184,255,0.35)",
+      "--card-glow": "rgba(155,89,182,0.35)"
+    },
+    "theme-review": {
+      "--card-bg": "linear-gradient(145deg, #221c14, #2e2618)",
+      "--card-accent": "#f0c878",
+      "--card-border": "rgba(240,200,120,0.35)",
+      "--card-glow": "rgba(240,200,120,0.35)"
+    },
+    "theme-default": {
+      "--card-bg": "linear-gradient(145deg, #181c28, #222838)",
+      "--card-accent": "#f0c040",
+      "--card-border": "rgba(240,192,64,0.28)"
+    }
+  }
+}

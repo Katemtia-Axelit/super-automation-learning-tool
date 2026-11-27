@@ -1,0 +1,1101 @@
+{
+  "schema_version": 2,
+  "generated_by": "scripts/legacy_divergence_probe.py",
+  "legacy_baseline": "tests/fixtures/legacy_baseline.json",
+  "total_cases": 40,
+  "identical_count": 32,
+  "divergent_count": 8,
+  "entries": [
+    {
+      "name": "health",
+      "method": "GET",
+      "path": "/api/health",
+      "verdict": "divergent",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": true,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "status": "healthy"
+      },
+      "factory_json": {
+        "phase": 1,
+        "status": "ok"
+      }
+    },
+    {
+      "name": "list_tasks",
+      "method": "GET",
+      "path": "/api/tasks",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": [],
+      "factory_json": []
+    },
+    {
+      "name": "get_task_missing",
+      "method": "GET",
+      "path": "/api/tasks/999999",
+      "verdict": "identical",
+      "status_legacy": 404,
+      "status_factory": 404,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "Task not found"
+      },
+      "factory_json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "get_dependents_missing",
+      "method": "GET",
+      "path": "/api/tasks/999999/dependents",
+      "verdict": "identical",
+      "status_legacy": 404,
+      "status_factory": 404,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "Task not found"
+      },
+      "factory_json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "create_task",
+      "method": "POST",
+      "path": "/api/tasks",
+      "verdict": "identical",
+      "status_legacy": 201,
+      "status_factory": 201,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "id": 1,
+        "message": "Task created successfully"
+      },
+      "factory_json": {
+        "id": 1,
+        "message": "Task created successfully"
+      }
+    },
+    {
+      "name": "create_task_no_name",
+      "method": "POST",
+      "path": "/api/tasks",
+      "verdict": "identical",
+      "status_legacy": 201,
+      "status_factory": 201,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "id": 2,
+        "message": "Task created successfully"
+      },
+      "factory_json": {
+        "id": 2,
+        "message": "Task created successfully"
+      }
+    },
+    {
+      "name": "complete_task",
+      "method": "POST",
+      "path": "/api/tasks/1/complete",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "message": "Task completed successfully",
+        "unlocked_tasks": []
+      },
+      "factory_json": {
+        "message": "Task completed successfully",
+        "unlocked_tasks": []
+      }
+    },
+    {
+      "name": "skip_task",
+      "method": "POST",
+      "path": "/api/tasks/2/skip",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "message": "Task skipped",
+        "unlocked_tasks": []
+      },
+      "factory_json": {
+        "message": "Task skipped",
+        "unlocked_tasks": []
+      }
+    },
+    {
+      "name": "update_task_missing",
+      "method": "PUT",
+      "path": "/api/tasks/999999",
+      "verdict": "identical",
+      "status_legacy": 404,
+      "status_factory": 404,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "Task not found"
+      },
+      "factory_json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "delete_task_missing",
+      "method": "DELETE",
+      "path": "/api/tasks/999999",
+      "verdict": "identical",
+      "status_legacy": 404,
+      "status_factory": 404,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "Task not found"
+      },
+      "factory_json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "complete_missing",
+      "method": "POST",
+      "path": "/api/tasks/999999/complete",
+      "verdict": "identical",
+      "status_legacy": 404,
+      "status_factory": 404,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "Task not found"
+      },
+      "factory_json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "skip_missing",
+      "method": "POST",
+      "path": "/api/tasks/999999/skip",
+      "verdict": "identical",
+      "status_legacy": 404,
+      "status_factory": 404,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "Task not found"
+      },
+      "factory_json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "refuse_missing",
+      "method": "POST",
+      "path": "/api/tasks/999999/refuse",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "message": "Refusal recorded"
+      },
+      "factory_json": {
+        "message": "Refusal recorded"
+      }
+    },
+    {
+      "name": "list_tags",
+      "method": "GET",
+      "path": "/api/tags",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": [],
+      "factory_json": []
+    },
+    {
+      "name": "create_tag",
+      "method": "POST",
+      "path": "/api/tags",
+      "verdict": "identical",
+      "status_legacy": 201,
+      "status_factory": 201,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "id": 1,
+        "name": "probetag"
+      },
+      "factory_json": {
+        "id": 1,
+        "name": "probetag"
+      }
+    },
+    {
+      "name": "create_tag_dup",
+      "method": "POST",
+      "path": "/api/tags",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "id": 1,
+        "name": "probetag"
+      },
+      "factory_json": {
+        "id": 1,
+        "name": "probetag"
+      }
+    },
+    {
+      "name": "delete_tag_missing",
+      "method": "DELETE",
+      "path": "/api/tags/999999",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "deleted": 999999
+      },
+      "factory_json": {
+        "deleted": 999999
+      }
+    },
+    {
+      "name": "tags_batch",
+      "method": "POST",
+      "path": "/api/tags/batch",
+      "verdict": "identical",
+      "status_legacy": 400,
+      "status_factory": 400,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "task_ids and tags required"
+      },
+      "factory_json": {
+        "error": "task_ids and tags required"
+      }
+    },
+    {
+      "name": "gacha_pools",
+      "method": "GET",
+      "path": "/api/gacha/pools",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": [
+        {
+          "description": "0-15分钟",
+          "id": "fragment",
+          "name": "碎片卡池"
+        },
+        {
+          "description": "15-45分钟",
+          "id": "tomato",
+          "name": "番茄卡池"
+        },
+        {
+          "description": "45分钟以上",
+          "id": "deep",
+          "name": "深度卡池"
+        }
+      ],
+      "factory_json": [
+        {
+          "description": "0-15分钟",
+          "id": "fragment",
+          "name": "碎片卡池"
+        },
+        {
+          "description": "15-45分钟",
+          "id": "tomato",
+          "name": "番茄卡池"
+        },
+        {
+          "description": "45分钟以上",
+          "id": "deep",
+          "name": "深度卡池"
+        }
+      ]
+    },
+    {
+      "name": "gacha_pools_detail",
+      "method": "GET",
+      "path": "/api/gacha/pools/detail",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "deep": {
+          "max": 999,
+          "min": 45,
+          "name": "深度卡池",
+          "tasks": [],
+          "time_range": "45分钟以上"
+        },
+        "fragment": {
+          "max": 15,
+          "min": 0,
+          "name": "碎片卡池",
+          "tasks": [],
+          "time_range": "0-15分钟"
+        },
+        "tomato": {
+          "max": 45,
+          "min": 15,
+          "name": "番茄卡池",
+          "tasks": [],
+          "time_range": "15-45分钟"
+        }
+      },
+      "factory_json": {
+        "deep": {
+          "max": 999,
+          "min": 45,
+          "name": "深度卡池",
+          "tasks": [],
+          "time_range": "45分钟以上"
+        },
+        "fragment": {
+          "max": 15,
+          "min": 0,
+          "name": "碎片卡池",
+          "tasks": [],
+          "time_range": "0-15分钟"
+        },
+        "tomato": {
+          "max": 45,
+          "min": 15,
+          "name": "番茄卡池",
+          "tasks": [],
+          "time_range": "15-45分钟"
+        }
+      }
+    },
+    {
+      "name": "gacha_statistics",
+      "method": "GET",
+      "path": "/api/gacha/statistics",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "acceptance_rate": 0,
+        "accepted": 0,
+        "by_pool": [],
+        "reject_reasons": [],
+        "rejections": 0,
+        "total_draws": 0
+      },
+      "factory_json": {
+        "acceptance_rate": 0,
+        "accepted": 0,
+        "by_pool": [],
+        "reject_reasons": [],
+        "rejections": 0,
+        "total_draws": 0
+      }
+    },
+    {
+      "name": "gacha_draw",
+      "method": "POST",
+      "path": "/api/gacha/draw",
+      "verdict": "identical",
+      "status_legacy": 404,
+      "status_factory": 404,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "No tasks available"
+      },
+      "factory_json": {
+        "error": "No tasks available"
+      }
+    },
+    {
+      "name": "gacha_care_draw",
+      "method": "POST",
+      "path": "/api/gacha/care-draw",
+      "verdict": "identical",
+      "status_legacy": 404,
+      "status_factory": 404,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "No tasks available"
+      },
+      "factory_json": {
+        "error": "No tasks available"
+      }
+    },
+    {
+      "name": "gacha_replace_missing",
+      "method": "POST",
+      "path": "/api/gacha/replace",
+      "verdict": "divergent",
+      "status_legacy": 404,
+      "status_factory": 400,
+      "body_differs": true,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "No replacement available"
+      },
+      "factory_json": {
+        "error": "reason required"
+      }
+    },
+    {
+      "name": "gacha_replace_no_reason",
+      "method": "POST",
+      "path": "/api/gacha/replace",
+      "verdict": "divergent",
+      "status_legacy": 404,
+      "status_factory": 400,
+      "body_differs": true,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "No replacement available"
+      },
+      "factory_json": {
+        "error": "reason required"
+      }
+    },
+    {
+      "name": "gacha_replace_with_reason",
+      "method": "POST",
+      "path": "/api/gacha/replace",
+      "verdict": "divergent",
+      "status_legacy": 404,
+      "status_factory": 404,
+      "body_differs": false,
+      "side_effects_differ": true,
+      "legacy_json": {
+        "error": "No replacement available"
+      },
+      "factory_json": {
+        "error": "No replacement available"
+      }
+    },
+    {
+      "name": "discard_pile",
+      "method": "GET",
+      "path": "/api/discard-pile",
+      "verdict": "divergent",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": true,
+      "legacy_json": [],
+      "factory_json": []
+    },
+    {
+      "name": "discard_restore_missing",
+      "method": "POST",
+      "path": "/api/discard-pile/999999/restore",
+      "verdict": "identical",
+      "status_legacy": 404,
+      "status_factory": 404,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "Task not found"
+      },
+      "factory_json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "move_to_discard_missing",
+      "method": "POST",
+      "path": "/api/tasks/999999/move-to-discard",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "message": "Task moved to discard pile"
+      },
+      "factory_json": {
+        "message": "Task moved to discard pile"
+      }
+    },
+    {
+      "name": "dependencies",
+      "method": "GET",
+      "path": "/api/dependencies",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "edges": [],
+        "nodes": [
+          {
+            "completed": 1,
+            "id": 1,
+            "is_unlocked": 1,
+            "name": "PROBE_TASK"
+          },
+          {
+            "completed": 1,
+            "id": 2,
+            "is_unlocked": 1,
+            "name": ""
+          }
+        ]
+      },
+      "factory_json": {
+        "edges": [],
+        "nodes": [
+          {
+            "completed": 1,
+            "id": 1,
+            "is_unlocked": 1,
+            "name": "PROBE_TASK"
+          },
+          {
+            "completed": 1,
+            "id": 2,
+            "is_unlocked": 1,
+            "name": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "config_get",
+      "method": "GET",
+      "path": "/api/config",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "api_base": "https://api.openai.com/v1",
+        "has_claude_key": false,
+        "has_openai_key": false,
+        "model": "gpt-4o-mini",
+        "notes_directory": "vault",
+        "vault_path": "vault"
+      },
+      "factory_json": {
+        "api_base": "https://api.openai.com/v1",
+        "has_claude_key": false,
+        "has_openai_key": false,
+        "model": "gpt-4o-mini",
+        "notes_directory": "vault",
+        "vault_path": "vault"
+      }
+    },
+    {
+      "name": "export",
+      "method": "GET",
+      "path": "/api/export",
+      "verdict": "divergent",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": true,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "daily_schedules": [],
+        "daily_user_state": [],
+        "gacha_records": [
+          {
+            "accepted": 0,
+            "available_time": 30,
+            "id": 1,
+            "pool_name": "fragment",
+            "refusal_reason": "other",
+            "task_id": 999999
+          },
+          {
+            "accepted": 0,
+            "available_time": 30,
+            "id": 2,
+            "pool_name": "fragment",
+            "refusal_reason": "other",
+            "task_id": 1
+          },
+          {
+            "accepted": 0,
+            "available_time": 30,
+            "id": 3,
+            "pool_name": "fragment",
+            "refusal_reason": "other",
+            "task_id": 1
+          }
+        ],
+        "tags": [
+          {
+            "id": 1,
+            "name": "probetag"
+          }
+        ],
+        "task_completion_feedback": [],
+        "task_dependencies": [],
+        "task_rejection_log": [
+          {
+            "id": 1,
+            "reason": "other",
+            "task_id": 999999
+          },
+          {
+            "id": 2,
+            "reason": "other",
+            "task_id": 1
+          },
+          {
+            "id": 3,
+            "reason": "other",
+            "task_id": 1
+          }
+        ],
+        "task_tags": [],
+        "tasks": [
+          {
+            "category": "study",
+            "completed": 1,
+            "completed_count": 0,
+            "deadline": null,
+            "description": null,
+            "difficulty": null,
+            "draw_count_today": 0,
+            "energy_required": "medium",
+            "estimated_time": 25,
+            "group_id": null,
+            "id": 1,
+            "in_discard_pile": 0,
+            "is_daily": 0,
+            "is_unlocked": 1,
+            "linked_note_path": null,
+            "min_push_time": "20:00",
+            "name": "PROBE_TASK",
+            "parent_task_id": null,
+            "preferred_time": null,
+            "prerequisite_ids": "[]",
+            "priority": 5,
+            "rarity": "common",
+            "refusal_count": 2,
+            "repeat_type": "none",
+            "resistance": "medium",
+            "success_rate": 0.1,
+            "tags": null,
+            "task_profile": "deadline_flexible",
+            "task_type": "normal"
+          },
+          {
+            "category": "study",
+            "completed": 1,
+            "completed_count": 0,
+            "deadline": null,
+            "description": null,
+            "difficulty": null,
+            "draw_count_today": 0,
+            "energy_required": "medium",
+            "estimated_time": 30,
+            "group_id": null,
+            "id": 2,
+            "in_discard_pile": 0,
+            "is_daily": 0,
+            "is_unlocked": 1,
+            "linked_note_path": null,
+            "min_push_time": "20:00",
+            "name": "",
+            "parent_task_id": null,
+            "preferred_time": null,
+            "prerequisite_ids": "[]",
+            "priority": 5,
+            "rarity": "common",
+            "refusal_count": 0,
+            "repeat_type": "none",
+            "resistance": "medium",
+            "success_rate": 0.0,
+            "tags": null,
+            "task_profile": "deadline_flexible",
+            "task_type": "normal"
+          }
+        ],
+        "user_schedule": []
+      },
+      "factory_json": {
+        "daily_schedules": [],
+        "daily_user_state": [],
+        "gacha_records": [],
+        "tags": [
+          {
+            "id": 1,
+            "name": "probetag"
+          }
+        ],
+        "task_completion_feedback": [],
+        "task_dependencies": [],
+        "task_rejection_log": [],
+        "task_tags": [],
+        "tasks": [
+          {
+            "category": "study",
+            "completed": 1,
+            "completed_count": 0,
+            "deadline": null,
+            "description": null,
+            "difficulty": null,
+            "draw_count_today": 0,
+            "energy_required": "medium",
+            "estimated_time": 25,
+            "group_id": null,
+            "id": 1,
+            "in_discard_pile": 0,
+            "is_daily": 0,
+            "is_unlocked": 1,
+            "linked_note_path": null,
+            "min_push_time": "20:00",
+            "name": "PROBE_TASK",
+            "parent_task_id": null,
+            "preferred_time": null,
+            "prerequisite_ids": "[]",
+            "priority": 5,
+            "rarity": "common",
+            "refusal_count": 0,
+            "repeat_type": "none",
+            "resistance": "medium",
+            "success_rate": 0.1,
+            "tags": null,
+            "task_profile": "deadline_flexible",
+            "task_type": "normal"
+          },
+          {
+            "category": "study",
+            "completed": 1,
+            "completed_count": 0,
+            "deadline": null,
+            "description": null,
+            "difficulty": null,
+            "draw_count_today": 0,
+            "energy_required": "medium",
+            "estimated_time": 30,
+            "group_id": null,
+            "id": 2,
+            "in_discard_pile": 0,
+            "is_daily": 0,
+            "is_unlocked": 1,
+            "linked_note_path": null,
+            "min_push_time": "20:00",
+            "name": "",
+            "parent_task_id": null,
+            "preferred_time": null,
+            "prerequisite_ids": "[]",
+            "priority": 5,
+            "rarity": "common",
+            "refusal_count": 0,
+            "repeat_type": "none",
+            "resistance": "medium",
+            "success_rate": 0.0,
+            "tags": null,
+            "task_profile": "deadline_flexible",
+            "task_type": "normal"
+          }
+        ],
+        "user_schedule": []
+      }
+    },
+    {
+      "name": "index",
+      "method": "GET",
+      "path": "/",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "__non_json__": "SYNTHETIC_ONLY_UI"
+      },
+      "factory_json": {
+        "__non_json__": "SYNTHETIC_ONLY_UI"
+      }
+    },
+    {
+      "name": "agent_agents",
+      "method": "GET",
+      "path": "/api/agent/agents",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": [
+        {
+          "action_labels": [
+            "保存笔记到 Vault（写操作，本模式不可用）"
+          ],
+          "actions": [
+            "save_note"
+          ],
+          "desc": "读取原始录音转写文件，重构为结构化Markdown笔记",
+          "icon": "fa-file-pen",
+          "id": "note_organizer",
+          "input_type": "raw_file",
+          "input_type_label": "从未分类/已分类目录选择 txt 文件",
+          "name": "笔记整理师",
+          "prompt_file": "笔记整理师"
+        },
+        {
+          "action_labels": [
+            "保存知识点到 Vault（写操作，本模式不可用）"
+          ],
+          "actions": [
+            "save_knowledge"
+          ],
+          "desc": "从已有笔记提取核心知识点，生成标准知识点文件",
+          "icon": "fa-lightbulb",
+          "id": "knowledge_extractor",
+          "input_type": "vault_note",
+          "input_type_label": "从 Vault 选择 Markdown 笔记",
+          "name": "知识点整理师",
+          "prompt_file": "知识点整理师"
+        },
+        {
+          "action_labels": [],
+          "actions": [],
+          "desc": "检查笔记格式、链接、Mermaid/Callout语法",
+          "icon": "fa-check-double",
+          "id": "structure_reviewer",
+          "input_type": "vault_note",
+          "input_type_label": "从 Vault 选择 Markdown 笔记",
+          "name": "结构审查师",
+          "prompt_file": "结构审查师"
+        },
+        {
+          "action_labels": [],
+          "actions": [],
+          "desc": "检查事实准确性、逻辑一致性、可读性",
+          "icon": "fa-magnifying-glass",
+          "id": "content_reviewer",
+          "input_type": "vault_note",
+          "input_type_label": "从 Vault 选择 Markdown 笔记",
+          "name": "内容审查师",
+          "prompt_file": "内容审查师"
+        },
+        {
+          "action_labels": [
+            "导入任务（写操作，本模式不可用）"
+          ],
+          "actions": [
+            "import_tasks"
+          ],
+          "desc": "用自然语言批量创建学习任务",
+          "icon": "fa-wand-magic-sparkles",
+          "id": "task_publisher",
+          "input_type": "text",
+          "input_type_label": "纯文本输入（自然语言）",
+          "name": "AI任务发布",
+          "prompt_file": "AI_assistant_prompt.md"
+        }
+      ],
+      "factory_json": [
+        {
+          "action_labels": [
+            "保存笔记到 Vault（写操作，本模式不可用）"
+          ],
+          "actions": [
+            "save_note"
+          ],
+          "desc": "读取原始录音转写文件，重构为结构化Markdown笔记",
+          "icon": "fa-file-pen",
+          "id": "note_organizer",
+          "input_type": "raw_file",
+          "input_type_label": "从未分类/已分类目录选择 txt 文件",
+          "name": "笔记整理师",
+          "prompt_file": "笔记整理师"
+        },
+        {
+          "action_labels": [
+            "保存知识点到 Vault（写操作，本模式不可用）"
+          ],
+          "actions": [
+            "save_knowledge"
+          ],
+          "desc": "从已有笔记提取核心知识点，生成标准知识点文件",
+          "icon": "fa-lightbulb",
+          "id": "knowledge_extractor",
+          "input_type": "vault_note",
+          "input_type_label": "从 Vault 选择 Markdown 笔记",
+          "name": "知识点整理师",
+          "prompt_file": "知识点整理师"
+        },
+        {
+          "action_labels": [],
+          "actions": [],
+          "desc": "检查笔记格式、链接、Mermaid/Callout语法",
+          "icon": "fa-check-double",
+          "id": "structure_reviewer",
+          "input_type": "vault_note",
+          "input_type_label": "从 Vault 选择 Markdown 笔记",
+          "name": "结构审查师",
+          "prompt_file": "结构审查师"
+        },
+        {
+          "action_labels": [],
+          "actions": [],
+          "desc": "检查事实准确性、逻辑一致性、可读性",
+          "icon": "fa-magnifying-glass",
+          "id": "content_reviewer",
+          "input_type": "vault_note",
+          "input_type_label": "从 Vault 选择 Markdown 笔记",
+          "name": "内容审查师",
+          "prompt_file": "内容审查师"
+        },
+        {
+          "action_labels": [
+            "导入任务（写操作，本模式不可用）"
+          ],
+          "actions": [
+            "import_tasks"
+          ],
+          "desc": "用自然语言批量创建学习任务",
+          "icon": "fa-wand-magic-sparkles",
+          "id": "task_publisher",
+          "input_type": "text",
+          "input_type_label": "纯文本输入（自然语言）",
+          "name": "AI任务发布",
+          "prompt_file": "AI_assistant_prompt.md"
+        }
+      ]
+    },
+    {
+      "name": "agent_files_raw",
+      "method": "GET",
+      "path": "/api/agent/files/raw",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "files": [],
+        "subdirs": []
+      },
+      "factory_json": {
+        "files": [],
+        "subdirs": []
+      }
+    },
+    {
+      "name": "agent_files_vault",
+      "method": "GET",
+      "path": "/api/agent/files/vault",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "current": "",
+        "dirs": [],
+        "files": []
+      },
+      "factory_json": {
+        "current": "",
+        "dirs": [],
+        "files": []
+      }
+    },
+    {
+      "name": "agent_save_note",
+      "method": "POST",
+      "path": "/api/agent/save-note",
+      "verdict": "divergent",
+      "status_legacy": 200,
+      "status_factory": 403,
+      "body_differs": true,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "path": "C:\\Users\\wn\\AppData\\Local\\Temp\\lt_freeze_baseline_i69xopa6\\sandbox\\vault\\note.md",
+        "relative": "note.md",
+        "saved": true
+      },
+      "factory_json": {
+        "error": "AI knowledge-base writes are disabled"
+      }
+    },
+    {
+      "name": "prompts_list",
+      "method": "GET",
+      "path": "/api/prompts",
+      "verdict": "identical",
+      "status_legacy": 200,
+      "status_factory": 200,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": [],
+      "factory_json": []
+    },
+    {
+      "name": "prompt_get_missing",
+      "method": "GET",
+      "path": "/api/prompts/does-not-exist.md",
+      "verdict": "identical",
+      "status_legacy": 404,
+      "status_factory": 404,
+      "body_differs": false,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "error": "文件不存在"
+      },
+      "factory_json": {
+        "error": "文件不存在"
+      }
+    },
+    {
+      "name": "agent_policy_status",
+      "method": "GET",
+      "path": "/api/agent-policy/status",
+      "verdict": "divergent",
+      "status_legacy": 404,
+      "status_factory": 200,
+      "body_differs": true,
+      "side_effects_differ": false,
+      "legacy_json": {
+        "__non_json__": "<!doctype html>\n<html lang=en>\n<title>404 Not Found</title>\n<h1>Not Found</h1>\n<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try agai"
+      },
+      "factory_json": {
+        "initialized": false,
+        "reason": "latest_json_absent",
+        "status": "missing",
+        "version": null
+      }
+    }
+  ]
+}

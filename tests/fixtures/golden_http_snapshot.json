@@ -1,0 +1,1440 @@
+{
+  "cases": [
+    {
+      "name": "create_task_a",
+      "method": "POST",
+      "path": "/api/tasks",
+      "query": {},
+      "status": 201,
+      "json": {
+        "id": 1,
+        "message": "Task created successfully"
+      },
+      "side_effects": {
+        "tasks": [
+          {
+            "id": 1,
+            "name": "GOLDEN_TASK_A",
+            "category": "study",
+            "task_type": "normal",
+            "description": null,
+            "estimated_time": 25,
+            "preferred_time": null,
+            "deadline": null,
+            "resistance": "medium",
+            "energy_required": "medium",
+            "rarity": "common",
+            "priority": 5,
+            "success_rate": 0.0,
+            "refusal_count": 0,
+            "is_daily": 0,
+            "completed": 0,
+            "repeat_type": "none",
+            "task_profile": "deadline_flexible",
+            "parent_task_id": null,
+            "group_id": null,
+            "draw_count_today": 0,
+            "min_push_time": "20:00",
+            "in_discard_pile": 0,
+            "completed_count": 0,
+            "tags": null,
+            "difficulty": null,
+            "prerequisite_ids": "[]",
+            "is_unlocked": 1,
+            "linked_note_path": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "create_task_b",
+      "method": "POST",
+      "path": "/api/tasks",
+      "query": {},
+      "status": 201,
+      "json": {
+        "id": 2,
+        "message": "Task created successfully"
+      },
+      "side_effects": {
+        "tasks": [
+          {
+            "id": 1,
+            "name": "GOLDEN_TASK_A",
+            "category": "study",
+            "task_type": "normal",
+            "description": null,
+            "estimated_time": 25,
+            "preferred_time": null,
+            "deadline": null,
+            "resistance": "medium",
+            "energy_required": "medium",
+            "rarity": "common",
+            "priority": 5,
+            "success_rate": 0.0,
+            "refusal_count": 0,
+            "is_daily": 0,
+            "completed": 0,
+            "repeat_type": "none",
+            "task_profile": "deadline_flexible",
+            "parent_task_id": null,
+            "group_id": null,
+            "draw_count_today": 0,
+            "min_push_time": "20:00",
+            "in_discard_pile": 0,
+            "completed_count": 0,
+            "tags": null,
+            "difficulty": null,
+            "prerequisite_ids": "[]",
+            "is_unlocked": 1,
+            "linked_note_path": null
+          },
+          {
+            "id": 2,
+            "name": "GOLDEN_TASK_B",
+            "category": "study",
+            "task_type": "normal",
+            "description": null,
+            "estimated_time": 30,
+            "preferred_time": null,
+            "deadline": null,
+            "resistance": "medium",
+            "energy_required": "medium",
+            "rarity": "common",
+            "priority": 6,
+            "success_rate": 0.0,
+            "refusal_count": 0,
+            "is_daily": 0,
+            "completed": 0,
+            "repeat_type": "none",
+            "task_profile": "deadline_flexible",
+            "parent_task_id": null,
+            "group_id": null,
+            "draw_count_today": 0,
+            "min_push_time": "20:00",
+            "in_discard_pile": 0,
+            "completed_count": 0,
+            "tags": null,
+            "difficulty": null,
+            "prerequisite_ids": "[]",
+            "is_unlocked": 1,
+            "linked_note_path": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "create_tag",
+      "method": "POST",
+      "path": "/api/tags",
+      "query": {},
+      "status": 201,
+      "json": {
+        "id": 1,
+        "name": "goldentag"
+      },
+      "side_effects": {
+        "tags": [
+          {
+            "id": 1,
+            "name": "goldentag"
+          }
+        ],
+        "task_tags": []
+      }
+    },
+    {
+      "name": "health",
+      "method": "GET",
+      "path": "/api/health",
+      "query": {},
+      "status": 200,
+      "json": {
+        "phase": 1,
+        "status": "ok"
+      }
+    },
+    {
+      "name": "list_tasks",
+      "method": "GET",
+      "path": "/api/tasks",
+      "query": {
+        "unlocked_only": "false"
+      },
+      "status": 200,
+      "json": [
+        {
+          "category": "study",
+          "completed": 0,
+          "completed_count": 0,
+          "deadline": null,
+          "description": null,
+          "difficulty": null,
+          "draw_count_today": 0,
+          "energy_required": "medium",
+          "estimated_time": 30,
+          "group_id": null,
+          "id": 2,
+          "in_discard_pile": 0,
+          "is_daily": 0,
+          "is_unlocked": 1,
+          "linked_note_path": null,
+          "min_push_time": "20:00",
+          "name": "GOLDEN_TASK_B",
+          "parent_task_id": null,
+          "preferred_time": null,
+          "prerequisite_ids": [],
+          "priority": 6,
+          "rarity": "common",
+          "refusal_count": 0,
+          "repeat_type": "none",
+          "resistance": "medium",
+          "success_rate": 0.0,
+          "tags": null,
+          "task_profile": "deadline_flexible",
+          "task_type": "normal"
+        },
+        {
+          "category": "study",
+          "completed": 0,
+          "completed_count": 0,
+          "deadline": null,
+          "description": null,
+          "difficulty": null,
+          "draw_count_today": 0,
+          "energy_required": "medium",
+          "estimated_time": 25,
+          "group_id": null,
+          "id": 1,
+          "in_discard_pile": 0,
+          "is_daily": 0,
+          "is_unlocked": 1,
+          "linked_note_path": null,
+          "min_push_time": "20:00",
+          "name": "GOLDEN_TASK_A",
+          "parent_task_id": null,
+          "preferred_time": null,
+          "prerequisite_ids": [],
+          "priority": 5,
+          "rarity": "common",
+          "refusal_count": 0,
+          "repeat_type": "none",
+          "resistance": "medium",
+          "success_rate": 0.0,
+          "tags": null,
+          "task_profile": "deadline_flexible",
+          "task_type": "normal"
+        }
+      ],
+      "side_effects": {
+        "tasks": [
+          {
+            "id": 1,
+            "name": "GOLDEN_TASK_A",
+            "category": "study",
+            "task_type": "normal",
+            "description": null,
+            "estimated_time": 25,
+            "preferred_time": null,
+            "deadline": null,
+            "resistance": "medium",
+            "energy_required": "medium",
+            "rarity": "common",
+            "priority": 5,
+            "success_rate": 0.0,
+            "refusal_count": 0,
+            "is_daily": 0,
+            "completed": 0,
+            "repeat_type": "none",
+            "task_profile": "deadline_flexible",
+            "parent_task_id": null,
+            "group_id": null,
+            "draw_count_today": 0,
+            "min_push_time": "20:00",
+            "in_discard_pile": 0,
+            "completed_count": 0,
+            "tags": null,
+            "difficulty": null,
+            "prerequisite_ids": "[]",
+            "is_unlocked": 1,
+            "linked_note_path": null
+          },
+          {
+            "id": 2,
+            "name": "GOLDEN_TASK_B",
+            "category": "study",
+            "task_type": "normal",
+            "description": null,
+            "estimated_time": 30,
+            "preferred_time": null,
+            "deadline": null,
+            "resistance": "medium",
+            "energy_required": "medium",
+            "rarity": "common",
+            "priority": 6,
+            "success_rate": 0.0,
+            "refusal_count": 0,
+            "is_daily": 0,
+            "completed": 0,
+            "repeat_type": "none",
+            "task_profile": "deadline_flexible",
+            "parent_task_id": null,
+            "group_id": null,
+            "draw_count_today": 0,
+            "min_push_time": "20:00",
+            "in_discard_pile": 0,
+            "completed_count": 0,
+            "tags": null,
+            "difficulty": null,
+            "prerequisite_ids": "[]",
+            "is_unlocked": 1,
+            "linked_note_path": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "list_tasks_completed",
+      "method": "GET",
+      "path": "/api/tasks",
+      "query": {
+        "unlocked_only": "false",
+        "include_completed": "true"
+      },
+      "status": 200,
+      "json": [
+        {
+          "category": "study",
+          "completed": 0,
+          "completed_count": 0,
+          "deadline": null,
+          "description": null,
+          "difficulty": null,
+          "draw_count_today": 0,
+          "energy_required": "medium",
+          "estimated_time": 30,
+          "group_id": null,
+          "id": 2,
+          "in_discard_pile": 0,
+          "is_daily": 0,
+          "is_unlocked": 1,
+          "linked_note_path": null,
+          "min_push_time": "20:00",
+          "name": "GOLDEN_TASK_B",
+          "parent_task_id": null,
+          "preferred_time": null,
+          "prerequisite_ids": [],
+          "priority": 6,
+          "rarity": "common",
+          "refusal_count": 0,
+          "repeat_type": "none",
+          "resistance": "medium",
+          "success_rate": 0.0,
+          "tags": null,
+          "task_profile": "deadline_flexible",
+          "task_type": "normal"
+        },
+        {
+          "category": "study",
+          "completed": 0,
+          "completed_count": 0,
+          "deadline": null,
+          "description": null,
+          "difficulty": null,
+          "draw_count_today": 0,
+          "energy_required": "medium",
+          "estimated_time": 25,
+          "group_id": null,
+          "id": 1,
+          "in_discard_pile": 0,
+          "is_daily": 0,
+          "is_unlocked": 1,
+          "linked_note_path": null,
+          "min_push_time": "20:00",
+          "name": "GOLDEN_TASK_A",
+          "parent_task_id": null,
+          "preferred_time": null,
+          "prerequisite_ids": [],
+          "priority": 5,
+          "rarity": "common",
+          "refusal_count": 0,
+          "repeat_type": "none",
+          "resistance": "medium",
+          "success_rate": 0.0,
+          "tags": null,
+          "task_profile": "deadline_flexible",
+          "task_type": "normal"
+        }
+      ]
+    },
+    {
+      "name": "get_task_missing",
+      "method": "GET",
+      "path": "/api/tasks/999999",
+      "query": {},
+      "status": 404,
+      "json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "get_task_missing_dependents",
+      "method": "GET",
+      "path": "/api/tasks/999999/dependents",
+      "query": {},
+      "status": 404,
+      "json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "create_task_no_name",
+      "method": "POST",
+      "path": "/api/tasks",
+      "query": {},
+      "status": 201,
+      "json": {
+        "id": 3,
+        "message": "Task created successfully"
+      }
+    },
+    {
+      "name": "create_task_cycle",
+      "method": "POST",
+      "path": "/api/tasks",
+      "query": {},
+      "status": 400,
+      "json": {
+        "error": "前置任务不存在"
+      }
+    },
+    {
+      "name": "update_task_missing",
+      "method": "PUT",
+      "path": "/api/tasks/999999",
+      "query": {},
+      "status": 404,
+      "json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "delete_task_missing",
+      "method": "DELETE",
+      "path": "/api/tasks/999999",
+      "query": {},
+      "status": 404,
+      "json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "complete_task_missing",
+      "method": "POST",
+      "path": "/api/tasks/999999/complete",
+      "query": {},
+      "status": 404,
+      "json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "skip_task_missing",
+      "method": "POST",
+      "path": "/api/tasks/999999/skip",
+      "query": {},
+      "status": 404,
+      "json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "refuse_task_missing",
+      "method": "POST",
+      "path": "/api/tasks/999999/refuse",
+      "query": {},
+      "status": 200,
+      "json": {
+        "message": "Refusal recorded"
+      }
+    },
+    {
+      "name": "list_tags",
+      "method": "GET",
+      "path": "/api/tags",
+      "query": {},
+      "status": 200,
+      "json": [
+        {
+          "id": 1,
+          "name": "goldentag",
+          "task_count": 0
+        }
+      ],
+      "side_effects": {
+        "tags": [
+          {
+            "id": 1,
+            "name": "goldentag"
+          }
+        ],
+        "task_tags": []
+      }
+    },
+    {
+      "name": "create_tag_dup",
+      "method": "POST",
+      "path": "/api/tags",
+      "query": {},
+      "status": 200,
+      "json": {
+        "id": 1,
+        "name": "goldentag"
+      }
+    },
+    {
+      "name": "create_tag_missing_name",
+      "method": "POST",
+      "path": "/api/tags",
+      "query": {},
+      "status": 400,
+      "json": {
+        "error": "Tag name required"
+      }
+    },
+    {
+      "name": "delete_tag_missing",
+      "method": "DELETE",
+      "path": "/api/tags/999999",
+      "query": {},
+      "status": 200,
+      "json": {
+        "deleted": 999999
+      }
+    },
+    {
+      "name": "tags_batch",
+      "method": "POST",
+      "path": "/api/tags/batch",
+      "query": {},
+      "status": 400,
+      "json": {
+        "error": "task_ids and tags required"
+      },
+      "side_effects": {
+        "tags": [
+          {
+            "id": 1,
+            "name": "goldentag"
+          }
+        ]
+      }
+    },
+    {
+      "name": "gacha_pools",
+      "method": "GET",
+      "path": "/api/gacha/pools",
+      "query": {},
+      "status": 200,
+      "json": [
+        {
+          "description": "0-15分钟",
+          "id": "fragment",
+          "name": "碎片卡池"
+        },
+        {
+          "description": "15-45分钟",
+          "id": "tomato",
+          "name": "番茄卡池"
+        },
+        {
+          "description": "45分钟以上",
+          "id": "deep",
+          "name": "深度卡池"
+        }
+      ]
+    },
+    {
+      "name": "gacha_pools_detail",
+      "method": "GET",
+      "path": "/api/gacha/pools/detail",
+      "query": {},
+      "status": 200,
+      "json": {
+        "deep": {
+          "max": 999,
+          "min": 45,
+          "name": "深度卡池",
+          "tasks": [],
+          "time_range": "45分钟以上"
+        },
+        "fragment": {
+          "max": 15,
+          "min": 0,
+          "name": "碎片卡池",
+          "tasks": [],
+          "time_range": "0-15分钟"
+        },
+        "tomato": {
+          "max": 45,
+          "min": 15,
+          "name": "番茄卡池",
+          "tasks": [
+            {
+              "category": "study",
+              "completed": 0,
+              "completed_count": 0,
+              "deadline": null,
+              "description": null,
+              "difficulty": null,
+              "draw_count_today": 0,
+              "energy_required": "medium",
+              "estimated_time": 25,
+              "group_id": null,
+              "id": 1,
+              "in_discard_pile": 0,
+              "is_daily": 0,
+              "is_unlocked": 1,
+              "linked_note_path": null,
+              "min_push_time": "20:00",
+              "name": "GOLDEN_TASK_A",
+              "parent_task_id": null,
+              "preferred_time": null,
+              "prerequisite_ids": "[]",
+              "priority": 5,
+              "rarity": "common",
+              "refusal_count": 0,
+              "repeat_type": "none",
+              "resistance": "medium",
+              "success_rate": 0.0,
+              "tags": [],
+              "task_profile": "deadline_flexible",
+              "task_type": "normal"
+            },
+            {
+              "category": "study",
+              "completed": 0,
+              "completed_count": 0,
+              "deadline": null,
+              "description": null,
+              "difficulty": null,
+              "draw_count_today": 0,
+              "energy_required": "medium",
+              "estimated_time": 30,
+              "group_id": null,
+              "id": 2,
+              "in_discard_pile": 0,
+              "is_daily": 0,
+              "is_unlocked": 1,
+              "linked_note_path": null,
+              "min_push_time": "20:00",
+              "name": "GOLDEN_TASK_B",
+              "parent_task_id": null,
+              "preferred_time": null,
+              "prerequisite_ids": "[]",
+              "priority": 6,
+              "rarity": "common",
+              "refusal_count": 0,
+              "repeat_type": "none",
+              "resistance": "medium",
+              "success_rate": 0.0,
+              "tags": [],
+              "task_profile": "deadline_flexible",
+              "task_type": "normal"
+            },
+            {
+              "category": "study",
+              "completed": 0,
+              "completed_count": 0,
+              "deadline": null,
+              "description": null,
+              "difficulty": null,
+              "draw_count_today": 0,
+              "energy_required": "medium",
+              "estimated_time": 30,
+              "group_id": null,
+              "id": 3,
+              "in_discard_pile": 0,
+              "is_daily": 0,
+              "is_unlocked": 1,
+              "linked_note_path": null,
+              "min_push_time": "20:00",
+              "name": "",
+              "parent_task_id": null,
+              "preferred_time": null,
+              "prerequisite_ids": "[]",
+              "priority": 5,
+              "rarity": "common",
+              "refusal_count": 0,
+              "repeat_type": "none",
+              "resistance": "medium",
+              "success_rate": 0.0,
+              "tags": [],
+              "task_profile": "deadline_flexible",
+              "task_type": "normal"
+            }
+          ],
+          "time_range": "15-45分钟"
+        }
+      }
+    },
+    {
+      "name": "gacha_statistics",
+      "method": "GET",
+      "path": "/api/gacha/statistics",
+      "query": {},
+      "status": 200,
+      "json": {
+        "acceptance_rate": 0,
+        "accepted": 0,
+        "by_pool": [],
+        "reject_reasons": [],
+        "rejections": 0,
+        "total_draws": 0
+      }
+    },
+    {
+      "name": "gacha_draw_empty",
+      "method": "POST",
+      "path": "/api/gacha/draw",
+      "query": {},
+      "status": 200,
+      "json": {
+        "can_replace": true,
+        "is_replacement": false,
+        "pool": "fragment",
+        "task": {
+          "category": "study",
+          "completed": 0,
+          "completed_count": 0,
+          "deadline": null,
+          "description": null,
+          "difficulty": null,
+          "draw_count_today": 0,
+          "energy_required": "medium",
+          "estimated_time": 30,
+          "group_id": null,
+          "id": 2,
+          "in_discard_pile": 0,
+          "is_daily": 0,
+          "is_unlocked": 1,
+          "linked_note_path": null,
+          "min_push_time": "20:00",
+          "name": "GOLDEN_TASK_B",
+          "parent_task_id": null,
+          "preferred_time": null,
+          "prerequisite_ids": [],
+          "priority": 6,
+          "rarity": "common",
+          "refusal_count": 0,
+          "repeat_type": "none",
+          "resistance": "medium",
+          "success_rate": 0.0,
+          "tags": [],
+          "task_profile": "deadline_flexible",
+          "task_type": "normal"
+        }
+      }
+    },
+    {
+      "name": "gacha_care_draw",
+      "method": "POST",
+      "path": "/api/gacha/care-draw",
+      "query": {},
+      "status": 200,
+      "json": {
+        "can_replace": true,
+        "is_replacement": false,
+        "pool": "fragment",
+        "task": {
+          "category": "study",
+          "completed": 0,
+          "completed_count": 0,
+          "deadline": null,
+          "description": null,
+          "difficulty": null,
+          "draw_count_today": 1,
+          "energy_required": "medium",
+          "estimated_time": 30,
+          "group_id": null,
+          "id": 2,
+          "in_discard_pile": 0,
+          "is_daily": 0,
+          "is_unlocked": 1,
+          "linked_note_path": null,
+          "min_push_time": "20:00",
+          "name": "GOLDEN_TASK_B",
+          "parent_task_id": null,
+          "preferred_time": null,
+          "prerequisite_ids": [],
+          "priority": 6,
+          "rarity": "common",
+          "refusal_count": 0,
+          "repeat_type": "none",
+          "resistance": "medium",
+          "success_rate": 0.0,
+          "tags": [],
+          "task_profile": "deadline_flexible",
+          "task_type": "normal"
+        }
+      }
+    },
+    {
+      "name": "gacha_replace_missing",
+      "method": "POST",
+      "path": "/api/gacha/replace",
+      "query": {},
+      "status": 400,
+      "json": {
+        "error": "reason required"
+      }
+    },
+    {
+      "name": "discard_pile",
+      "method": "GET",
+      "path": "/api/discard-pile",
+      "query": {},
+      "status": 200,
+      "json": [],
+      "side_effects": {
+        "tasks": [
+          {
+            "id": 1,
+            "name": "GOLDEN_TASK_A",
+            "category": "study",
+            "task_type": "normal",
+            "description": null,
+            "estimated_time": 25,
+            "preferred_time": null,
+            "deadline": null,
+            "resistance": "medium",
+            "energy_required": "medium",
+            "rarity": "common",
+            "priority": 5,
+            "success_rate": 0.0,
+            "refusal_count": 0,
+            "is_daily": 0,
+            "completed": 0,
+            "repeat_type": "none",
+            "task_profile": "deadline_flexible",
+            "parent_task_id": null,
+            "group_id": null,
+            "draw_count_today": 0,
+            "min_push_time": "20:00",
+            "in_discard_pile": 0,
+            "completed_count": 0,
+            "tags": null,
+            "difficulty": null,
+            "prerequisite_ids": "[]",
+            "is_unlocked": 1,
+            "linked_note_path": null
+          },
+          {
+            "id": 3,
+            "name": "",
+            "category": "study",
+            "task_type": "normal",
+            "description": null,
+            "estimated_time": 30,
+            "preferred_time": null,
+            "deadline": null,
+            "resistance": "medium",
+            "energy_required": "medium",
+            "rarity": "common",
+            "priority": 5,
+            "success_rate": 0.0,
+            "refusal_count": 0,
+            "is_daily": 0,
+            "completed": 0,
+            "repeat_type": "none",
+            "task_profile": "deadline_flexible",
+            "parent_task_id": null,
+            "group_id": null,
+            "draw_count_today": 0,
+            "min_push_time": "20:00",
+            "in_discard_pile": 0,
+            "completed_count": 0,
+            "tags": null,
+            "difficulty": null,
+            "prerequisite_ids": "[]",
+            "is_unlocked": 1,
+            "linked_note_path": null
+          },
+          {
+            "id": 2,
+            "name": "GOLDEN_TASK_B",
+            "category": "study",
+            "task_type": "normal",
+            "description": null,
+            "estimated_time": 30,
+            "preferred_time": null,
+            "deadline": null,
+            "resistance": "medium",
+            "energy_required": "medium",
+            "rarity": "common",
+            "priority": 6,
+            "success_rate": 0.0,
+            "refusal_count": 0,
+            "is_daily": 0,
+            "completed": 0,
+            "repeat_type": "none",
+            "task_profile": "deadline_flexible",
+            "parent_task_id": null,
+            "group_id": null,
+            "draw_count_today": 2,
+            "min_push_time": "20:00",
+            "in_discard_pile": 0,
+            "completed_count": 0,
+            "tags": null,
+            "difficulty": null,
+            "prerequisite_ids": "[]",
+            "is_unlocked": 1,
+            "linked_note_path": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "discard_restore_missing",
+      "method": "POST",
+      "path": "/api/discard-pile/999999/restore",
+      "query": {},
+      "status": 404,
+      "json": {
+        "error": "Task not found"
+      }
+    },
+    {
+      "name": "move_to_discard_missing",
+      "method": "POST",
+      "path": "/api/tasks/999999/move-to-discard",
+      "query": {},
+      "status": 200,
+      "json": {
+        "message": "Task moved to discard pile"
+      }
+    },
+    {
+      "name": "dependencies",
+      "method": "GET",
+      "path": "/api/dependencies",
+      "query": {},
+      "status": 200,
+      "json": {
+        "edges": [],
+        "nodes": [
+          {
+            "completed": 0,
+            "id": 1,
+            "is_unlocked": 1,
+            "name": "GOLDEN_TASK_A"
+          },
+          {
+            "completed": 0,
+            "id": 2,
+            "is_unlocked": 1,
+            "name": "GOLDEN_TASK_B"
+          },
+          {
+            "completed": 0,
+            "id": 3,
+            "is_unlocked": 1,
+            "name": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "config_get",
+      "method": "GET",
+      "path": "/api/config",
+      "query": {},
+      "status": 200,
+      "json": {
+        "api_base": "https://api.openai.com/v1",
+        "has_claude_key": false,
+        "has_openai_key": false,
+        "model": "gpt-4o-mini",
+        "notes_directory": "vault",
+        "vault_path": "vault"
+      }
+    },
+    {
+      "name": "export",
+      "method": "GET",
+      "path": "/api/export",
+      "query": {},
+      "status": 200,
+      "json": {
+        "daily_schedules": [],
+        "daily_user_state": [],
+        "gacha_records": [
+          {
+            "accepted": 0,
+            "available_time": null,
+            "id": 1,
+            "pool_name": "fragment",
+            "refusal_reason": null,
+            "task_id": 2
+          }
+        ],
+        "tags": [
+          {
+            "id": 1,
+            "name": "goldentag"
+          }
+        ],
+        "task_completion_feedback": [],
+        "task_dependencies": [],
+        "task_rejection_log": [],
+        "task_tags": [],
+        "tasks": [
+          {
+            "category": "study",
+            "completed": 0,
+            "completed_count": 0,
+            "deadline": null,
+            "description": null,
+            "difficulty": null,
+            "draw_count_today": 0,
+            "energy_required": "medium",
+            "estimated_time": 25,
+            "group_id": null,
+            "id": 1,
+            "in_discard_pile": 0,
+            "is_daily": 0,
+            "is_unlocked": 1,
+            "linked_note_path": null,
+            "min_push_time": "20:00",
+            "name": "GOLDEN_TASK_A",
+            "parent_task_id": null,
+            "preferred_time": null,
+            "prerequisite_ids": "[]",
+            "priority": 5,
+            "rarity": "common",
+            "refusal_count": 0,
+            "repeat_type": "none",
+            "resistance": "medium",
+            "success_rate": 0.0,
+            "tags": null,
+            "task_profile": "deadline_flexible",
+            "task_type": "normal"
+          },
+          {
+            "category": "study",
+            "completed": 0,
+            "completed_count": 0,
+            "deadline": null,
+            "description": null,
+            "difficulty": null,
+            "draw_count_today": 2,
+            "energy_required": "medium",
+            "estimated_time": 30,
+            "group_id": null,
+            "id": 2,
+            "in_discard_pile": 0,
+            "is_daily": 0,
+            "is_unlocked": 1,
+            "linked_note_path": null,
+            "min_push_time": "20:00",
+            "name": "GOLDEN_TASK_B",
+            "parent_task_id": null,
+            "preferred_time": null,
+            "prerequisite_ids": "[]",
+            "priority": 6,
+            "rarity": "common",
+            "refusal_count": 0,
+            "repeat_type": "none",
+            "resistance": "medium",
+            "success_rate": 0.0,
+            "tags": null,
+            "task_profile": "deadline_flexible",
+            "task_type": "normal"
+          },
+          {
+            "category": "study",
+            "completed": 0,
+            "completed_count": 0,
+            "deadline": null,
+            "description": null,
+            "difficulty": null,
+            "draw_count_today": 0,
+            "energy_required": "medium",
+            "estimated_time": 30,
+            "group_id": null,
+            "id": 3,
+            "in_discard_pile": 0,
+            "is_daily": 0,
+            "is_unlocked": 1,
+            "linked_note_path": null,
+            "min_push_time": "20:00",
+            "name": "",
+            "parent_task_id": null,
+            "preferred_time": null,
+            "prerequisite_ids": "[]",
+            "priority": 5,
+            "rarity": "common",
+            "refusal_count": 0,
+            "repeat_type": "none",
+            "resistance": "medium",
+            "success_rate": 0.0,
+            "tags": null,
+            "task_profile": "deadline_flexible",
+            "task_type": "normal"
+          }
+        ],
+        "user_schedule": []
+      }
+    },
+    {
+      "name": "agent_agents",
+      "method": "GET",
+      "path": "/api/agent/agents",
+      "query": {},
+      "status": 200,
+      "json": [
+        {
+          "action_labels": [
+            "保存笔记到 Vault（写操作，本模式不可用）"
+          ],
+          "actions": [
+            "save_note"
+          ],
+          "desc": "读取原始录音转写文件，重构为结构化Markdown笔记",
+          "icon": "fa-file-pen",
+          "id": "note_organizer",
+          "input_type": "raw_file",
+          "input_type_label": "从未分类/已分类目录选择 txt 文件",
+          "name": "笔记整理师",
+          "prompt_file": "笔记整理师"
+        },
+        {
+          "action_labels": [
+            "保存知识点到 Vault（写操作，本模式不可用）"
+          ],
+          "actions": [
+            "save_knowledge"
+          ],
+          "desc": "从已有笔记提取核心知识点，生成标准知识点文件",
+          "icon": "fa-lightbulb",
+          "id": "knowledge_extractor",
+          "input_type": "vault_note",
+          "input_type_label": "从 Vault 选择 Markdown 笔记",
+          "name": "知识点整理师",
+          "prompt_file": "知识点整理师"
+        },
+        {
+          "action_labels": [],
+          "actions": [],
+          "desc": "检查笔记格式、链接、Mermaid/Callout语法",
+          "icon": "fa-check-double",
+          "id": "structure_reviewer",
+          "input_type": "vault_note",
+          "input_type_label": "从 Vault 选择 Markdown 笔记",
+          "name": "结构审查师",
+          "prompt_file": "结构审查师"
+        },
+        {
+          "action_labels": [],
+          "actions": [],
+          "desc": "检查事实准确性、逻辑一致性、可读性",
+          "icon": "fa-magnifying-glass",
+          "id": "content_reviewer",
+          "input_type": "vault_note",
+          "input_type_label": "从 Vault 选择 Markdown 笔记",
+          "name": "内容审查师",
+          "prompt_file": "内容审查师"
+        },
+        {
+          "action_labels": [
+            "导入任务（写操作，本模式不可用）"
+          ],
+          "actions": [
+            "import_tasks"
+          ],
+          "desc": "用自然语言批量创建学习任务",
+          "icon": "fa-wand-magic-sparkles",
+          "id": "task_publisher",
+          "input_type": "text",
+          "input_type_label": "纯文本输入（自然语言）",
+          "name": "AI任务发布",
+          "prompt_file": "AI_assistant_prompt.md"
+        }
+      ]
+    },
+    {
+      "name": "agent_files_raw",
+      "method": "GET",
+      "path": "/api/agent/files/raw",
+      "query": {},
+      "status": 200,
+      "json": {
+        "files": [],
+        "subdirs": []
+      }
+    },
+    {
+      "name": "agent_files_vault",
+      "method": "GET",
+      "path": "/api/agent/files/vault",
+      "query": {},
+      "status": 200,
+      "json": {
+        "current": "",
+        "dirs": [],
+        "files": []
+      }
+    },
+    {
+      "name": "agent_save_note_blocked",
+      "method": "POST",
+      "path": "/api/agent/save-note",
+      "query": {},
+      "status": 403,
+      "json": {
+        "error": "AI knowledge-base writes are disabled"
+      }
+    },
+    {
+      "name": "prompts_list",
+      "method": "GET",
+      "path": "/api/prompts",
+      "query": {},
+      "status": 200,
+      "json": []
+    },
+    {
+      "name": "prompt_get_missing",
+      "method": "GET",
+      "path": "/api/prompts/does-not-exist.md",
+      "query": {},
+      "status": 404,
+      "json": {
+        "error": "文件不存在"
+      }
+    },
+    {
+      "name": "state_daily_tone",
+      "method": "GET",
+      "path": "/api/state/daily-tone",
+      "query": {},
+      "status": 200,
+      "json": {
+        "bed_time": null,
+        "daily_tone": "normal",
+        "energy_afternoon": null,
+        "energy_evening": null,
+        "energy_morning": null,
+        "sleep_early_streak": 0
+      }
+    },
+    {
+      "name": "state_sleep",
+      "method": "GET",
+      "path": "/api/state/sleep",
+      "query": {},
+      "status": 200,
+      "json": []
+    },
+    {
+      "name": "state_weekly_energy",
+      "method": "GET",
+      "path": "/api/state/weekly-energy",
+      "query": {},
+      "status": 200,
+      "json": []
+    },
+    {
+      "name": "timer_active",
+      "method": "GET",
+      "path": "/api/timer/active",
+      "query": {},
+      "status": 200,
+      "json": null
+    },
+    {
+      "name": "schedule_slots",
+      "method": "GET",
+      "path": "/api/schedule/slots",
+      "query": {},
+      "status": 200,
+      "json": [
+        {
+          "end_time": "08:50",
+          "name": "上午第一节",
+          "slot_id": "am1",
+          "start_time": "08:00"
+        },
+        {
+          "end_time": "09:50",
+          "name": "上午第二节",
+          "slot_id": "am2",
+          "start_time": "09:00"
+        },
+        {
+          "end_time": "11:00",
+          "name": "上午第三节",
+          "slot_id": "am3",
+          "start_time": "10:10"
+        },
+        {
+          "end_time": "12:00",
+          "name": "上午第四节",
+          "slot_id": "am4",
+          "start_time": "11:10"
+        },
+        {
+          "end_time": "14:00",
+          "name": "午休",
+          "slot_id": "noon",
+          "start_time": "12:00"
+        },
+        {
+          "end_time": "14:50",
+          "name": "下午第一节",
+          "slot_id": "pm1",
+          "start_time": "14:00"
+        },
+        {
+          "end_time": "15:50",
+          "name": "下午第二节",
+          "slot_id": "pm2",
+          "start_time": "15:00"
+        },
+        {
+          "end_time": "17:00",
+          "name": "下午第三节",
+          "slot_id": "pm3",
+          "start_time": "16:10"
+        },
+        {
+          "end_time": "18:00",
+          "name": "下午第四节",
+          "slot_id": "pm4",
+          "start_time": "17:10"
+        },
+        {
+          "end_time": "21:30",
+          "name": "晚自习",
+          "slot_id": "night",
+          "start_time": "19:00"
+        }
+      ]
+    },
+    {
+      "name": "schedule_weekly",
+      "method": "GET",
+      "path": "/api/schedule/weekly",
+      "query": {},
+      "status": 200,
+      "json": {
+        "0": {},
+        "1": {},
+        "2": {},
+        "3": {},
+        "4": {},
+        "5": {},
+        "6": {}
+      }
+    },
+    {
+      "name": "schedule_daily",
+      "method": "GET",
+      "path": "/api/schedule/daily",
+      "query": {},
+      "status": 200,
+      "json": []
+    },
+    {
+      "name": "schedule_activities",
+      "method": "GET",
+      "path": "/api/schedule/activities",
+      "query": {},
+      "status": 200,
+      "json": []
+    },
+    {
+      "name": "knowledge_categories",
+      "method": "GET",
+      "path": "/api/knowledge/categories",
+      "query": {},
+      "status": 200,
+      "json": [
+        {
+          "count": 0,
+          "id": "math",
+          "name": "高等数学"
+        },
+        {
+          "count": 0,
+          "id": "physics",
+          "name": "大学物理"
+        },
+        {
+          "count": 8,
+          "id": "linear",
+          "name": "线性代数"
+        },
+        {
+          "count": 0,
+          "id": "electronics",
+          "name": "电子技术"
+        },
+        {
+          "count": 6,
+          "id": "computer",
+          "name": "计算机"
+        }
+      ]
+    },
+    {
+      "name": "knowledge_notes",
+      "method": "GET",
+      "path": "/api/knowledge/notes",
+      "query": {},
+      "status": 200,
+      "json": []
+    },
+    {
+      "name": "knowledge_points",
+      "method": "GET",
+      "path": "/api/knowledge/points",
+      "query": {},
+      "status": 200,
+      "json": []
+    },
+    {
+      "name": "knowledge_recent",
+      "method": "GET",
+      "path": "/api/knowledge/recent",
+      "query": {},
+      "status": 200,
+      "json": [
+        {
+          "category": "大学物理",
+          "name": "高斯定理"
+        },
+        {
+          "category": "线性代数",
+          "name": "矩阵运算"
+        },
+        {
+          "category": "高等数学",
+          "name": "导数"
+        },
+        {
+          "category": "电子技术",
+          "name": "布尔代数"
+        }
+      ]
+    },
+    {
+      "name": "feedback_list",
+      "method": "GET",
+      "path": "/api/task-feedback",
+      "query": {},
+      "status": 200,
+      "json": []
+    }
+  ]
+}
