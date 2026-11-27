@@ -63,10 +63,31 @@ jobs:
     name: redline scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      # Protected-path patterns, deliberately broader than the three canonical
+      # redline paths. See the step comments below for why.
+      #
+      # Covers:
+      #   1. the canonical redlines (src/notes/**, data/task_publisher.db
+      #      family, config/config.json)
+      #   2. ANY *.db / *.db-wal / *.db-shm anywhere (production DB copies
+      #      under _archive/ were a real 2026-11-27 leak)
+      #   3. ANY *.zip (note archives were packed into zips and committed)
+      #   4. the whole data/ tree (course assets, imports, backups)
+      #   5. vault-bearing directory names, in any script or any branch
+      #      (笔记_backup*, 笔记处理系统/笔记, 笔记处理系统/归档, ...)
+      PROTECTED_RE: '(^src/notes/|^data/|^config/config\.json$|\.db(-wal|-shm)?$|\.zip$|(^|/)备份(/|$)|(^|/)vault(/|$)|(^|/)笔记_backup|(^|/)笔记处理系统/(笔记|归档|已分类)/|(^|/)src/notes/)'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # --- Layer 2: repository-level redline enforcement ---
+      # The patterns below are deliberately BROADER than the three canonical
+      # redline paths. The 2026-11-27 audit proved that a narrow list misses
+      # real leaks: production DB copies under _archive/, note archives packed
+      # as .zip, and course asset dumps under data/ were all reachable.
+      # A redline is a *class of content*, not a single filename.
 
       - name: protected paths must not appear in the PR diff
         if: github.event_name == 'pull_request'
@@ -75,8 +96,7 @@ jobs:
           base="${{ github.event.pull_request.base.sha }}"
           head="${{ github.event.pull_request.head.sha }}"
           echo "base=$base head=$head"
-          if git diff --name-only "$base" "$head" \
-             | grep -nE '^(src/notes/|data/task_publisher\.db|data/task_publisher\.db-(wal|shm)|config/config\.json$)' ; then
+          if git diff --name-only "$base" "$head" | grep -nE "$PROTECTED_RE"; then
             echo "::error::protected path touched by this PR"
             exit 1
           fi
@@ -85,8 +105,7 @@ jobs:
       - name: protected paths must not be tracked in the repository
         run: |
           set -euo pipefail
-          if git ls-files \
-             | grep -nE '^(src/notes/|data/task_publisher\.db|data/task_publisher\.db-(wal|shm)|config/config\.json$)' ; then
+          if git ls-files | grep -nE "$PROTECTED_RE"; then
             echo "::error::protected path is tracked by git"
             exit 1
           fi
@@ -96,14 +115,32 @@ jobs:
       - name: protected paths must not appear anywhere in reachable history
         run: |
           set -euo pipefail
-          hits="$(git rev-list --objects --all \
-            | grep -E ' (src/notes/|data/task_publisher\.db|data/task_publisher\.db-(wal|shm)|config/config\.json$)' || true)"
+          hits="$(git rev-list --objects --all | grep -E "$PROTECTED_RE" || true)"
           if [ -n "$hits" ]; then
             echo "::error::protected path present in history:"
             echo "$hits"
             exit 1
           fi
           echo "OK: no protected path reachable in history"
+
+      - name: protected paths must not appear in any remote-tracking ref
+        run: |
+          set -euo pipefail
+          # origin/main and origin/master are both fetched. A leak sitting
+          # only on a non-default branch is still a public leak.
+          failed=0
+          for ref in $(git for-each-ref --format='%(refname)' refs/remotes); do
+            hits="$(git rev-list --objects "$ref" | grep -E "$PROTECTED_RE" || true)"
+            if [ -n "$hits" ]; then
+              echo "::error::protected path present in $ref:"
+              echo "$hits" | head -40
+              failed=1
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            exit 1
+          fi
+          echo "OK: no protected path in any remote-tracking ref"
 
       - name: credentials must not be committed
         run: |
