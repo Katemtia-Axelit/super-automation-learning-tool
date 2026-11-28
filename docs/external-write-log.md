@@ -156,3 +156,51 @@
 > p0-cleanup 8 / pytest-collection 2）是**已知欠债清单，不是豁免** ——
 > 新增任何一条失败都会让 CI 变红。
 
+---
+
+## 7. 已记录的写操作（续二）
+
+### 2026-11-28 — 里程碑 Issue 台账发布（批 0–6）
+
+> **本节的范围**：把本项目全部已知里程碑（不论完成、未完成、废止、暂停、未授权、已归档）
+> 逐条落到 GitHub Issue，形成可追溯、可检索、状态明确的台账。
+> **本轮唯一被改动的仓库文件是本文件**（`docs/external-write-log.md`）；其余均为 GitHub 侧写操作。
+> **未新建 PR**（刻意不制造 70 个 PR，与「减少协调税」方向相反）；**未改分支保护**；**未改仓库设置**（标签创建除外）。
+
+| 时间 | 操作 | 目标 | 理由 | 执行者 | 幂等键 | 关联 Issue |
+|---|---|---|---|---|---|---|
+| 2026-11-28T13:55:00+08:00 | `gh label create` ×2 | `repo:label:type:milestone-record`、`repo:label:stage:historical` | 新增两个标签承载历史台账：`type:milestone-record` = 历史/已发生里程碑的记录台账（无论完成、未完成、废止）；`stage:historical` = 已归档的历史记录。**不复用** `type:milestone-proposal`（其语义是「需批准后才可开工」，标记已完成里程碑属误用），**也不用** `stage:shipped` 兼表「刚交付」与「已封存」 | 仓库所有者 | - | - |
+| 2026-11-28T13:58:00+08:00 | `gh issue create` ×6 + `gh issue close` ×1 | `super-automation-learning-tool#6`–`#11` | 批 1：A 层产品里程碑（A1–A6）。A1 `[M01/MS-START]` 已完成故 close；A2/A5/A6 未完成/暂停保持 open；A3/A4 从未获授权标 `stage:proposal` | 仓库所有者 | - | #6-#11 |
+| 2026-11-28T13:59:00+08:00 | `gh issue create` ×5 + `gh issue close` ×3 | `super-automation-learning-tool#12`,`#14`–`#17` | 批 2：B 层工程里程碑 AR01–AR05。AR01/AR02/AR03 子目标级完成故 close；**AR04/AR05 保持 open** —— 两者从未以 AR 里程碑名义正式验收关闭（`batch-ledgers/` 中 `*AR04*`/`*AR05*` 匹配数 = 0），且 AR04 仍有 3 项可核对的未达成判据 | 仓库所有者 | - | #12,#14-#17 |
+| 2026-11-28T14:02:00+08:00 | `gh issue create` ×5 + `gh issue close` ×5 | `super-automation-learning-tool#18`–`#22` | 批 3a：D 层五组重构切片 P1–P5（2026-11-20 指令，非 2026-06 legacy 工单） | 仓库所有者 | - | #18-#22 |
+| 2026-11-28T14:06:00+08:00 | `gh issue create` ×18 + `gh issue close` ×17 | `super-automation-learning-tool#23`–`#40` | 批 3b：C 层 AR03 子组 G01–G15.4。**`[AR03/G15.4]` 保持 open** —— W22 Controller 结论 PARTIAL（`loadDiscardPileList` 只预检 1/4 渲染适配器；W23 从未派发） | 仓库所有者 | - | #23-#40 |
+| 2026-11-28T14:12:00+08:00 | `gh issue create` ×11 + `gh issue close` ×11 | `super-automation-learning-tool#41`–`#49`,`#74`,`#75` | 批 4a：E 层前里程碑历史链 H00–H10，标 `stage:historical`（**不叠加** `stage:shipped`，避免双重语义） | 仓库所有者 | - | #41-#49,#74,#75 |
+| 2026-11-28T14:12:00+08:00 | `gh issue create` ×8 + `gh issue close` ×8 | `super-automation-learning-tool#50`–`#57` | 批 4b：F 层旧编号体系（`旧` 前缀强制隔离，不合并不覆盖）。与 E 层**分开成条**，因为二者权威来源不同（历史链 = `PROJECT_HISTORY_CHAIN_*.md`；旧体系 = `PROJECT_CHANGELOG.md` + canonical ledger 快照） | 仓库所有者 | - | #50-#57 |
+| 2026-11-28T14:14:00+08:00 | `gh issue create` ×13 | `super-automation-learning-tool#58`–`#70` | 批 5a：G 层 13 条未闭合缺口，**全部保持 open**（含被废止/暂停项亦按「建议保持 open」处置） | 仓库所有者 | - | #58-#70 |
+| 2026-11-28T14:15:00+08:00 | `gh issue create` ×2 | `super-automation-learning-tool#71`,`#72` | 批 5b：H 层 2 条仓库治理未决项（LICENSE + Release v0.1.0；gh token scope + 公开 fork 旧历史），**全部保持 open** | 仓库所有者 | - | #71,#72 |
+| 2026-11-28T14:20:00+08:00 | `gh api -X POST repos/.../milestones` ×4 | `repo:milestone:1`–`repo:milestone:4` | 批 6：创建 4 个 GitHub Milestone 作为容器。`state` 语义是「这一组**容器**的工作是否整体收口」，与 issue 的 `state` 语义**不同** —— 容器 3/4 为 `closed` 而 `[AR03/G15.4]`（#40）仍为 open，不构成矛盾 | 仓库所有者 | - | #6-#57 |
+| 2026-11-28T14:22:00+08:00 | `gh api -X PATCH repos/.../issues/{n}` ×52 | `super-automation-learning-tool#6`–`#57` | 批 6：把 52 条里程碑记录挂到 4 个 Milestone 容器（容器 1 = 6 条 / 容器 2 = 5 条 / 容器 3 = 23 条 / 容器 4 = 17 条）。**G 层 13 条 + H 层 2 条不挂容器** —— 它们是待裁决待办，不是里程碑容器成员 | 仓库所有者 | - | #6-#57 |
+| 2026-11-28T14:24:00+08:00 | `gh issue create` ×1 | `super-automation-learning-tool#76` | 批 6：汇总索引 issue `[台账] 里程碑 Issue 台账索引（2026-11-28）`，含全量表格 + 4 个容器链接 + 两套 state 的语义说明 —— 本台账未来的**导航入口** | 仓库所有者 | - | #76 |
+| 2026-11-28T14:26:00+08:00 | `gh issue edit` ×1 | `super-automation-learning-tool#72` | 事实纠偏：登记期间 token scope 已被仓库所有者收敛（`gh auth status` 实测 `Token scopes: 'gist', 'read:org', 'repo'`，`workflow` 已移除），故更新正文，把「scope 未收敛」改为「已收敛」并补 `PROJECT_CHANGELOG.md` 已随之更新的事实。**不推翻**用户对旧历史处置的裁决 | 仓库所有者 | - | #72 |
+| 2026-11-28T14:30:00+08:00 | `git commit` + `git push origin main` | `refs/heads/main` | 批 6：提交并推送本审计日志（线性历史，无 merge commit，满足 `required_linear_history`；普通 push，未 force）。分支保护未要求 PR 审批，故直推 `main`。**不推 `master`**（与 `main` 无共同祖先） | 仓库所有者 | - | #76 |
+
+> **本轮最终计数（2026-11-28 实测）**：
+> 台账 issue **69 条**（68 条里程碑记录 + 1 条汇总索引），
+> 其中 **closed 45 / open 24**；
+> 4 个 Milestone 容器覆盖 53 条，另有 15 条（G 层 13 + H 层 2）不挂容器。
+>
+> **本轮记录的判定口径（写给未来的读者）**：
+> 1. **Batch `CLOSED` ≠ 里程碑完成** —— 每层子任务的 `resolution` 逐条保留在 issue 正文。
+> 2. **P5 报告的「14 BP / 82 路由」「legacy 桥已退役」在当前工作树不可复现** —— 2026-11-28 实测 **8 BP / 79 路由**，legacy 兼容桥仍**活跃绑定 19 条路由**（`server/app/app_factory.py:73-74` 无条件加载它）。该反证已逐条记入 `[AR04]`、`[P2]`、`[P5]` 与缺口 `[缺口] app_factory 只注册 8/15 个 Blueprint`。
+> 3. **两套 state 语义不同**：Milestone `state` = 容器是否整体收口；Issue `state` = 该条交付物是否达成验收判据。
+> 4. **失败结论全部保留**，未抹平任何历史失败、未伪造任何 PR / commit / SHA。
+> 5. **查不到就标 UNKNOWN**（共 11 项），不推测。
+>
+> **治理层文件不入库**：按 `docs/ROUNDTABLE_PROTOCOL.md` §11「Controller Loop 治理层**不入库**」，
+> 本轮只把**可公开的项目事实**（批次 ID、任务 token、Review 结论、Collection SHA、
+> 测试退出码、门禁失败签名）写入 issue 正文，**未复制** `controller-loop/` 下的任何文件本体。
+>
+> **红线自检**：`git diff --name-only HEAD~1 HEAD` 仅含 `docs/external-write-log.md`；
+> 不含 `src/notes/**`、`data/`、`config/config.json`、`.db`、`.zip`。
+> 本轮 issue 正文不含 token / Cookie / 私钥，不引用 `src/notes/**`、
+> `data/task_publisher.db*`、`config/config.json`，不引用任何指向承载旧历史的 fork 对象或路径。
