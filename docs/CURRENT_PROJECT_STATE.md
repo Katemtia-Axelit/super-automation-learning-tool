@@ -214,8 +214,8 @@ GitHub Actions run 46037291244                    -> mechanical gates ✅ / redl
 |---|---|
 | LICENSE（MIT / AGPL-3.0 / 保留所有权） | **待用户决定** |
 | GitHub Release `v0.1.0-public-fact-source` | **待用户决定**（tag 草案已备） |
-| `main` 分支保护规则 | **待设置**（需 CI 两个检查先建立） |
-| `gh` token scope 收敛为 `repo` | **待办**（S5） |
+| `main` 分支保护规则 | **已设置**（2026-11-28）—— 见上方「S5 收尾」节的分支保护实测值 |
+| `gh` token scope 收敛 | **待办** —— `gh auth refresh --help` 实测：`repo`/`read:org`/`gist` 属最小集合**不可移除**，唯一可行操作是 `--remove-scopes workflow`。设备码流程需交互式 GitHub 登录，Agent 无凭据 |
 
 ---
 
