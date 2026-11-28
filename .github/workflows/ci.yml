@@ -80,8 +80,14 @@ jobs:
       #   3. ANY *.zip (note archives were packed into zips and committed)
       #   4. the whole data/ tree (course assets, imports, backups)
       #   5. vault-bearing directory names, in any script or any branch
-      #      (笔记_backup*, 笔记处理系统/笔记, 笔记处理系统/归档, ...)
-      PROTECTED_RE: '(^src/notes/|^data/|^config/config\.json$|\.db(-wal|-shm)?$|\.zip$|(^|/)备份(/|$)|(^|/)vault(/|$)|(^|/)笔记_backup|(^|/)笔记处理系统/(笔记|归档|已分类)/|(^|/)src/notes/)'
+      #      (笔记_backup*, notes_backup*, 笔记处理系统/笔记, 笔记处理系统/归档, ...)
+      #
+      # NOTE: this pattern MUST stay in sync with the content-class rules in
+      # .cursor/hooks/redline-guard.js. The hook is the local pre-write
+      # guard; this regex is the remote post-push guard. If they disagree,
+      # one of them is a bypass. They are verified equivalent by the
+      # consistency probe documented in .cursor/infra-tests/redline-guard/README.md.
+      PROTECTED_RE: '(^src/notes/|^data/|^config/config\.json$|\.db(-wal|-shm)?$|\.zip$|(^|/)备份(/|$)|(^|/)vault(/|$)|(^|/)(notes_backup|笔记_backup|笔记备份)(/|$)|(^|/)笔记处理系统/(笔记|归档|已分类)(/|$)|(^|/)src/notes/)'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -115,6 +121,21 @@ jobs:
             exit 1
           fi
           echo "OK: no protected path tracked"
+
+      # A protected file that is untracked but NOT ignored would be picked up
+      # by `git add .` / `git add -A` and could leak on the next push.
+      # `--exclude-standard` honours .gitignore, so legitimately ignored
+      # working files (the vault, data/, ...) do not produce false positives.
+      - name: protected paths must not be untracked-and-not-ignored
+        run: |
+          set -euo pipefail
+          hits="$(git ls-files --others --exclude-standard | grep -E "$PROTECTED_RE" || true)"
+          if [ -n "$hits" ]; then
+            echo "::error::protected path is untracked and not ignored (a broad git add would stage it):"
+            echo "$hits"
+            exit 1
+          fi
+          echo "OK: no protected path is untracked-and-not-ignored"
 
       # Catches "add then delete" bypasses that only inspect the final tree.
       - name: protected paths must not appear anywhere in reachable history
@@ -158,6 +179,13 @@ jobs:
 
       - name: redline guard contract tests
         run: node .cursor/infra-tests/redline-guard/harness.js
+
+      # The local hook and this workflow's PROTECTED_RE are two halves of one
+      # policy. If they drift apart, the looser one becomes a bypass.
+      # This probe reads PROTECTED_RE straight out of this file and compares
+      # it against the hook's verdict for a fixed corpus.
+      - name: redline guard / CI regex consistency
+        run: node .cursor/infra-tests/redline-guard/consistency_probe.js
 
       # The guard must behave identically on non-Windows runners. Before
       # 2026-11-28 its case folding was gated on process.platform, so the
