@@ -104,7 +104,7 @@
 
 | 项 | 状态 |
 |---|---|
-| `gh` token scope 收敛 | **已收敛**（2026-11-28）—— 仓库所有者在交互式终端完成设备码授权，实测 `gh auth status` 现为 `gist, read:org, repo`。`workflow` 已移除。注意：`gh auth refresh --help` 明确 `repo`/`read:org`/`gist` 属最小集合**不可移除**，故最终 scope 无法进一步收窄到 `repo` 单一值 |
+| `gh` token scope | **已收敛，但含 `workflow`**（2026-11-28 最终态）—— 实测 `gh auth status` 为 `gist, read:org, repo, workflow`。`gh auth refresh --help` 明确 `repo`/`read:org`/`gist` 属最小集合**不可移除**。`workflow` 曾被移除，后经**实测证明不可移除**（git push 与 REST API 两条路径均被拒）而由所有者决定恢复。完整取舍见 §8.2 |
 | 每席位独立账号（真正的身份隔离） | **未实现** —— 当前为单账号方案，见 `docs/ROUNDTABLE_PROTOCOL.md` §2.3 |
 | CI 写权限 | **无**（`.github/workflows/ci.yml` 声明 `permissions: contents: read`） |
 | 分支保护规则 | **已设置**（2026-11-28）—— `main` 必过 `mechanical gates` + `redline scan`（strict）、`enforce_admins`、线性历史、禁 force-push、禁删除、会话必须解决。**不要求 PR 审批**（单账号仓库无法自审，`require_last_push_approval` 会造成新的死锁） |
@@ -211,3 +211,76 @@
 > 不含 `src/notes/**`、`data/`、`config/config.json`、`.db`、`.zip`。
 > 本轮 issue 正文不含 token / Cookie / 私钥，不引用 `src/notes/**`、
 > `data/task_publisher.db*`、`config/config.json`，不引用任何指向承载旧历史的 fork 对象或路径。
+
+---
+
+## 8. 已记录的写操作（续三）
+
+### 2026-11-28 — 上传防线加固 + `workflow` scope 的取舍与恢复
+
+> **本节的范围**：落实仓库所有者的指示 ——「fork 泄露这条直接忽视，保证之后真实数据不再上传即可」。
+> **本轮不改仓库设置**（分支保护、标签、Milestone 容器均未动）；唯一变更的凭据权限面是
+> **`gh` token 的 `workflow` scope**，其取舍过程见下。
+
+#### 8.1 起点：实测发现本地 hook 几乎形同虚设
+
+用 21 种真实泄露形态探测 `.cursor/hooks/redline-guard.js`，实测 **denied=3 / allowed=18**。
+只有 `src/notes/**`、`data/task_publisher.db`、`config/config.json` 被拦；`.zip`、任意 `.db`、
+整个 `data/` 树、`notes_backup/`、`git add -f`、`cp`、`tar` 打包 vault 等形态**全部放行**。
+
+**根因**：本地 hook 只认 3 个**精确路径**，而 CI 的 `redline-scan` 已按**内容类别**拦截。
+两道防线口径不一致 → **更松的那道就是后门**。
+
+#### 8.2 `workflow` scope 的取舍（实测结论：不可移除）
+
+| 时点 | 实测 | 结论 |
+|---|---|---|
+| scope 收敛后首次推送含 `ci.yml` 的分支 | `! [remote rejected] ... (refusing to allow an OAuth App to create or update workflow `.github/workflows/ci.yml` without `workflow` scope)` | git 传输路径需要该 scope |
+| 改走 REST API（contents endpoint）尝试写入 | `403 refusing to allow an OAuth App to create or update workflow ... without 'workflow' scope` | **API 路径同样需要**该 scope |
+| 一致性探针在 main 上的实测 | 4 处分歧（`notes_backup`、`笔记备份` 变体）：`ci=allow hook=deny` | 远端扫描比本地 hook 松 → 远端这道门存在缺口 |
+
+**决策**：仓库所有者选择**恢复 `workflow` scope**。理由与风险面：
+
+- **必要性**：`workflow` 是维护 CI 的**唯一**途径。移除它 = 任何门禁调整、依赖升级、
+  CI 修复都会被硬性拒绝，且**无 API 变通路径**。
+- **风险面**：`workflow` 允许修改 `.github/workflows/*.yml`，确实意味着「能改 CI 就可能改坏 CI」。
+- **缓解**：真正的防线不是 scope，而是
+  1. 分支保护：`main` 直推被拒（`enforce_admins: true`）、禁 force-push、禁删除、线性历史
+  2. PR 必过 `mechanical gates` + `redline scan`
+  3. `redline-scan` 自身扫描 CI 文件是否引入受保护路径
+  4. 一致性探针在每次 CI 中校验 hook 与 `PROTECTED_RE` 等价
+- **不可移除的下界**：`gh auth refresh --help` 明确 `repo`/`read:org`/`gist` 属最小集合，
+  本 token 的**最小可行 scope 集** = `gist, read:org, repo, workflow`。
+
+#### 8.3 本轮写操作
+
+| 时间 | 操作 | 目标 | 理由 | 执行者 | 关联 PR |
+|---|---|---|---|---|---|
+| 2026-11-28T14:29:00+08:00 | `git commit` + `git push -u origin feature/harden-upload-defense` | `refs/heads/feature/harden-upload-defense` | 上传防线加固：hook 内容类别判定 + 一致性探针 + 13 条新 fixture + `.gitignore` 兜底 + 文档 | 仓库所有者 | #78 |
+| 2026-11-28T14:30:00+08:00 | `gh pr create` | `super-automation-learning-tool#78` | 建立 PR。**刻意不含 `ci.yml`** —— 该文件改动因 `workflow` scope 被移除而无法推送 | 仓库所有者 | #78 |
+| 2026-11-28T14:31:00+08:00 | CI（自动） | `super-automation-learning-tool#78` | run `46116768264`：mechanical gates ✅ / redline scan ✅ | GitHub Actions | #78 |
+| 2026-11-28T14:32:00+08:00 | `gh pr merge --squash --delete-branch` | `super-automation-learning-tool#78` | CI 转绿后 squash 合并，合并 commit `f16221f`；合并后 main 触发 run `46116834597` ✅✅。**未 force push、未推 `master`** | 仓库所有者 | #78 |
+| 2026-11-28T16:00:00+08:00 | `gh auth refresh -h github.com -s workflow`（设备码 `4870-5B49`，用户交互式授权） | `gh` token scope | **恢复 `workflow` scope** —— 实测证明该 scope 不可移除（git 与 REST API 两条路径均被拒） | 仓库所有者 | #81 |
+| 2026-11-28T16:05:00+08:00 | `gh auth setup-git` | git credential 配置 | `git config credential.https://github.com.helper '!gh.exe auth git-credential'`（**优先于** Windows `manager`）。原因：`gh` 已刷新但 git 仍用凭据管理器里的旧 token，实测 push 仍报 scope 缺失 | 仓库所有者 | #81 |
+| 2026-11-28T16:10:00+08:00 | `git rebase origin/main` + `git push --force-with-lease` | `refs/heads/feature/ci-regex-sync` | PR `#81` 首次创建时状态 `CONFLICTING`（分支基于旧 `f16221f`）。rebase 到 `origin/main`（`832d935`）之上，产出 `7acffc3`。用 `--force-with-lease`（非 `--force`），**仅改写自己的功能分支** | 仓库所有者 | #81 |
+| 2026-11-28T16:12:00+08:00 | `gh pr create --base main --head feature/ci-regex-sync` | `super-automation-learning-tool#81` | 建立 PR：`ci.yml` 补齐 `notes_backup`/`笔记备份` 变体、新增「未跟踪且未忽略」检查、新增一致性探针步骤 | 仓库所有者 | #81 |
+| 2026-11-28T16:14:00+08:00 | CI（自动） | `super-automation-learning-tool#81` | run `46125005258`：mechanical gates ✅ / redline scan ✅（含新的一致性探针步骤，0 分歧） | GitHub Actions | #81 |
+| 2026-11-28T16:17:09+08:00 | `gh pr merge --squash --delete-branch` | `super-automation-learning-tool#81` | CI 转绿后 squash 合并，合并 commit `b273f99`。**未 force push `main`、未改分支保护、未推 `master`** | 仓库所有者 | #81 |
+
+#### 8.4 本轮红线自检
+
+- `git diff --name-only` 涉及的全部路径：`.cursor/**`、`.github/workflows/ci.yml`、`.gitignore`、
+  `AGENTS.md`、`docs/CURRENT_PROJECT_STATE.md`、`docs/external-write-log.md`。
+  **不含** `src/notes/**`、`data/`、`config/config.json`、任何 `*.db` / `*.zip`。
+- 本轮全部 commit / PR 正文中**不含** token、Cookie、私钥。
+- 本轮**未**创建、修改或引用任何指向旧历史 fork 对象的路径或链接。
+- 本轮**未**新增仓库设置变更；分支保护规则与 `main` 的必过检查保持原样。
+
+#### 8.5 仍然诚实登记的边界
+
+| 项 | 状态 |
+|---|---|
+| 公开 fork `Linmoqian/learning-tools` | **按用户裁决不处理**。这是已知风险，本节的工作无法关闭它 |
+| 本地 `refs/stash` 的 7 个敏感路径可达引用 | **待带外清理**（destructive-guard 拦截）。**不影响 CI** —— CI 是全新 clone，无本地 stash；本地实测 `--not refs/stash` 后命中为 **0** |
+| 一致性探针的覆盖面 | 31 条固定语料 + 从政策推导的期望值。**不等于形式化证明**；新增规则时必须同步更新语料与 `PROTECTED_RE`，探针会立刻报分歧 |
+| hook 的管辖范围 | 仅**项目根之内**。用户主动写 `~/Downloads/x.zip` 不属本仓库红线，不拦截 |
