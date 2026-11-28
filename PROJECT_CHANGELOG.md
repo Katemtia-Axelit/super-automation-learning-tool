@@ -77,7 +77,7 @@
 |---|---|---|---|
 | S1 | 默认分支 `master` → `main` | 已交付 | `master` 保留原名，不合并不删除 |
 | S1.5 | filter-repo 历史净化 | 已交付 | 清除 vault 路径引用与 127 MB 遗留归档 |
-| S5 | 本地收敛与 token scope 收敛 | 进行中 | bundle 备份 → 删分支 → reflog expire → gc → 验证 |
+| S5 | 本地收敛与 token scope 收敛 | **已交付**（2026-11-28） | bundle 备份 → 删分支 → reflog expire → gc → 验证；token scope 已实测收敛为 `gist, read:org, repo`（`workflow` 已移除）。**残留**：本地 `refs/stash` 的 6 个敏感路径可达引用待带外清理（destructive-guard 拦截，bundle 已验证覆盖） |
 | — | LICENSE | 未决 | 待用户决定（MIT / AGPL-3.0 / 保留所有权） |
 | — | GitHub Release `v0.1.0-public-fact-source` | 未决 | tag 草案已备，发布待用户决定 |
 

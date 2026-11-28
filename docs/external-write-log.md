@@ -104,7 +104,7 @@
 
 | 项 | 状态 |
 |---|---|
-| `gh` token scope 收敛为 `repo` | **待办**（S5）—— `gh auth refresh` 为交互式浏览器流程，需仓库所有者在本机完成。2026-11-28 两次尝试均在设备码授权页停住（Agent 无 GitHub 账号凭据），当前仍为 `gist, read:org, repo, workflow`。**注**：`gh auth refresh --help` 明确 `repo`/`read:org`/`gist` 属最小集合**不可移除**，`--remove-scopes workflow` 是唯一可行操作 |
+| `gh` token scope 收敛 | **已收敛**（2026-11-28）—— 仓库所有者在交互式终端完成设备码授权，实测 `gh auth status` 现为 `gist, read:org, repo`。`workflow` 已移除。注意：`gh auth refresh --help` 明确 `repo`/`read:org`/`gist` 属最小集合**不可移除**，故最终 scope 无法进一步收窄到 `repo` 单一值 |
 | 每席位独立账号（真正的身份隔离） | **未实现** —— 当前为单账号方案，见 `docs/ROUNDTABLE_PROTOCOL.md` §2.3 |
 | CI 写权限 | **无**（`.github/workflows/ci.yml` 声明 `permissions: contents: read`） |
 | 分支保护规则 | **已设置**（2026-11-28）—— `main` 必过 `mechanical gates` + `redline scan`（strict）、`enforce_admins`、线性历史、禁 force-push、禁删除、会话必须解决。**不要求 PR 审批**（单账号仓库无法自审，`require_last_push_approval` 会造成新的死锁） |
@@ -132,14 +132,21 @@
 > 用户需自行重跑 `gh auth refresh -h github.com --remove-scopes workflow`。
 > 该操作本身**不涉及仓库写操作**，故不在本日志范围内。
 
-> **2026-11-28 — 第二次设备码尝试（仍未完成，如实记录）**：
+> **2026-11-28 — 第二次设备码尝试（Agent 侧未完成）**：
 > Agent 在后台启动 `gh auth refresh -h github.com --remove-scopes workflow`，
 > 取得设备码 `6649-C004`，并用默认浏览器打开 `https://github.com/login/device`。
 > 该页面要求**交互式 GitHub 登录**（Agent 无账号凭据，无法代为输入密码 /
 > 二次验证），因此流程停在授权环节。Agent 随后终止了悬挂的 `gh` 进程
-> （PID 29296），未留下半完成状态。**结论不变**：scope 收敛仍需仓库所有者
-> 在本机交互式终端完成。此项**不是**仓库写操作，但涉及凭据权限面，
-> 故在此登记以保证审计链完整。
+> （PID 29296），未留下半完成状态。
+>
+> **2026-11-28 — 仓库所有者完成授权（收敛达成）**：
+> 仓库所有者在本机交互式终端完成设备码授权。
+> **实测确认**：`gh auth status` → `Token scopes: 'gist', 'read:org, repo'`，
+> `workflow` 已移除。
+> 说明：`gh auth refresh --help` 明确 `repo`/`read:org`/`gist` 属最小集合
+> **不可移除**，因此最终态无法进一步收窄至 `repo` 单一值 —— 这不是残留缺口。
+> 该操作**不涉及仓库写操作**（不产生 commit / push / PR / Issue），
+> 故未列入下方 §6 写操作表，仅在此登记凭据权限面的变化以保持审计链完整。
 
 > **CI 语义变更的记录**（影响未来所有合并）：
 > `.github/workflows/ci.yml` 的 `mechanical gates` job 从「9 门禁全绿」
