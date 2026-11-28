@@ -1,0 +1,12 @@
+{
+  "name": "shell-deny-tar-vault-into-zip",
+  "description": "Shell: archiving the vault into a .zip must be denied. The source directory (src/notes) is protected even though the output file name is not.",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "tar cf notes.zip src/notes"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

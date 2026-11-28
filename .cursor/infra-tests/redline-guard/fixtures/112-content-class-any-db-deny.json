@@ -1,0 +1,12 @@
+{
+  "name": "content-class-deny-any-db",
+  "description": "Content-class rule: any .db (and its -wal/-shm siblings) is protected. Production DB copies were historically committed under _archive/03_数据库备份/.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "_archive/03_数据库备份/task_publisher_backup_20260604.db"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

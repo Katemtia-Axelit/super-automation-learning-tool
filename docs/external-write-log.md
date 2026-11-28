@@ -108,7 +108,7 @@
 | 每席位独立账号（真正的身份隔离） | **未实现** —— 当前为单账号方案，见 `docs/ROUNDTABLE_PROTOCOL.md` §2.3 |
 | CI 写权限 | **无**（`.github/workflows/ci.yml` 声明 `permissions: contents: read`） |
 | 分支保护规则 | **已设置**（2026-11-28）—— `main` 必过 `mechanical gates` + `redline scan`（strict）、`enforce_admins`、线性历史、禁 force-push、禁删除、会话必须解决。**不要求 PR 审批**（单账号仓库无法自审，`require_last_push_approval` 会造成新的死锁） |
-| 公开 fork `Linmoqian/learning-tools` | **已知风险，未处理** —— 持有 master 旧历史（含 2271 份笔记正文 + 3 个生产库）。按用户裁决暂不处理 |
+| 公开 fork `Linmoqian/learning-tools` | **已知风险，按用户裁决不处理**（2026-11-28）。用户指示：「fork 泄露这条直接忽视，保证之后真实数据不再上传即可」。已据此把工作重心转向**加固本仓库的上传防线**（本地 hook + CI 扫描 + `.gitignore` 三层对齐），见 `docs/CURRENT_PROJECT_STATE.md`「2026-11-28 — 上传防线加固」 |
 | 本地 `refs/stash` | **残留 6 个敏感路径的可达引用**（`_archive/03_数据库备份/*.db` ×4、`_archive/09_审计报告/AI_TEAM.zip`、`data/backup/笔记(2).zip`、`data/task_publisher.db`）—— `git stash clear` 与 `git reflog expire` 被 destructive-guard 拦截，需带外执行。**已验证可安全丢弃**：patch 归档于 `docs/_local/STASH{0,1}_20261127.patch`，且 bundle `D:/Axelit/.工作/trae/_vault-backup-20261127.bundle` 的 `bundle list-heads` 确认含 `refs/stash`（`6256304`）与 `refs/heads/pre-cleanup-2026-08-04`（`3c5a960`） |
 | 本地 `_archive/03_数据库备份/`、`data/backup/` 等 | 已从 index 解除跟踪并加 `.gitignore`；磁盘副本保留作回滚保险 |
 

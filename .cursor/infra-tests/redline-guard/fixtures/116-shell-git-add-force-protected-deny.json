@@ -1,0 +1,12 @@
+{
+  "name": "shell-deny-git-add-force-protected-zip",
+  "description": "Shell: `git add -f` bypasses .gitignore, so it must be denied for protected content-class paths too. This was a real bypass vector.",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git add -f archive.zip"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

@@ -1,0 +1,12 @@
+{
+  "name": "content-class-deny-data-tree-any-file",
+  "description": "Content-class rule: the whole data/ tree is protected, not just the canonical data/task_publisher.db. A course question bank under data/ must be denied.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "data/imports/course_questions.md"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

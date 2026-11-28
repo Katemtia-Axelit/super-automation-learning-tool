@@ -66,6 +66,119 @@ const EXACT_FILE_DENIES = [
     ['config', 'config.json']
 ];
 
+// ------------------------------------------------------------------
+// Content-class deny (2026-11-28)
+//
+// 为什么需要这一层：
+//   上面三条 canonical 红线只覆盖**精确路径**。但 2026-11-27 的实测证明，
+//   真实泄露是以「同一类内容的不同落点」发生的：
+//     * `data/backup/笔记(2).zip`      —— 笔记打包成 zip
+//     * `_archive/03_数据库备份/*.db`  —— 生产库副本藏在归档目录
+//     * `data/*.txt` / `data/*.md`     —— 课程题库
+//     * `src/notes_backup/`、`笔记处理系统/归档/` —— vault 的其它落点
+//
+//   本地 hook 若只认精确路径，这些落点**全部放行**（实测 21 个泄露形态
+//   只有 3 个被拦）。而 CI 的 `redline-scan` 已经按内容类别拦截 ——
+//   两道防线口径不一致，hook 就成了绕过 CI 的后门。
+//
+// 因此本节的规则集与 `.github/workflows/ci.yml` 的 `PROTECTED_RE`
+// **逐条对应**。CI 拦得住的，hook 也必须拦得住。
+//
+// 判定方式：把相对路径转成 POSIX 形态后逐条正则匹配。路径分段已做
+// case-insensitive 比较（见 caseFold 注释），但这里的正则额外做
+// 小写归一，以覆盖 `Notes.ZIP` 这类「扩展名大小写变体」。
+// ------------------------------------------------------------------
+
+// 目录前缀（相对项目根，POSIX 形态）。命中即 deny 整棵子树。
+// 注意：前缀按**路径分段**匹配，不按字符串前缀。`src/notes_backup`
+// 必须能被 `notes_backup` 规则命中，因此关键词走「任意层级」判定。
+const PROTECTED_DIR_PREFIXES = [
+    'src/notes',            // canonical：Obsidian vault
+    'data'                  // 生产数据树（库、备份、导入、题库）
+];
+
+// 目录名关键词。命中路径中任意一段（或相邻多段）即 deny，不限位置、不限层级。
+// 这是 CI 的 `(^|/)备份(/|$)` 与 `(^|/)vault(/|$)` 的等价物。
+// `notes_backup` 放在这里而非 PROTECTED_DIR_PREFIXES，正是为了覆盖
+// `src/notes_backup/` 这种「任意层级」落点。
+const PROTECTED_DIR_SEGMENT_KEYWORDS = [
+    '备份',
+    'vault',
+    'notes_backup',
+    '笔记_backup',
+    '笔记备份',
+    '笔记处理系统/笔记',
+    '笔记处理系统/归档',
+    '笔记处理系统/已分类'
+];
+
+// 文件扩展名。命中即 deny —— 这是 CI 的 `\.db(-wal|-shm)?$` 与 `\.zip$` 的等价物。
+// 注意 `\.db$` 不带 `$` 锚定前文，因此 `task_publisher.db-wal` 也会命中
+// `\.db` 之后紧跟 `-wal` 的分支。
+const PROTECTED_FILE_EXTENSIONS = [
+    '.db',
+    '.db-wal',
+    '.db-shm',
+    '.zip'
+];
+
+// 精确文件名（相对项目根）。命中即 deny。
+const PROTECTED_EXACT_FILES = [
+    'config/config.json'
+];
+
+// 归一化：转 POSIX、转小写、去掉末尾斜杠。
+function normaliseRelPath(relPosix) {
+    let s = String(relPosix).replace(/\\/g, '/');
+    s = s.replace(/^\.\//, '');
+    s = s.replace(/\/+$/, '');
+    return s.toLowerCase();
+}
+
+// 判断一个（相对项目根的）POSIX 路径是否属于受保护内容类别。
+// 返回 { kind, target } 或 null。
+function classifyContentClass(relPosix) {
+    const s = normaliseRelPath(relPosix);
+    if (s === '') return null;
+
+    // 1) 精确文件名
+    for (const f of PROTECTED_EXACT_FILES) {
+        if (s === f) return { kind: 'exact', target: f };
+    }
+
+    // 2) 目录前缀（目录本身或其子树）
+    for (const d of PROTECTED_DIR_PREFIXES) {
+        const dl = d.toLowerCase();
+        if (s === dl || s.startsWith(dl + '/')) {
+            return { kind: 'prefix', target: d };
+        }
+    }
+
+    // 3) 目录名关键词（任意层级）
+    const segs = s.split('/');
+    for (const kw of PROTECTED_DIR_SEGMENT_KEYWORDS) {
+        const kwParts = kw.toLowerCase().split('/');
+        // 多段关键词（如 笔记处理系统/归档）要求相邻段匹配
+        for (let i = 0; i + kwParts.length <= segs.length; i++) {
+            let hit = true;
+            for (let j = 0; j < kwParts.length; j++) {
+                if (segs[i + j] !== kwParts[j]) { hit = false; break; }
+            }
+            if (hit) return { kind: 'keyword-dir', target: kw };
+        }
+    }
+
+    // 4) 文件扩展名
+    const base = segs[segs.length - 1];
+    for (const ext of PROTECTED_FILE_EXTENSIONS) {
+        if (base.endsWith(ext)) {
+            return { kind: 'extension', target: ext };
+        }
+    }
+
+    return null;
+}
+
 // Tools that mutate project files via a path-bearing field, using the REAL
 // Cursor preToolUse envelope (tool_name -> tool_input[field]).
 const PATH_FIELDS = {
@@ -205,6 +318,12 @@ function classifyBySegments(segments) {
             return { kind: 'exact', target: deny.join('/') };
         }
     }
+    // Content-class match (2026-11-28) —— 与 CI 的 PROTECTED_RE 口径对齐。
+    // 只在项目根之内判定；项目根之外的内容类别不在本 hook 的管辖范围
+    // （例如用户主动写 ~/Downloads/x.zip 不属于本仓库红线）。
+    const relPosix = rel.join('/');
+    const cc = classifyContentClass(relPosix);
+    if (cc) return cc;
     return null;
 }
 
@@ -277,6 +396,14 @@ function classifyShell(cmd) {
                 // No explicit paths => broad add; we must run precondition
                 return { kind: 'broad-git-add' };
             }
+            // `git add .` / `git add ./` / `git add ..` etc. are broad adds
+            // expressed as a path, not as an explicit file list. Treating
+            // "." as an explicit path would resolve to the project root and
+            // miss every file underneath it — including protected ones.
+            const isDotPath = paths.every((p) => p === '.' || p === './' || p === '..');
+            if (isDotPath) {
+                return { kind: 'broad-git-add' };
+            }
             for (const p of paths) {
                 const c = classifyPath(p, PROJECT_ROOT);
                 if (c) return { kind: 'shell-path', target: c.target, source: p };
@@ -309,6 +436,40 @@ function classifyShell(cmd) {
             const c = classifyPath(t, PROJECT_ROOT);
             if (c) return { kind: 'shell-path', target: c.target, source: t };
         }
+        return null;
+    }
+
+    // Copy / move / archive tools (2026-11-28).
+    //
+    // 为什么加这一组：真实泄露不只发生在 `git add`。
+    // `cp data/backup/笔记(2).zip .` 会把受保护内容复制成普通文件；
+    // `tar cf notes.zip src/notes` 会把 vault 打包。这些命令的共同点是
+    // **命令行里出现了受保护路径**，因此对「所有参数」逐个判定即可。
+    //
+    // `cp` 的最后一个参数是**目标目录**，前面的参数是**源文件**。
+    // 源与目标都要判定：`cp notes.zip archive/` 的目标是目录（`archive/`
+    // 不是受保护类别），但源 `notes.zip` 是 —— 仍必须拦。
+    const COPY_MOVE_TOOLS = new Set([
+        'cp', 'copy', 'xcopy', 'robocopy', 'mv', 'move',
+        'tar', 'zip', '7z', '7za', 'gzip', 'gunzip', 'rar'
+    ]);
+    if (COPY_MOVE_TOOLS.has(headBase)) {
+        for (const t of toks.slice(1)) {
+            // 选项与「选项=值」形式跳过
+            if (t.startsWith('-')) continue;
+            // `tar cf notes.zip src` —— `cf` 是 tar 的模式参数，不是路径。
+            // 判定方式：若该 token 不含路径分隔符、且不是绝对路径、且
+            // 不含扩展名，则它是子命令而非路径。含扩展名的（如 `notes.zip`）
+            // 一律按路径判定。
+            if (headBase === 'tar' && !t.includes('/') && !t.includes('\\') &&
+                !/^\.[a-z0-9]+$/i.test(t) && !t.includes('.')) {
+                continue;
+            }
+            const c = classifyPath(t, PROJECT_ROOT);
+            if (c) return { kind: 'shell-path', target: c.target, source: t };
+        }
+        // tar/zip 的源目录可能不带扩展名（如 `tar cf out.tgz src/notes`）
+        // —— 已由上面的路径判定覆盖（src/notes 命中前缀规则）。
         return null;
     }
 
@@ -346,6 +507,39 @@ function listTrackedOrStagedProtected() {
     const lines = (tracked + '\n' + staged).split(/\r?\n/);
     const hits = [];
     for (const line of lines) {
+        const c = classifyPath(line, PROJECT_ROOT);
+        if (c) hits.push({ line, target: c.target });
+    }
+    return hits;
+}
+
+// List files that a broad `git add .` / `git add -A` would pick up:
+// untracked, not-ignored, working-tree files.
+//
+// Why this is needed (2026-11-28):
+//   The previous precondition only inspected `git ls-files` (already
+//   tracked) and `git diff --cached` (already staged). That misses the
+//   exact case that matters most:
+//
+//       $ cp ~/Downloads/notes.zip .        # untracked, not ignored
+//       $ git add .                          # <- would stage it
+//
+//   An untracked-but-not-ignored file is invisible to both previous
+//   queries, so the broad-add precondition passed and the protected
+//   content was staged. `git ls-files --others --exclude-standard`
+//   enumerates precisely that set.
+//
+//   `--exclude-standard` honours .gitignore, so legitimately ignored
+//   working files (the whole vault, data/, ...) do NOT produce false
+//   denials — they can never be staged by `git add .` anyway.
+function listUntrackedNotIgnoredProtected() {
+    const out = gitQuery([
+        '-c', 'core.quotepath=false',
+        'ls-files', '--others', '--exclude-standard'
+    ]);
+    const hits = [];
+    for (const line of out.split(/\r?\n/)) {
+        if (!line) continue;
         const c = classifyPath(line, PROJECT_ROOT);
         if (c) hits.push({ line, target: c.target });
     }
@@ -526,6 +720,21 @@ function main() {
             if (hits.length > 0) {
                 emit(deny(hits[0].target, 'broad git command detected protected path: ' + hits[0].line));
                 return;
+            }
+            // Also check untracked-but-not-ignored files: a broad add would
+            // stage them, and they are invisible to ls-files / diff --cached.
+            //
+            // Only for broad ADD. `git commit -a` stages modifications to
+            // ALREADY-TRACKED files only — it never stages untracked files.
+            // Checking untracked for a commit would be a false positive.
+            if (c.kind === 'broad-git-add') {
+                const untracked = listUntrackedNotIgnoredProtected();
+                if (untracked.length > 0) {
+                    emit(deny(untracked[0].target,
+                        'broad git command would stage an untracked, non-ignored protected path: ' +
+                        untracked[0].line));
+                    return;
+                }
             }
             emit(allow());
             return;

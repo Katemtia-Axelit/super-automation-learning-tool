@@ -1,0 +1,18 @@
+{
+  "name": "broad-git-add-deny-untracked-protected-file",
+  "description": "Broad `git add .` must be denied when an untracked, NON-ignored protected path exists in the working tree. The previous precondition only inspected `git ls-files` (tracked) and `git diff --cached` (staged), so this exact case slipped through. The probe uses data/nested/deep/ : the whole data/ tree is a protected content class (hook rule), but .gitignore only covers data/*.db / data/*.txt / data/*.md at ONE level, so this nested path is NOT ignored — exactly the gap between the two layers. setupFiles materialises a synthetic zero-byte placeholder — it contains no user data.",
+  "setupFiles": [
+    {
+      "path": "data/nested/deep/harness_probe.md",
+      "content": ""
+    }
+  ],
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git add ."
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

@@ -277,33 +277,80 @@ function main() {
         // structural check above.
         if (fx.name === 'config-shape-current-must-RED') continue;
 
-        const expanded = expandInput(fx.input, projectRoot);
-        const stdinPayload = fx.rawStdin === true
-            ? (typeof expanded === 'string' ? expanded : JSON.stringify(expanded))
-            : JSON.stringify(expanded);
+        // Optional on-disk setup: some scenarios (e.g. "a broad `git add .`
+        // would stage an untracked protected file") cannot be expressed as a
+        // pure envelope, because the hook inspects the real working tree.
+        //
+        // `setupFiles` is an array of { path, content }. Paths are relative
+        // to the project root. Files are created before the hook call and
+        // removed afterwards, in a finally block, so the harness never
+        // leaves state behind.
+        const created = [];
+        if (Array.isArray(fx.setupFiles)) {
+            for (const sf of fx.setupFiles) {
+                const abs = path.resolve(projectRoot, sf.path);
+                if (!abs.startsWith(projectRoot)) {
+                    console.error('harness: setupFiles path escapes project root: ' + sf.path);
+                    process.exit(2);
+                }
+                try {
+                    fs.mkdirSync(path.dirname(abs), { recursive: true });
+                    fs.writeFileSync(abs, typeof sf.content === 'string' ? sf.content : '');
+                    created.push(abs);
+                } catch (err) {
+                    console.error('harness: cannot create setupFiles entry ' + sf.path + ': ' + err.message);
+                    for (const c of created) { try { fs.unlinkSync(c); } catch (_) { /* ignore */ } }
+                    process.exit(2);
+                }
+            }
+        }
 
-        const result = callHook(HOOK, stdinPayload);
-        if (!result.ok) {
+        try {
+            const expanded = expandInput(fx.input, projectRoot);
+            const stdinPayload = fx.rawStdin === true
+                ? (typeof expanded === 'string' ? expanded : JSON.stringify(expanded))
+                : JSON.stringify(expanded);
+
+            const result = callHook(HOOK, stdinPayload);
+            if (!result.ok) {
+                rows.push({
+                    name: fx.name,
+                    expected: fx.expect,
+                    got: 'ERROR(' + result.reason + ')',
+                    pass: false,
+                    error: true
+                });
+                error++;
+                continue;
+            }
+            const got = result.decision.permission;
+            const ok = (got === fx.expect);
             rows.push({
                 name: fx.name,
                 expected: fx.expect,
-                got: 'ERROR(' + result.reason + ')',
-                pass: false,
-                error: true
+                got: got,
+                pass: ok,
+                error: false
             });
-            error++;
-            continue;
+            if (ok) pass++; else fail++;
+        } finally {
+            // Remove in reverse creation order, then prune the directories
+            // that setupFiles created (but only those that are now empty —
+            // never a directory that existed before).
+            for (let i = created.length - 1; i >= 0; i--) {
+                const p = created[i];
+                try { fs.unlinkSync(p); } catch (_) { /* ignore */ }
+                // Prune empty parent dirs up to (but not including) root.
+                let dir = path.dirname(p);
+                while (dir.startsWith(projectRoot) && dir !== projectRoot) {
+                    let entries;
+                    try { entries = fs.readdirSync(dir); } catch (_) { break; }
+                    if (entries.length > 0) break;
+                    try { fs.rmdirSync(dir); } catch (_) { break; }
+                    dir = path.dirname(dir);
+                }
+            }
         }
-        const got = result.decision.permission;
-        const ok = (got === fx.expect);
-        rows.push({
-            name: fx.name,
-            expected: fx.expect,
-            got: got,
-            pass: ok,
-            error: false
-        });
-        if (ok) pass++; else fail++;
     }
 
     // Pretty-print

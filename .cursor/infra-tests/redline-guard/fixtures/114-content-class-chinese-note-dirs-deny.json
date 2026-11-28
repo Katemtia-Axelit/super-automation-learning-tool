@@ -1,0 +1,12 @@
+{
+  "name": "content-class-deny-chinese-note-system-dirs",
+  "description": "Content-class rule: the Chinese-named note system directories (笔记处理系统/归档 etc.) are protected. These held packed note archives in the 2026-06 history.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "笔记处理系统/归档/压缩包/笔记.zip"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

@@ -1,0 +1,12 @@
+{
+  "name": "content-class-deny-any-zip",
+  "description": "Content-class rule: any .zip is protected. Note archives were historically packed into .zip files and committed — that was a real 2026-11-27 leak.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "notes_archive.zip"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

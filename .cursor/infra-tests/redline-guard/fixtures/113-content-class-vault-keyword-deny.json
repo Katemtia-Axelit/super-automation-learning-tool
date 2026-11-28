@@ -1,0 +1,12 @@
+{
+  "name": "content-class-deny-vault-keyword-any-level",
+  "description": "Content-class rule: a vault-bearing directory name is protected at ANY level, not just under src/notes. `src/notes_backup/` is a historical vault landing spot.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "src/notes_backup/高等数学/微积分.md"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

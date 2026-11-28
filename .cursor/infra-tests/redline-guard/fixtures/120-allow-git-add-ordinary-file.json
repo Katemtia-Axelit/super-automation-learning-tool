@@ -1,0 +1,12 @@
+{
+  "name": "allow-git-add-ordinary-source-file",
+  "description": "Regression guard against over-blocking: staging an ordinary source file must still be allowed.",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git add static/app.js"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}
