@@ -191,7 +191,6 @@ node .cursor/infra-tests/redline-guard/consistency_probe.js -> PASSED（0 分歧
 本地模拟 CI redline-scan 四步                                -> tracked ✅ / untracked-not-ignored ✅
                                                                 history ✅（CI 视角）/ remote refs ✅
 ```
-
 > harness 由 45 条增至 **58 条**（新增 13 条永久回归用例，含 2 条
 > 「反向」用例防止过度拦截：普通源码文件与干净树上的 `git add .` 必须仍被允许）。
 > harness 新增 `setupFiles` 能力，用于构造「工作区存在未跟踪受保护文件」
@@ -205,6 +204,29 @@ node .cursor/infra-tests/redline-guard/consistency_probe.js -> PASSED（0 分歧
 | 本地 `refs/stash` 的 7 个敏感路径可达引用 | **待带外清理**（destructive-guard 拦截）。**不影响 CI** —— CI 是全新 clone，无本地 stash；本地模拟也确认 `--not refs/stash` 后命中为 **0** |
 | hook 的覆盖范围 | 仅**项目根之内**。用户主动写 `~/Downloads/x.zip` 不属本仓库红线，不拦截 |
 | hook 与 CI 的比较范围 | 一致性探针覆盖 31 条语料。**不等于**形式化证明；若日后新增规则，必须同步更新语料与 `PROTECTED_RE`，探针会立刻报分歧 |
+
+### 配套：CI 侧同步（PR #81）
+
+本地 hook 加固后，一致性探针在 main 上实测报出 **4 处分歧** —— CI 的 `PROTECTED_RE`
+只匹配中文 `笔记_backup`，漏了英文 `notes_backup` 与中文 `笔记备份`。
+
+本地 hook 严、CI 松 → **远端那道门是缺口**（绕过 Cursor 直接 `git push` 时远端拦不住）。
+
+修复需要修改 `.github/workflows/ci.yml`，而实测发现：
+
+| 路径 | 结果 |
+|---|---|
+| `git push`（含 `ci.yml` 改动的分支） | `remote rejected ... without 'workflow' scope` |
+| REST API contents endpoint | `403 refusing to allow an OAuth App to create or update workflow ... without 'workflow' scope` |
+
+→ **`workflow` scope 不可移除**（无 API 变通路径）。所有者决定恢复该 scope，详见
+`docs/external-write-log.md` §8.2 的完整取舍记录。
+
+修复内容（PR #81，合并 commit `b273f99`）：
+
+1. `PROTECTED_RE` 补齐 `notes_backup` / `笔记备份` 变体
+2. 新增「未跟踪且未被忽略」检查步骤 —— 补上「`git add .` 会捞起未跟踪文件」这个缺口
+3. 新增一致性探针为 CI 步骤 —— 防漂移机制常态化
 
 ---
 
