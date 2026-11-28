@@ -1,0 +1,12 @@
+{
+  "name": "shell-deny-cp-protected-source",
+  "description": "Shell: copying a protected file must be denied. `cp` can launder a protected file into an innocuous name (e.g. notes.zip -> a.zip) before it is staged.",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "cp notes.zip a.zip"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

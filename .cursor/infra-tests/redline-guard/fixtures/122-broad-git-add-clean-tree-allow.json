@@ -1,0 +1,12 @@
+{
+  "name": "broad-git-add-allow-clean-tree",
+  "description": "Regression guard: a broad `git add .` on a tree with no protected untracked files must still be allowed. The content-class rules must not turn broad git commands into a blanket deny.",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git add ."
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

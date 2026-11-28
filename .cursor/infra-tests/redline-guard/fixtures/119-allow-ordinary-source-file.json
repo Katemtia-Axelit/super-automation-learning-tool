@@ -1,0 +1,12 @@
+{
+  "name": "allow-write-ordinary-source-file",
+  "description": "Regression guard against over-blocking: an ordinary source file must still be allowed. The content-class rules must not turn the hook into a blanket deny.",
+  "input": {
+    "tool_name": "Write",
+    "tool_input": {
+      "file_path": "static/modules/gacha/index.js"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "allow"
+}

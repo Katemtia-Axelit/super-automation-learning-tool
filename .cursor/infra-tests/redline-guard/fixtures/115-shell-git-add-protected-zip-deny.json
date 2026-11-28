@@ -1,0 +1,12 @@
+{
+  "name": "shell-deny-git-add-protected-zip",
+  "description": "Shell: `git add` on a protected content-class path must be denied. The 2026-11-27 leak was committed exactly this way.",
+  "input": {
+    "tool_name": "Shell",
+    "tool_input": {
+      "command": "git add data/backup/笔记(2).zip"
+    },
+    "cwd": "<PROJECT_ROOT>"
+  },
+  "expect": "deny"
+}

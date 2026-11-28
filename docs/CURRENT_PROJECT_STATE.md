@@ -126,6 +126,88 @@ GitHub Actions run 46037291244                    -> mechanical gates ✅ / redl
 
 ---
 
+## 2026-11-28 — 上传防线加固：三层口径对齐（fork 泄露按用户裁决不处理后的替代动作）
+
+> **背景**：仓库所有者的指示 ——「fork 泄露这条直接忽视，保证之后真实数据不再上传即可」。
+> 因此本节的工作目标不是清理既有 fork，而是**保证本仓库此后再无真实数据被上传**。
+
+### 起点：实测发现本地 hook 几乎形同虚设
+
+用 21 种真实泄露形态探测 `.cursor/hooks/redline-guard.js`：
+
+```
+denied=3 allowed=18
+```
+
+**只有 3 种被拦**（`src/notes/**`、`data/task_publisher.db`、`config/config.json`）。
+其余全部放行，包括：
+
+| 形态 | 结果 |
+|---|---|
+| `Write data/backup/notes.zip` | ALLOW |
+| `Write archive.zip`（任意 .zip） | ALLOW |
+| `Write _archive/03_x/task.db`（任意 .db） | ALLOW |
+| `Write data/imports/course.md`（整个 data/ 树） | ALLOW |
+| `Write src/notes_backup/a.md`（vault 其它落点） | ALLOW |
+| `git add data/backup/notes.zip` | ALLOW |
+| `git add -f archive.zip` | ALLOW |
+| `git add .`（有未跟踪的 .zip 待暂存） | ALLOW |
+| `cp notes.zip a.zip` | ALLOW |
+| `tar cf notes.zip src/notes` | ALLOW |
+
+**根因**：本地 hook 只认 **3 个精确路径**，而 CI 的 `redline-scan` 已经按
+**内容类别**拦截（任意 `.db`/`.zip`、整个 `data/` 树、备份目录）。
+两道防线口径不一致 → **更松的那道就是后门**。
+
+### 处置：三层对齐
+
+| 层 | 文件 | 变更 |
+|---|---|---|
+| 本地写入前 | `.cursor/hooks/redline-guard.js` | 新增**内容类别**判定：整个 `data/` 树、任意 `.db`/`.db-wal`/`.db-shm`、任意 `.zip`、vault 关键字目录（任意层级）、`config/config.json`。新增 shell 覆盖：`cp`/`mv`/`tar`/`zip` 等复制归档类命令。修正 `git add .` 被误当作显式路径的漏洞，并新增**未跟踪且未被忽略**文件的预检 |
+| 远端推送后 | `.github/workflows/ci.yml` | `PROTECTED_RE` 补齐 `notes_backup`/`笔记备份` 变体（原先只匹配中文的 `笔记_backup`）；新增 `untracked-and-not-ignored` 检查步骤 |
+| 默认排除 | `.gitignore` | 新增内容类别兜底：`*.zip`、`*.db*`、`**/备份/`、`**/vault/`、`**/notes_backup/`、`**/笔记处理系统/{笔记,归档,已分类}/` |
+
+### 防漂移机制（关键）
+
+三层各写一套规则必然漂移。因此新增 **一致性探针**
+`.cursor/infra-tests/redline-guard/consistency_probe.js`：
+
+- **直接读取** `.github/workflows/ci.yml` 里的 `PROTECTED_RE`（不复制副本，避免自身腐烂）
+- 对 31 条固定语料逐条比较「CI regex 判定」与「hook 实际判定」
+- 同时对照**从红线政策推导的期望值**（不是对照任一实现，因此是真交叉校验）
+
+```
+corpus=31 gate-disagreements=0 policy-violations=0
+```
+
+该探针**已接入 CI**，每次 push 都跑。
+
+### 验证
+
+```
+node .cursor/infra-tests/redline-guard/harness.js         -> Total: 58  Pass: 58  Fail: 0
+node .cursor/infra-tests/_platform_check.js                -> linux-simulated 58/58 OK
+node .cursor/infra-tests/redline-guard/consistency_probe.js -> PASSED（0 分歧）
+本地模拟 CI redline-scan 四步                                -> tracked ✅ / untracked-not-ignored ✅
+                                                                history ✅（CI 视角）/ remote refs ✅
+```
+
+> harness 由 45 条增至 **58 条**（新增 13 条永久回归用例，含 2 条
+> 「反向」用例防止过度拦截：普通源码文件与干净树上的 `git add .` 必须仍被允许）。
+> harness 新增 `setupFiles` 能力，用于构造「工作区存在未跟踪受保护文件」
+> 这一必须依赖真实磁盘状态的场景；文件在 `finally` 中清理，不留残留。
+
+### 仍然诚实登记的边界
+
+| 项 | 状态 |
+|---|---|
+| 公开 fork `Linmoqian/learning-tools` | **按用户裁决不处理**（已知风险，非本节可关闭） |
+| 本地 `refs/stash` 的 7 个敏感路径可达引用 | **待带外清理**（destructive-guard 拦截）。**不影响 CI** —— CI 是全新 clone，无本地 stash；本地模拟也确认 `--not refs/stash` 后命中为 **0** |
+| hook 的覆盖范围 | 仅**项目根之内**。用户主动写 `~/Downloads/x.zip` 不属本仓库红线，不拦截 |
+| hook 与 CI 的比较范围 | 一致性探针覆盖 31 条语料。**不等于**形式化证明；若日后新增规则，必须同步更新语料与 `PROTECTED_RE`，探针会立刻报分歧 |
+
+---
+
 ## 2026-11-27 — 云端仓库状态梳理 S1–S5：公开骨架、元数据与本地收敛
 
 > **历史快照。** 本节记录 S1–S4 的成果与当时的门禁实测。
