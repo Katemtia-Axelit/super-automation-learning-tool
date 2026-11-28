@@ -185,6 +185,11 @@
 | 2026-11-28T14:28:00+08:00 | `git push -u origin feature/milestone-issue-ledger` | `refs/heads/feature/milestone-issue-ledger` | **直推 `main` 被拒**（实测 `GH006`）：`required_status_checks` 开启 `strict`，要求两个必过检查在**该精确 commit SHA** 上跑过，而未推送的 commit 不可能有 CI 结果。故按仓库既有惯例改走分支 + PR（此前 PR `#2` 即此模式） | 仓库所有者 | - | #77 |
 | 2026-11-28T14:29:00+08:00 | `gh pr create` | `super-automation-learning-tool#77` | 建立 PR：仅含 `docs/external-write-log.md` 的台账审计记录。PR 正文含红线自检、治理层文件不入库声明，以及「为什么不直推 main」的实测原因 | 仓库所有者 | - | #77 |
 | 2026-11-28T14:32:00+08:00 | `gh pr merge --squash --delete-branch` | `super-automation-learning-tool#77` | CI 两个必过检查转绿后合并（run `46116422740`：mechanical gates ✅ / redline scan ✅）；合并 commit `3cf64ee`；合并后 main 的 push 触发 run `46116669657`（mechanical gates ✅ / redline scan ✅）。**未 force push、未推 `master`** | 仓库所有者 | - | #77 |
+| 2026-11-28T14:31:56+08:00 | `gh pr create` | `super-automation-learning-tool#79` | 建立第二个 PR：**仅更正**上一条日志行（`3cf64ee` 写的是"直推 main"，实测被 `GH006` 拒绝）。PR 正文记录实测路径与两次 CI run 号。本次 PR 与同仓库另一 actor 的 PR `#73`（token scope 收敛）、`#78`（redline hook 加固）并存，**互不覆盖** | 仓库所有者 | - | #79 |
+| 2026-11-28T14:32:30+08:00 | `git rebase origin/main` + `git push --force-with-lease` | `refs/heads/feature/milestone-issue-ledger` | PR `#79` 与 PR `#78` 同时改动 `docs/external-write-log.md`，合并前实测 PR 状态为 `CONFLICTING` / `DIRTY`。故把本地提交 `e20abab` rebase 到 `origin/main`（`f16221f`）之上，产出 `4cbb547`。使用 `--force-with-lease`（非 `--force`），仅改写自己的功能分支，**未 force push `main`、未改分支保护、未推 `master`** | 仓库所有者 | - | #79 |
+| 2026-11-28T14:37:31+08:00 | CI（自动） | `super-automation-learning-tool#79` | rebase 后 PR 检查重跑：run `46117470253`（head SHA `4cbb547`，mechanical gates ✅ / redline scan ✅，`success`） | GitHub Actions | - | #79 |
+| 2026-11-28T14:40:11+08:00 | `gh pr merge --squash --delete-branch` | `super-automation-learning-tool#79` | CI 转绿后 squash 合并，合并 commit `f1b287e`；合并后 main 的 push 触发 run `46117673004`（mechanical gates ✅ / redline scan ✅，`success`）。**未 force push、未推 `master`** | 仓库所有者 | - | #79 |
+| 2026-11-28T14:26:00+08:00 | `gh issue close` ×2 | `super-automation-learning-tool#74`,`#75` | 批 4 补漏：H08 / H09 首次创建时遇瞬时网络 `EOF`（`Post "https://api.github.com/graphql": EOF`），编号序列缺口 `[13, 73]` 暴露出来。重建为 `#74` / `#75`，挂 Milestone 4 后按已完成历史关闭 | 仓库所有者 | - | #74,#75 |
 
 > **本轮最终计数（2026-11-28 实测）**：
 > 台账 issue **69 条**（68 条里程碑记录 + 1 条汇总索引），
