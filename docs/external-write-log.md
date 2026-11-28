@@ -182,7 +182,9 @@
 | 2026-11-28T14:22:00+08:00 | `gh api -X PATCH repos/.../issues/{n}` ×52 | `super-automation-learning-tool#6`–`#57` | 批 6：把 52 条里程碑记录挂到 4 个 Milestone 容器（容器 1 = 6 条 / 容器 2 = 5 条 / 容器 3 = 23 条 / 容器 4 = 17 条）。**G 层 13 条 + H 层 2 条不挂容器** —— 它们是待裁决待办，不是里程碑容器成员 | 仓库所有者 | - | #6-#57 |
 | 2026-11-28T14:24:00+08:00 | `gh issue create` ×1 | `super-automation-learning-tool#76` | 批 6：汇总索引 issue `[台账] 里程碑 Issue 台账索引（2026-11-28）`，含全量表格 + 4 个容器链接 + 两套 state 的语义说明 —— 本台账未来的**导航入口** | 仓库所有者 | - | #76 |
 | 2026-11-28T14:26:00+08:00 | `gh issue edit` ×1 | `super-automation-learning-tool#72` | 事实纠偏：登记期间 token scope 已被仓库所有者收敛（`gh auth status` 实测 `Token scopes: 'gist', 'read:org', 'repo'`，`workflow` 已移除），故更新正文，把「scope 未收敛」改为「已收敛」并补 `PROJECT_CHANGELOG.md` 已随之更新的事实。**不推翻**用户对旧历史处置的裁决 | 仓库所有者 | - | #72 |
-| 2026-11-28T14:30:00+08:00 | `git commit` + `git push origin main` | `refs/heads/main` | 批 6：提交并推送本审计日志（线性历史，无 merge commit，满足 `required_linear_history`；普通 push，未 force）。分支保护未要求 PR 审批，故直推 `main`。**不推 `master`**（与 `main` 无共同祖先） | 仓库所有者 | - | #76 |
+| 2026-11-28T14:28:00+08:00 | `git push -u origin feature/milestone-issue-ledger` | `refs/heads/feature/milestone-issue-ledger` | **直推 `main` 被拒**（实测 `GH006`）：`required_status_checks` 开启 `strict`，要求两个必过检查在**该精确 commit SHA** 上跑过，而未推送的 commit 不可能有 CI 结果。故按仓库既有惯例改走分支 + PR（此前 PR `#2` 即此模式） | 仓库所有者 | - | #77 |
+| 2026-11-28T14:29:00+08:00 | `gh pr create` | `super-automation-learning-tool#77` | 建立 PR：仅含 `docs/external-write-log.md` 的台账审计记录。PR 正文含红线自检、治理层文件不入库声明，以及「为什么不直推 main」的实测原因 | 仓库所有者 | - | #77 |
+| 2026-11-28T14:32:00+08:00 | `gh pr merge --squash --delete-branch` | `super-automation-learning-tool#77` | CI 两个必过检查转绿后合并（run `46116422740`：mechanical gates ✅ / redline scan ✅）；合并 commit `3cf64ee`；合并后 main 的 push 触发 run `46116669657`（mechanical gates ✅ / redline scan ✅）。**未 force push、未推 `master`** | 仓库所有者 | - | #77 |
 
 > **本轮最终计数（2026-11-28 实测）**：
 > 台账 issue **69 条**（68 条里程碑记录 + 1 条汇总索引），
